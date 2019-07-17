@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EvoS.Framework.Network.Shared
+namespace EvoS.Framework.Constants.Enums
 {
     public enum Region
     {

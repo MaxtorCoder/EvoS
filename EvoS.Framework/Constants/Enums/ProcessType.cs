@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EvoS.Framework.Network.Shared
+namespace EvoS.Framework.Constants.Enums
 {
     [Flags]
     public enum ProcessType

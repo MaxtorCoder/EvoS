@@ -1,4 +1,4 @@
-﻿namespace EvoS.Framework.Network.Shared
+﻿namespace EvoS.Framework.Constants.Enums
 {
     public enum ClientProxyStatus
     {

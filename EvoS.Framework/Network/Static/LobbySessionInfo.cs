@@ -1,4 +1,4 @@
-﻿using EvoS.Framework.Network.Shared;
+﻿using EvoS.Framework.Constants.Enums;
 using System;
 
 namespace EvoS.Framework.Network.Static
