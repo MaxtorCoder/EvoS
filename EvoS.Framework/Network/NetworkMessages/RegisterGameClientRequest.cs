@@ -15,11 +15,10 @@ namespace EvoS.Framework.Network.NetworkMessages
 		public string SteamUserId;
 		public LobbyGameClientSystemInfo SystemInfo;
 
-        public override void HandleMessage(MemoryStream message)
+        public override void HandleMessage(EvosMessageStream message)
         {
-            BinarySerializer bs = new BinarySerializer();
-
             ReadHeader(message);
+            this.AuthInfo = AuthInfo.ReadFromStream(message);
         }
     }
 }

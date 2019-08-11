@@ -22,12 +22,11 @@ namespace EvoS.Framework.Network.WebSocket
         [NonSerialized]
         public long SerializedLength;
 
-        public abstract void HandleMessage(MemoryStream message);
+        public abstract void HandleMessage(EvosMessageStream message);
 
-        public void ReadHeader(MemoryStream message) {
-            BinarySerializer bs = new BinarySerializer();
-            RequestId = bs.ReadVarInt(message);
-            ResponseId = bs.ReadVarInt(message);
+        public void ReadHeader(EvosMessageStream message) {
+            RequestId = message.ReadVarInt();
+            ResponseId = message.ReadVarInt();
 
             Console.WriteLine("request: " + RequestId + ", response: " + ResponseId);
         }

@@ -7,6 +7,7 @@ using System.Threading;
 using vtortola.WebSockets;
 using vtortola.WebSockets.Rfc6455;
 using EvoS.Framework.Network.Static;
+using EvoS.Framework.Network;
 using EvoS.Framework.Network.WebSocket;
 using EvoS.Framework.Network.NetworkMessages;
 using System.Reflection;
@@ -43,7 +44,6 @@ namespace EvoS.LobbyServer
 
         public async void HandleConnection()
         {
-            BinarySerializer bs = new BinarySerializer();
             while (true)
             {
                 WebSocketMessageReadStream message = await Socket.ReadMessageAsync(CancellationToken.None);
@@ -69,13 +69,10 @@ namespace EvoS.LobbyServer
                         await message.CopyToAsync(ms);
                         await ms.FlushAsync();
 
-                        
-
-                        //Set the stream at the begging
-                        ms.Seek(0, SeekOrigin.Begin);
+                        EvosMessageStream ems = new EvosMessageStream(ms);
 
                         // Get the Type of NetworkMessage received
-                        int typeId = bs.ReadVarInt(ms);
+                        int typeId = ems.ReadVarInt();
 
                         networkMessage = null;
                         typeDict.TryGetValue(typeId, out networkMessage);
@@ -87,10 +84,9 @@ namespace EvoS.LobbyServer
                             // Call the HandleMessage method of the received message
                             object wsm = networkMessage.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
                             MethodInfo handleMessageMethod = networkMessage.GetMethod("HandleMessage");
-                            handleMessageMethod.Invoke(wsm, new object[] { ms });
+                            handleMessageMethod.Invoke(wsm, new object[] { ems });
 
-                            //This is the actual message, uncomment to print the received bytes
-                            /*
+                            /*//This is the actual message, uncomment to print the received bytes
                             byte[] msg = ms.ToArray();
                             Console.WriteLine(Encoding.Default.GetString(msg));
                             //*/

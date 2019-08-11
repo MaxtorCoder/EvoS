@@ -14,7 +14,7 @@ namespace EvoS.Framework.Network.NetworkMessages
         public LobbyGameClientProxyInfo ProxyInfo { get; set; }
         public string LobbyServerAddress { get; set; }
 
-        public override void HandleMessage(MemoryStream message)
+        public override void HandleMessage(EvosMessageStream message)
         {
             throw new NotImplementedException();
         }

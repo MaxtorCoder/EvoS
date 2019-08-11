@@ -17,10 +17,16 @@ namespace EvoS.Framework.Network.Static
         public string AccountCurrency { get; set; }
         public long SteamId { get; set; }
 
-        /*public void Read(Stream s) {
+
+        public static AuthInfo ReadFromStream(EvosMessageStream stream)
+        {
+            AuthInfo ret = new AuthInfo();
             BinarySerializer bs = new BinarySerializer();
-            Type = (AuthType)bs.ReadVarInt(s);
-            AccountId = bs.ReadVarInt(s);
-        }*/
+
+            ret.AccountCurrency = stream.ReadString();
+            ret.AccountId = stream.ReadVarInt();
+            ret.AccountStatus = stream.ReadString();
+            return ret;
+        }
     }
 }

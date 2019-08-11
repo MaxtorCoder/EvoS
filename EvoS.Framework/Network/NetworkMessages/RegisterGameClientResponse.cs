@@ -16,7 +16,7 @@ namespace EvoS.Framework.Network.NetworkMessages
 		public string DevServerConnectionUrl;
 		public LocalizationPayload LocalizedFailure;
 
-        public override void HandleMessage(MemoryStream message)
+        public override void HandleMessage(EvosMessageStream message)
         {
             throw new NotImplementedException();
         }

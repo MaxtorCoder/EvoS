@@ -23,7 +23,7 @@ namespace EvoS.Framework.Network.NetworkMessages
 		public TimeSpan TimeOffset;
 		public TimeSpan? ErrorReportRate;
 
-        public override void HandleMessage(MemoryStream message)
+        public override void HandleMessage(EvosMessageStream message)
         {
             throw new NotImplementedException();
         }

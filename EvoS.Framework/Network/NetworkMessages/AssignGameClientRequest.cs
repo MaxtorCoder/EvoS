@@ -16,7 +16,7 @@ namespace EvoS.Framework.Network.NetworkMessages
 
         
 
-        public override void HandleMessage(MemoryStream ms) {
+        public override void HandleMessage(EvosMessageStream ms) {
             Console.WriteLine("AssignGameClientRequest.HandleMessage");
         }
     }
