@@ -1,4 +1,5 @@
 ﻿using EvoS.Framework;
+using EvoS.Framework.Network.Static;
 using EvoS.Framework.Logging;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using vtortola.WebSockets;
 using vtortola.WebSockets.Rfc6455;
+using System.IO;
 
 namespace EvoS.LobbyServer
 {
@@ -24,10 +26,14 @@ namespace EvoS.LobbyServer
 
         private static async Task StartServer()
         {
-            WebSocketListenerOptions options = new WebSocketListenerOptions();
-            options.Standards.RegisterRfc6455();
-            WebSocketListener server = new WebSocketListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6060), options);
-            await server.StartAsync();
+            Console.WriteLine("Starting server");
+            WebSocketListener server = new WebSocketListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6060));
+            server.Standards.RegisterStandard(new WebSocketFactoryRfc6455());
+            
+            // Server doesnt start if i await StartAsync...
+            #pragma warning disable CS4014
+            server.StartAsync();
+            #pragma warning restore CS4014
 
             Log.Print(LogType.Server, "Started webserver on '0.0.0.0:6060'");
 
