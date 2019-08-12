@@ -10,15 +10,22 @@ namespace EvoS.Framework.Network.NetworkMessages
 	{
         public new static int MessageTypeID = 783;
 
+        public AuthInfo AuthInfo;
         public LobbySessionInfo SessionInfo;
-		public AuthInfo AuthInfo;
 		public string SteamUserId;
 		public LobbyGameClientSystemInfo SystemInfo;
 
         public override void HandleMessage(EvosMessageStream message)
         {
             ReadHeader(message);
+            Console.WriteLine("auth");
             this.AuthInfo = AuthInfo.ReadFromStream(message);
+            Console.WriteLine("session info");
+            this.SessionInfo = LobbySessionInfo.ReadFromStream(message);
+            Console.WriteLine("steam");
+            this.SteamUserId = message.ReadString();
+            Console.WriteLine("sysinfo");
+            this.SystemInfo = LobbyGameClientSystemInfo.ReadFromStream(message);
         }
     }
 }

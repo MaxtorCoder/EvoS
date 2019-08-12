@@ -86,7 +86,7 @@ namespace EvoS.LobbyServer
                             MethodInfo handleMessageMethod = networkMessage.GetMethod("HandleMessage");
                             handleMessageMethod.Invoke(wsm, new object[] { ems });
 
-                            /*//This is the actual message, uncomment to print the received bytes
+                            //This is the actual message, uncomment to print the received bytes
                             byte[] msg = ms.ToArray();
                             Console.WriteLine(Encoding.Default.GetString(msg));
                             //*/

@@ -6,7 +6,7 @@ namespace EvoS.Framework.Constants.Enums
 {
     public enum Region
     {
-        const_0,
-        const_1
+        EN,
+        EU
     }
 }

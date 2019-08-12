@@ -1,4 +1,6 @@
 ﻿using EvoS.Framework.Network.NetworkMessages;
+using EvoS.Framework.Network.Static;
+using EvoS.Framework.Constants.Enums;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +9,8 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
 using System.Net;
+using Newtonsoft.Json;
+
 
 namespace EvoS.DirectoryServer
 {
@@ -41,10 +45,30 @@ namespace EvoS.DirectoryServer
             {
                 context.Response.ContentType = "application/json";
                 MemoryStream ms = new MemoryStream();
-
-                Console.WriteLine(context.Request.Body.ToString());
+                context.Request.Body.CopyTo(ms);
+                ms.Position = 0;
+                string requestBody = new StreamReader(ms).ReadToEnd(); ;
                 ms.Dispose();
-                return context.Response.WriteAsync("{\"SessionInfo\":{\"AccountId\":1,\"UserName\":\"a@b.c\",\"BuildVersion\":\"STABLE-122-100\",\"ProtocolVersion\":\"b486c83d8a8950340936d040e1953493\",\"SessionToken\":1,\"ReconnectSessionToken\":0,\"ProcessType\":\"AtlasReactor\",\"ConnectionAddress\":\"127.0.0.1\",\"Handle\":\"maxtorcoder1#857\",\"IsBinary\":true,\"Region\":0,\"LanguageCode\":\"en\"},\"LobbyServerAddress\":\"ws://127.0.0.1:6060/\",\"Success\":true,\"RequestId\":0,\"ResponseId\":2}");
+
+                AssignGameClientRequest request = JsonConvert.DeserializeObject<AssignGameClientRequest>(requestBody);
+                AssignGameClientResponse response = new AssignGameClientResponse();
+                response.RequestId = request.RequestId;
+                response.ResponseId = request.ResponseId;
+                response.Success = true;
+                response.ErrorMessage = "";
+                response.SessionInfo = request.SessionInfo;
+                response.LobbyServerAddress = "127.0.0.1";
+
+                LobbyGameClientProxyInfo proxyInfo = new LobbyGameClientProxyInfo();
+                proxyInfo.AccountId = request.SessionInfo.AccountId;
+                proxyInfo.SessionToken = request.SessionInfo.SessionToken;
+                proxyInfo.AssignmentTime = 1565574095;
+                proxyInfo.Handle = request.SessionInfo.Handle;
+                proxyInfo.Status = ClientProxyStatus.Assigned;
+
+                response.ProxyInfo = proxyInfo;
+
+                return context.Response.WriteAsync(JsonConvert.SerializeObject(response));
             });
         }
     }

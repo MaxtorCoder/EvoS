@@ -7,7 +7,7 @@ namespace EvoS.Framework.Network
 {
     public class EvosMessageStream
     {
-        public MemoryStream stream;
+        private MemoryStream stream;
 
         public EvosMessageStream(MemoryStream ms) {
             stream = ms;
@@ -35,12 +35,14 @@ namespace EvoS.Framework.Network
 
         public String ReadString()
         {
-            int length = ReadVarInt();
+            int data_length = ReadVarInt();
+            int string_length = ReadVarInt();
             byte[] buffer;
 
-            if (length > 0){
-                buffer = new byte[length];
-                return buffer.ToString();
+            if (data_length > 0){
+                buffer = new byte[string_length];
+                stream.Read(buffer, 0, string_length);
+                return Encoding.UTF8.GetString(buffer, 0, buffer.Length);
             } else {
                 return "";
             }
