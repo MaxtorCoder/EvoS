@@ -26,7 +26,7 @@ namespace EvoS.Framework.Network.Static
             int typeId = stream.ReadVarInt();
 
             ret.AccountCurrency = stream.ReadString();
-            ret.AccountId = stream.ReadVarInt();
+            ret.AccountId = stream.ReadLong();
             ret.AccountStatus = stream.ReadString();
             ret.Handle = stream.ReadString();
             ret.Password = stream.ReadString();

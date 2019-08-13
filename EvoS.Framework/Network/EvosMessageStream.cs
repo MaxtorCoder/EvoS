@@ -14,6 +14,15 @@ namespace EvoS.Framework.Network
             stream.Seek(0, SeekOrigin.Begin);
         }
 
+        public bool ReadBool() {
+            return stream.ReadByte() != 0;
+        }
+
+        public long ReadLong() {
+            long n = (long)ReadVarInt();
+            return (long)(n >> 1 ^ - (n & 1L));
+        }
+
         public int ReadVarInt()
         {
             int shift = 0;

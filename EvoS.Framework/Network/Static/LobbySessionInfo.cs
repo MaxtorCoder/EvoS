@@ -27,19 +27,19 @@ namespace EvoS.Framework.Network.Static
             LobbySessionInfo ret = new LobbySessionInfo();
             int typeId = stream.ReadVarInt();
 
-            ret.AccountId = stream.ReadVarInt();
+            ret.AccountId = stream.ReadLong();
             ret.BuildVersion = stream.ReadString();
             ret.ConnectionAddress = stream.ReadString();
             ret.FakeEntitlements = stream.ReadString();
             ret.Handle = stream.ReadString();
-            ret.IsBinary = stream.ReadVarInt() != 0;
+            ret.IsBinary = stream.ReadBool();
             ret.LanguageCode = stream.ReadString();
             ret.ProcessCode = stream.ReadString();
             ret.ProcessType = (ProcessType)stream.ReadVarInt();
             ret.ProtocolVersion = stream.ReadString();
-            ret.ReconnectSessionToken = stream.ReadVarInt();
+            ret.ReconnectSessionToken = stream.ReadLong();
             ret.Region = (Region)stream.ReadVarInt();
-            ret.SessionToken = stream.ReadVarInt();
+            ret.SessionToken = stream.ReadLong();
             ret.UserName = stream.ReadString();
 
             return ret;
