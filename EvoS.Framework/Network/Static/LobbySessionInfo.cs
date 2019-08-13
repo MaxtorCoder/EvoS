@@ -25,44 +25,22 @@ namespace EvoS.Framework.Network.Static
         public static LobbySessionInfo ReadFromStream(EvosMessageStream stream)
         {
             LobbySessionInfo ret = new LobbySessionInfo();
-
             int typeId = stream.ReadVarInt();
 
             ret.AccountId = stream.ReadVarInt();
             ret.BuildVersion = stream.ReadString();
             ret.ConnectionAddress = stream.ReadString();
-
-            int idk = stream.ReadVarInt();
-
+            ret.FakeEntitlements = stream.ReadString();
             ret.Handle = stream.ReadString();
             ret.IsBinary = stream.ReadVarInt() != 0;
             ret.LanguageCode = stream.ReadString();
             ret.ProcessCode = stream.ReadString();
-            ret.ReconnectSessionToken = stream.ReadVarInt();
-            
-            ret.ProtocolVersion = stream.ReadString();
-            ret.Region = (Region)stream.ReadVarInt();
-            ret.ReconnectSessionToken = stream.ReadVarInt();
             ret.ProcessType = (ProcessType)stream.ReadVarInt();
+            ret.ProtocolVersion = stream.ReadString();
+            ret.ReconnectSessionToken = stream.ReadVarInt();
+            ret.Region = (Region)stream.ReadVarInt();
             ret.SessionToken = stream.ReadVarInt();
             ret.UserName = stream.ReadString();
-
-
-            Console.WriteLine("AccountId: " + ret.AccountId);
-            Console.WriteLine("BuildVersion: " + ret.BuildVersion);
-            Console.WriteLine("ConnectionAddress: " + ret.ConnectionAddress);
-            Console.WriteLine("idk: " + idk);
-            Console.WriteLine("Handle: " + ret.Handle);
-            Console.WriteLine("IsBinary: " + ret.IsBinary);
-            Console.WriteLine("LanguageCode: " + ret.LanguageCode);
-            Console.WriteLine("ProcessCode: " + ret.ProcessCode);
-            Console.WriteLine("ProcessType: " + ret.ProcessType);
-            Console.WriteLine("ProtocolVersion: " + ret.ProtocolVersion);
-            Console.WriteLine("Region: " + ret.Region);
-            Console.WriteLine("ReconnectSessionToken: " + ret.ReconnectSessionToken);
-            Console.WriteLine("SessionToken: " + ret.SessionToken);
-            Console.WriteLine("UserName: " + ret.UserName);
-
 
             return ret;
         }

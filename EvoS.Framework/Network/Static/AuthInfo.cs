@@ -6,8 +6,7 @@ namespace EvoS.Framework.Network.Static
 {
     [Serializable]
     public class AuthInfo
-    {
-        
+    {   
         public string AccountCurrency { get; set; }
         public long AccountId { get; set; }
         public string AccountStatus { get; set; }
@@ -31,6 +30,7 @@ namespace EvoS.Framework.Network.Static
             ret.AccountStatus = stream.ReadString();
             ret.Handle = stream.ReadString();
             ret.Password = stream.ReadString();
+            ret.SteamId = stream.ReadVarInt();
             ret.TicketData = stream.ReadString();
             ret.Type = (AuthType)stream.ReadVarInt();
             ret.UserName = stream.ReadString();

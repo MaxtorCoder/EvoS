@@ -25,7 +25,7 @@ namespace EvoS.Framework.Network
                 byteValue = stream.ReadByte();
                 //Console.WriteLine("read value: " + byteValue);
                 if (byteValue == -1) break;
-                result |= (byteValue & 0x7f) << shift;
+                result |= ((byteValue & 0x7f) << shift);
                 shift += 7;
                 if ((byteValue & 0x80) != 0x80) break;
             }
@@ -36,15 +36,18 @@ namespace EvoS.Framework.Network
         public String ReadString()
         {
             int data_length = ReadVarInt();
-            int string_length = ReadVarInt();
+
             byte[] buffer;
 
-            if (data_length > 0){
+            if (data_length == 0) {
+                return null;
+            } else if (data_length == 1) {
+                return string.Empty;
+            } else { 
+                int string_length = ReadVarInt();
                 buffer = new byte[string_length];
                 stream.Read(buffer, 0, string_length);
                 return Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-            } else {
-                return "";
             }
         }
     }

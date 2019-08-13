@@ -56,8 +56,13 @@ namespace EvoS.DirectoryServer
                 response.ResponseId = request.ResponseId;
                 response.Success = true;
                 response.ErrorMessage = "";
+
                 response.SessionInfo = request.SessionInfo;
+                response.SessionInfo.ConnectionAddress = "127.0.0.1";
+
+                response.SessionInfo.ProcessCode = "This is the process code";
                 response.LobbyServerAddress = "127.0.0.1";
+                response.SessionInfo.FakeEntitlements = "";
 
                 LobbyGameClientProxyInfo proxyInfo = new LobbyGameClientProxyInfo();
                 proxyInfo.AccountId = request.SessionInfo.AccountId;
