@@ -10,6 +10,7 @@ using EvoS.Framework.Network.Static;
 using EvoS.Framework.Network;
 using EvoS.Framework.Network.WebSocket;
 using EvoS.Framework.Network.NetworkMessages;
+using EvoS.LobbyServer.NetworkMessageHandlers;
 using System.Reflection;
 
 namespace EvoS.LobbyServer
@@ -29,9 +30,6 @@ namespace EvoS.LobbyServer
         private void InitTypeDict() {
             typeDict = new Dictionary<int, Type>();
             typeDict.Add(RegisterGameClientRequest.MessageTypeID, typeof(RegisterGameClientRequest));
-            typeDict.Add(RegisterGameClientResponse.MessageTypeID, typeof(RegisterGameClientResponse));
-            typeDict.Add(AssignGameClientRequest.MessageTypeID, typeof(AssignGameClientRequest));
-            typeDict.Add(AssignGameClientResponse.MessageTypeID, typeof(AssignGameClientResponse));
         }
 
         public void Disconnect() {
@@ -79,25 +77,29 @@ namespace EvoS.LobbyServer
 
                         if (networkMessage != null)
                         {
-                            Console.WriteLine("Received " + networkMessage.Name + "(" + typeId + ")");
+                            Log.Print(LogType.Network, $"Received {networkMessage.Name}. ID {typeId}");
 
-                            // Call the HandleMessage method of the received message
-                            object wsm = networkMessage.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-                            MethodInfo handleMessageMethod = networkMessage.GetMethod("HandleMessage");
-                            handleMessageMethod.Invoke(wsm, new object[] { ems });
+                            Type handler = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{networkMessage.Name}Handler");
 
-                            //This is the actual message, uncomment to print the received bytes
-                            byte[] msg = ms.ToArray();
-                            Console.WriteLine(Encoding.Default.GetString(msg));
-                            //*/
+                            // Create an instance of the handler by calling its constructor
+                            object wsm = handler.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
+
+                            // Log Packet data?
+                            if ((bool)(handler.GetMethod("DoLogPacket").Invoke(wsm, new object[] { }))) {
+                                byte[] msg = ms.ToArray();
+                                Log.Print(LogType.Packet, Encoding.Default.GetString(msg));
+                            }
+
+                            // Execute handler.OnMessage()
+                            handler.GetMethod("OnMessage").Invoke(wsm, new object[] { ems });
                         }
                         else
                         {
                             //Received an unknown/not implemented yet NetworkMessage
-                            Console.WriteLine("------------- UNKNOWN NETWORK MESSAGE START "+typeId+" ---------------");
+                            Log.Print(LogType.Network, "------------- UNKNOWN NETWORK MESSAGE START "+typeId+" ---------------");
                             byte[] msg = ms.ToArray();
-                            Console.WriteLine(Encoding.Default.GetString(msg));
-                            Console.WriteLine("------------- UNKNOWN NETWORK MESSAGE END ---------------");
+                            Log.Print(LogType.Network, Encoding.Default.GetString(msg));
+                            Log.Print(LogType.Network, "------------- UNKNOWN NETWORK MESSAGE END ---------------");
                         }
                         
                         

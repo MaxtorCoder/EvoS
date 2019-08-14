@@ -22,7 +22,7 @@ namespace EvoS.Framework.Network.Static
 
         public string FakeEntitlements { get; set; }
 
-        public static LobbySessionInfo ReadFromStream(EvosMessageStream stream)
+        public static LobbySessionInfo CreateFromStream(EvosMessageStream stream)
         {
             LobbySessionInfo ret = new LobbySessionInfo();
             int typeId = stream.ReadVarInt();

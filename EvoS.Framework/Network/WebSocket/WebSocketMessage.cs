@@ -22,7 +22,7 @@ namespace EvoS.Framework.Network.WebSocket
         [NonSerialized]
         public long SerializedLength;
 
-        public abstract void HandleMessage(EvosMessageStream message);
+        public abstract void CreateFromStream(EvosMessageStream message);
 
         public void ReadHeader(EvosMessageStream message) {
             RequestId = message.ReadVarInt();

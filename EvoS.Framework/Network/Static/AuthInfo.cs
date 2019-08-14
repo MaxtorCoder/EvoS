@@ -19,7 +19,7 @@ namespace EvoS.Framework.Network.Static
         public long SteamId { get; set; }
 
 
-        public static AuthInfo ReadFromStream(EvosMessageStream stream)
+        public static AuthInfo CreateFromStream(EvosMessageStream stream)
         {
             AuthInfo ret = new AuthInfo();
             BinarySerializer bs = new BinarySerializer();
