@@ -12,11 +12,20 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
         public void OnMessage(EvosMessageStream stream)
         {
-            RegisterGameClientRequest data = new RegisterGameClientRequest();
-            data.CreateFromStream(stream);
+            RegisterGameClientRequest request = new RegisterGameClientRequest();
+            request.CreateFromStream(stream);
 
-            // TODO: Use the data for something useful
-            
+            RegisterGameClientResponse response = new RegisterGameClientResponse();
+
+            response.SessionInfo = request.SessionInfo;
+            response.SessionInfo.ConnectionAddress = "127.0.0.1";
+            response.AuthInfo = request.AuthInfo;
+            response.Status = new LobbyStatusNotification();
+            response.DevServerConnectionUrl = "127.0.0.1"; // What is this?
+            response.LocalizedFailure = null;
+
+            response.WriteData(stream);
+
         }
     }
 }

@@ -42,6 +42,8 @@ namespace EvoS.LobbyServer
 
         public async void HandleConnection()
         {
+            WebSocketMessageWriteStream writeStream = Socket.CreateMessageWriter(WebSocketMessageType.Binary);
+
             while (true)
             {
                 WebSocketMessageReadStream message = await Socket.ReadMessageAsync(CancellationToken.None);
@@ -50,6 +52,7 @@ namespace EvoS.LobbyServer
                 if (message == null)
                 {
                     Console.WriteLine("Message is null");
+                    writeStream.Dispose();
                     Disconnect();
                     return;
                 }
@@ -67,10 +70,10 @@ namespace EvoS.LobbyServer
                         await message.CopyToAsync(ms);
                         await ms.FlushAsync();
 
-                        EvosMessageStream ems = new EvosMessageStream(ms);
+                        EvosMessageStream messageStream = new EvosMessageStream(ms);
 
                         // Get the Type of NetworkMessage received
-                        int typeId = ems.ReadVarInt();
+                        int typeId = messageStream.ReadVarInt();
 
                         networkMessage = null;
                         typeDict.TryGetValue(typeId, out networkMessage);
@@ -91,7 +94,9 @@ namespace EvoS.LobbyServer
                             }
 
                             // Execute handler.OnMessage()
-                            handler.GetMethod("OnMessage").Invoke(wsm, new object[] { ems });
+                            handler.GetMethod("OnMessage").Invoke(wsm, new object[] { messageStream });
+
+                            await messageStream.GetOutputStream().CopyToAsync(writeStream);
                         }
                         else
                         {
