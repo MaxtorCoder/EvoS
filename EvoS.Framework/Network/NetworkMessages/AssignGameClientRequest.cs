@@ -14,9 +14,10 @@ namespace EvoS.Framework.Network.NetworkMessages
 
         public new static int MessageTypeID = 788;
 
-        
 
-        public override void CreateFromStream(EvosMessageStream ms) {
+
+        public override void CreateFromStream(EvosMessageStream ms)
+        {
             Console.WriteLine("AssignGameClientRequest.HandleMessage");
         }
     }

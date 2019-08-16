@@ -24,7 +24,8 @@ namespace EvoS.Framework.Network.WebSocket
 
         public abstract void CreateFromStream(EvosMessageStream message);
 
-        public void ReadHeader(EvosMessageStream message) {
+        public void ReadHeader(EvosMessageStream message)
+        {
             RequestId = message.ReadVarInt();
             ResponseId = message.ReadVarInt();
 

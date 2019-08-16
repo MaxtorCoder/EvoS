@@ -7,12 +7,14 @@ namespace EvoS.Framework.Network.Static
 {
     public class BinarySerializer
     {
-        public int ReadVarIntsss(Stream buffer) {
+        public int ReadVarIntsss(Stream buffer)
+        {
             int shift = 0;
             int result = 0;
             int byteValue;
 
-            while (true) {
+            while (true)
+            {
                 byteValue = buffer.ReadByte();
 
                 //Console.WriteLine("read value: " + byteValue);
@@ -24,14 +26,16 @@ namespace EvoS.Framework.Network.Static
 
                 if ((byteValue & 0x80) != 0x80) break;
             }
-            
+
             return result;
         }
 
-        public void WriteVarIntssss(Stream buffer, int value) {
+        public void WriteVarIntssss(Stream buffer, int value)
+        {
             int byteValue;
 
-            while (true) {
+            while (true)
+            {
                 byteValue = value & 0x7f;
                 value >>= 7;
 
@@ -46,7 +50,8 @@ namespace EvoS.Framework.Network.Static
             }
         }
 
-        public String ReadStringssss(Stream s) {
+        public String ReadStringssss(Stream s)
+        {
             int length = ReadVarIntsss(s);
             byte[] buffer;
 
@@ -57,14 +62,17 @@ namespace EvoS.Framework.Network.Static
 
                 return buffer.ToString();
             }
-            else {
+            else
+            {
                 return "";
             }
         }
 
-        public void WriteStringsss(Stream s, String str) {
+        public void WriteStringsss(Stream s, String str)
+        {
             WriteVarIntssss(s, str.Length);
-            for (int i = 0; i < str.Length; i++) {
+            for (int i = 0; i < str.Length; i++)
+            {
                 s.WriteByte((byte)str[i]);
             }
         }

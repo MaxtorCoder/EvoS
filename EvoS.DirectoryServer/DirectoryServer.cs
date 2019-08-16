@@ -29,7 +29,7 @@ namespace EvoS.DirectoryServer
                 await host.StopAsync();
                 host.Dispose();
             };
-            
+
             host.Run();
         }
     }
@@ -40,7 +40,7 @@ namespace EvoS.DirectoryServer
         {
             var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
             Console.WriteLine("Started DirectoryServer on '0.0.0.0:6050'");
-            
+
             app.Run((context) =>
             {
                 context.Response.ContentType = "application/json";

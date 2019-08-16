@@ -2,7 +2,7 @@
 {
     public enum LogType
     {
-        None, 
+        None,
         Debug,
         Server,
         Packet,

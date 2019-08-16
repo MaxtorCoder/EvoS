@@ -20,7 +20,7 @@ namespace EvoS.LobbyServer
         static void Main(string[] args)
         {
             Task server = Task.Run(StartServer);
-            server.Wait();    
+            server.Wait();
             Log.Print(LogType.Server, "Server Stopped");
         }
 
@@ -29,11 +29,11 @@ namespace EvoS.LobbyServer
             Console.WriteLine("Starting server");
             WebSocketListener server = new WebSocketListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6060));
             server.Standards.RegisterStandard(new WebSocketFactoryRfc6455());
-            
+
             // Server doesnt start if i await StartAsync...
-            #pragma warning disable CS4014
+#pragma warning disable CS4014
             server.StartAsync();
-            #pragma warning restore CS4014
+#pragma warning restore CS4014
 
             Log.Print(LogType.Server, "Started webserver on '0.0.0.0:6060'");
 
@@ -44,7 +44,7 @@ namespace EvoS.LobbyServer
                 Log.Print(LogType.Server, "Client connected");
                 ClientConnection newClient = new ClientConnection(socket);
                 ConnectedClients.Add(newClient);
-                
+
                 new Thread(newClient.HandleConnection).Start();
             }
         }
@@ -55,7 +55,7 @@ namespace EvoS.LobbyServer
             while (true)
             {
                 WebSocketMessageReadStream message = await client.ReadMessageAsync(CancellationToken.None);
-                if (!client.IsConnected || message==null)
+                if (!client.IsConnected || message == null)
                 {
                     Log.Print(LogType.Server, "a client disconnected");
                     client.Dispose();
@@ -64,7 +64,7 @@ namespace EvoS.LobbyServer
                 Console.WriteLine($"RECV {message.MessageType} {(message.MessageType == WebSocketMessageType.Text ? message.ReadText() : message.ReadBinary())}");
                 message.Dispose();
             }
-            
+
         }
     }
 }

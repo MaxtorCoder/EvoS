@@ -5,15 +5,15 @@ using System.IO;
 
 namespace EvoS.Framework.Network.NetworkMessages
 {
-	[Serializable]
-	public class RegisterGameClientRequest : WebSocketMessage
-	{
+    [Serializable]
+    public class RegisterGameClientRequest : WebSocketMessage
+    {
         public new static int MessageTypeID = 783;
 
         public AuthInfo AuthInfo;
         public LobbySessionInfo SessionInfo;
-		public string SteamUserId;
-		public LobbyGameClientSystemInfo SystemInfo;
+        public string SteamUserId;
+        public LobbyGameClientSystemInfo SystemInfo;
 
         public override void CreateFromStream(EvosMessageStream message)
         {

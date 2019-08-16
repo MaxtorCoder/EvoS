@@ -7,7 +7,8 @@ namespace EvoS.Framework.Network.Static
     {
         public string GraphicsDeviceName;
 
-        public static LobbyGameClientSystemInfo CreateFromStream(EvosMessageStream stream) {
+        public static LobbyGameClientSystemInfo CreateFromStream(EvosMessageStream stream)
+        {
             LobbyGameClientSystemInfo ret = new LobbyGameClientSystemInfo();
 
             int typeId = stream.ReadVarInt();

@@ -6,7 +6,7 @@ namespace EvoS.Framework.Network.Static
 {
     [Serializable]
     public class AuthInfo
-    {   
+    {
         public string AccountCurrency { get; set; }
         public long AccountId { get; set; }
         public string AccountStatus { get; set; }

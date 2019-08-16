@@ -10,24 +10,28 @@ namespace EvoS.Framework.Network
         private MemoryStream stream;
         private MemoryStream outputStream;
 
-        public EvosMessageStream(MemoryStream ms) {
+        public EvosMessageStream(MemoryStream ms)
+        {
             stream = ms;
             stream.Seek(0, SeekOrigin.Begin);
 
             outputStream = new MemoryStream();
         }
 
-        public MemoryStream GetOutputStream() {
+        public MemoryStream GetOutputStream()
+        {
             return outputStream;
         }
 
-        public bool ReadBool() {
+        public bool ReadBool()
+        {
             return stream.ReadByte() != 0;
         }
 
-        public long ReadLong() {
+        public long ReadLong()
+        {
             long n = (long)ReadVarInt();
-            return (long)(n >> 1 ^ - (n & 1L));
+            return (long)(n >> 1 ^ -(n & 1L));
         }
 
         public int ReadVarInt()
@@ -55,11 +59,16 @@ namespace EvoS.Framework.Network
 
             byte[] buffer;
 
-            if (data_length == 0) {
+            if (data_length == 0)
+            {
                 return null;
-            } else if (data_length == 1) {
+            }
+            else if (data_length == 1)
+            {
                 return string.Empty;
-            } else { 
+            }
+            else
+            {
                 int string_length = ReadVarInt();
                 buffer = new byte[string_length];
                 stream.Read(buffer, 0, string_length);
@@ -105,7 +114,7 @@ namespace EvoS.Framework.Network
                 return WriteVarInt(1);
             }
 
-            byteCount += WriteVarInt(str.Length+1);
+            byteCount += WriteVarInt(str.Length + 1);
             byteCount += WriteVarInt(str.Length);
             byte[] buffer = Encoding.GetEncoding("UTF-8").GetBytes(str.ToCharArray());
             outputStream.Write(buffer, 0, buffer.Length);
@@ -114,8 +123,9 @@ namespace EvoS.Framework.Network
             return byteCount;
         }
 
-        public int WriteBool(bool value) {
-            outputStream.WriteByte(value?((byte)1):((byte)0));
+        public int WriteBool(bool value)
+        {
+            outputStream.WriteByte(value ? ((byte)1) : ((byte)0));
             return 1;
         }
     }

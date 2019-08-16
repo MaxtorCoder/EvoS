@@ -46,5 +46,5 @@ namespace EvoS.Framework.Network.Static
         }
     }
 
-    
+
 }

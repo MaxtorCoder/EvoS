@@ -21,22 +21,25 @@ namespace EvoS.LobbyServer
         private Dictionary<int, Type> typeDict;
         ILog Log = new Log();
 
-        public ClientConnection(WebSocket socket) {
+        public ClientConnection(WebSocket socket)
+        {
             Socket = socket;
-            
+
             InitTypeDict();
         }
 
-        private void InitTypeDict() {
+        private void InitTypeDict()
+        {
             typeDict = new Dictionary<int, Type>();
             typeDict.Add(RegisterGameClientRequest.MessageTypeID, typeof(RegisterGameClientRequest));
         }
 
-        public void Disconnect() {
+        public void Disconnect()
+        {
             Log.Print(LogType.Server, "Client disconnected.");
-            if (Socket.IsConnected) {
+            if (Socket.IsConnected)
                 Socket.Close();
-            }
+
             Socket.Dispose();
         }
 
@@ -48,7 +51,7 @@ namespace EvoS.LobbyServer
             {
                 WebSocketMessageReadStream message = await Socket.ReadMessageAsync(CancellationToken.None);
                 Type networkMessage = null;
-                
+
                 if (message == null)
                 {
                     Console.WriteLine("Message is null");
@@ -56,11 +59,14 @@ namespace EvoS.LobbyServer
                     Disconnect();
                     return;
                 }
+
                 if (message.MessageType == WebSocketMessageType.Text)
                 {
                     var msgContent = string.Empty;
+
                     using (var sr = new StreamReader(message, Encoding.UTF8))
                         msgContent = await sr.ReadToEndAsync();
+
                     Console.WriteLine(msgContent);
                 }
                 else if (message.MessageType == WebSocketMessageType.Binary)
@@ -88,7 +94,8 @@ namespace EvoS.LobbyServer
                             object wsm = handler.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
 
                             // Log Packet data?
-                            if ((bool)(handler.GetMethod("DoLogPacket").Invoke(wsm, new object[] { }))) {
+                            if ((bool)(handler.GetMethod("DoLogPacket").Invoke(wsm, new object[] { })))
+                            {
                                 byte[] msg = ms.ToArray();
                                 Log.Print(LogType.Packet, Encoding.Default.GetString(msg));
                             }
@@ -101,13 +108,13 @@ namespace EvoS.LobbyServer
                         else
                         {
                             //Received an unknown/not implemented yet NetworkMessage
-                            Log.Print(LogType.Network, "------------- UNKNOWN NETWORK MESSAGE START "+typeId+" ---------------");
+                            Log.Print(LogType.Network, "------------- UNKNOWN NETWORK MESSAGE START " + typeId + " ---------------");
                             byte[] msg = ms.ToArray();
                             Log.Print(LogType.Network, Encoding.Default.GetString(msg));
                             Log.Print(LogType.Network, "------------- UNKNOWN NETWORK MESSAGE END ---------------");
                         }
-                        
-                        
+
+
                     }
 
                 }

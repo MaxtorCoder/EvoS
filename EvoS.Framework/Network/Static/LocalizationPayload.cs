@@ -7,7 +7,7 @@ using System.IO;
 [Serializable]
 public class LocalizationPayload
 {
-    public string Term = "unset";   
+    public string Term = "unset";
     public string Context;
     public byte[][] ArgumentsAsBinaryData;
 
