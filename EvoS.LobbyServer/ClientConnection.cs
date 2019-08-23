@@ -45,10 +45,12 @@ namespace EvoS.LobbyServer
 
         public async void HandleConnection()
         {
+            Console.WriteLine("Handling Connection");
             WebSocketMessageWriteStream writeStream = Socket.CreateMessageWriter(WebSocketMessageType.Binary);
 
             while (true)
             {
+                Console.WriteLine("while");
                 WebSocketMessageReadStream message = await Socket.ReadMessageAsync(CancellationToken.None);
                 Type networkMessage = null;
 
@@ -78,6 +80,8 @@ namespace EvoS.LobbyServer
 
                         EvosMessageStream messageStream = new EvosMessageStream(ms);
 
+                        messageStream.ReadGeneral();
+                        /*
                         // Get the Type of NetworkMessage received
                         int typeId = messageStream.ReadVarInt();
 
@@ -101,7 +105,8 @@ namespace EvoS.LobbyServer
                             }
 
                             // Execute handler.OnMessage()
-                            handler.GetMethod("OnMessage").Invoke(wsm, new object[] { messageStream });
+                            //handler.GetMethod("OnMessage").Invoke(wsm, new object[] { messageStream });
+
 
                             await messageStream.GetOutputStream().CopyToAsync(writeStream);
                         }
@@ -113,6 +118,7 @@ namespace EvoS.LobbyServer
                             Log.Print(LogType.Network, Encoding.Default.GetString(msg));
                             Log.Print(LogType.Network, "------------- UNKNOWN NETWORK MESSAGE END ---------------");
                         }
+                        */
 
 
                     }

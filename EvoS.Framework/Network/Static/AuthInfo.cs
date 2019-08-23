@@ -12,11 +12,12 @@ namespace EvoS.Framework.Network.Static
         public string AccountStatus { get; set; }
         public string Handle { get; set; }
         public string Password { get; set; }
+        public long SteamId { get; set; }
         public string TicketData { get; set; }
         public AuthType Type { get; set; }
         public string UserName { get; set; }
 
-        public long SteamId { get; set; }
+        
 
 
         public static AuthInfo CreateFromStream(EvosMessageStream stream)
