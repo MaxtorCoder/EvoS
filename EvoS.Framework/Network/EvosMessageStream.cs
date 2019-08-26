@@ -14,50 +14,48 @@ namespace EvoS.Framework.Network
     {
         private MemoryStream stream;
         private MemoryStream outputStream;
-        private static Dictionary<int, Type> typesById = new Dictionary<int, Type>
-        {
-            /*[757] = typeof(JoinGameRequest),
-            [758] = typeof(CreateGameResponse),
-            [759] = typeof(CreateGameRequest),
-            [760] = typeof(SyncNotification),
-            [761] = typeof(SetRegionRequest),
-            [762] = typeof(UnsubscribeFromCustomGamesRequest),
-            [763] = typeof(SubscribeToCustomGamesRequest),
-            [764] = typeof(LobbyCustomGamesNotification),
-            [765] = typeof(List`1),
-            [766] = typeof(LobbyGameInfo[]),
-            [767] = typeof(LobbyGameplayOverridesNotification),// */
-            [768] = typeof(LobbyStatusNotification),
-            [769] = typeof(ServerMessageOverrides),
-            [770] = typeof(ServerMessage),
-            [771] = typeof(ServerLockState),
-            [772] = typeof(ConnectionQueueInfo),
-            /*[773] = typeof(LobbyServerReadyNotification),
-            [774] = typeof(LobbyPlayerGroupInfo),
-            [775] = typeof(EnvironmentType),
-            [776] = typeof(List`1),
-            [777] = typeof(PersistedCharacterData[]),// */
-            [778] = typeof(RegisterGameClientResponse),
-            [779] = typeof(LobbySessionInfo),
-            [780] = typeof(ProcessType),
-            [781] = typeof(AuthInfo),
-            [782] = typeof(AuthType),
-            [783] = typeof(RegisterGameClientRequest),
-            [784] = typeof(LobbyGameClientSystemInfo),
-            //[785] = typeof(AssignGameClientResponse),
-            [786] = typeof(LobbyGameClientProxyInfo),
-            //[787] = typeof(LobbyGameClientProxyStatus),
-            //[788] = typeof(AssignGameClientRequest),
+        private static Dictionary<Type, int> idsByType = new Dictionary<Type, int>();
+        private static Dictionary<int, Type> typesByIds = new Dictionary<int, Type>();
+        private static bool typesAndIdsLoaded = false;
 
-
-        };
 
         public EvosMessageStream(MemoryStream ms)
         {
             stream = ms;
             stream.Seek(0, SeekOrigin.Begin);
-
             outputStream = new MemoryStream();
+        }
+
+
+        private static Type GetTypeFromId(int id_)
+        {
+            if (!typesAndIdsLoaded)
+                EvosMessageStream.LoadTypesAndIds();
+            
+            Type ret;
+            if (typesByIds.TryGetValue(id_, out ret)) {
+                return ret;
+            }
+            else
+            {
+                throw new EvosMessageStreamException($"Can't find a registered type from id {id_}");
+            }
+        }
+
+        private static int GetIdFromType(Type T)
+        {
+            if (!typesAndIdsLoaded)
+                EvosMessageStream.LoadTypesAndIds();
+
+            int ret;
+            if (idsByType.TryGetValue(T, out ret))
+            {
+                return ret;
+            }
+            else
+            {
+                throw new EvosMessageStreamException($"Can't find a registered id from type {T.Name}");
+            }
         }
 
         public MemoryStream GetOutputStream()
@@ -74,6 +72,32 @@ namespace EvoS.Framework.Network
         {
             long n = (long)ReadVarInt();
             return (long)(n >> 1 ^ -(n & 1L));
+        }
+
+        public unsafe double ReadDouble()
+        {
+            long num = (long)ReadVarInt();
+            double value = *(double*)(&num);
+            return value;
+        }
+
+        public unsafe int WriteDouble(double value)
+        {
+            /*u*/long value2 = /*(ulong)*/(*(long*)(&value));
+            return WriteVarInt(value2);
+        }
+
+        public unsafe float ReadFloat()
+        {
+            /*u*/int num = ReadVarInt();
+            float value = *(float*)(&num);
+            return value;
+        }
+
+        public unsafe int WriteFloat(float value)
+        {
+            /*u*/int value2 = (*(/*u*/int*)(&value));
+            return WriteVarInt(value2);
         }
 
         public int ReadVarInt()
@@ -143,6 +167,28 @@ namespace EvoS.Framework.Network
             }
         }
 
+        public int WriteVarInt(long value)
+        {
+            int byteValue;
+            int byteCount = 0;
+
+            while (true)
+            {
+                byteValue = (int)(value & 0x7f);
+                value >>= 7;
+
+                if (value != 0)
+                {
+                    byteValue |= 0x80;
+                }
+                //Console.WriteLine("writing byte: " + byteValue);
+                outputStream.WriteByte((byte)byteValue);
+                byteCount++;
+
+                if (value == 0) return byteCount;
+            }
+        }
+
         public int WriteString(String str)
         {
             int byteCount = 0;
@@ -165,132 +211,292 @@ namespace EvoS.Framework.Network
             return byteCount;
         }
 
+        public int WriteLong(long value)
+        {
+            long a = value << 1 ^ value >> 63;
+            return WriteVarInt( a );
+        }
+
         public int WriteBool(bool value)
         {
             outputStream.WriteByte(value ? ((byte)1) : ((byte)0));
             return 1;
         }
 
+        public int WriteDateTime(DateTime value)
+        {
+            long d = value.ToBinary();
+            return WriteLong(d);
+        }
+
+        public DateTime ReadDateTime()
+        {
+            DateTime d = DateTime.FromBinary(ReadLong());
+            return d;
+        }
+
         public object ReadGeneral()
         {
             /*
+             * TODO: think a better name
              * Note to self: properties and fields are read by declaration order, so i should sort them by name on declaration
              */
             ILog Log = new Log();
             int type_id = ReadVarInt();
             
             if (type_id == 0){
+                Console.WriteLine("NULL!");
                 return null;
             } else if (type_id == 1) {
                 return new object();
             } else {
-                Type T;
-                if (EvosMessageStream.typesById.TryGetValue(type_id, out T))
-                {
-                    Console.WriteLine("Deserializing " + T.Name);
-                    object obj = T.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-                    //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
-                    MemberInfo[] members = T.GetMembers();
+                Type T = GetTypeFromId(type_id);
+                
+                Console.WriteLine("Deserializing " + T.Name);
+                object obj = T.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
+                //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
+                MemberInfo[] members = T.GetMembers();
 
-                    for (int i = 0; i < members.Length; i++) {
-                        MemberInfo member = members[i];
-                        
+                // TODO?: the two ifs are repeated, maybe there is a way to merge them to make the code more readable
+                for (int i = 0; i < members.Length; i++) {
+                    MemberInfo member = members[i];
 
-                        if (member.MemberType == MemberTypes.Field && !(((FieldInfo)member).IsNotSerialized))
+                    if (member.MemberType == MemberTypes.Field && !(((FieldInfo)member).IsNotSerialized))
+                    {
+                        FieldInfo field = (FieldInfo)member;
+
+                        if (field.FieldType == typeof(String))
                         {
-                            FieldInfo field = (FieldInfo)member;
-
-                            if (field.FieldType == typeof(String))
-                            {
-                                String value = ReadString();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
-                                T.GetField(field.Name).SetValue(obj, value);
-                            }
-                            else if (field.FieldType == typeof(long))
-                            {
-                                long value = ReadLong();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
-                                T.GetField(field.Name).SetValue(obj, value);
-                            }
-                            else if (field.FieldType == typeof(Int32) || field.FieldType == typeof(int))
-                            {
-                                int value = ReadVarInt();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
-                                T.GetField(field.Name).SetValue(obj, value);
-                            }
-                            else if (field.FieldType.IsEnum)
-                            {
-                                int value = ReadVarInt();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
-                                T.GetField(field.Name).SetValue(obj, value);
-                            }
-                            else if (field.FieldType == typeof(bool))
-                            {
-                                bool value = ReadBool();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
-                                T.GetField(field.Name).SetValue(obj, value);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"==== Woops! =====: I dont know how to read {field.GetType().Name}");
-                                T.GetField(field.Name).SetValue(obj, ReadGeneral());
-                            }
+                            String value = ReadString();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            T.GetField(field.Name).SetValue(obj, value);
                         }
-                        else if (member.MemberType == MemberTypes.Property)
+                        else if (field.FieldType == typeof(long))
                         {
-                            PropertyInfo property = (PropertyInfo)member;
-
-                            if (property.PropertyType == typeof(String))
-                            {
-                                String value = ReadString();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
-                                T.GetProperty(property.Name).SetValue(obj, value);
-                            }
-                            else if (property.PropertyType == typeof(long))
-                            {
-                                long value = ReadLong();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
-                                T.GetProperty(property.Name).SetValue(obj, value);
-                            }
-                            else if (property.PropertyType == typeof(Int32) || property.PropertyType == typeof(int))
-                            {
-                                int value = ReadVarInt();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
-                                T.GetProperty(property.Name).SetValue(obj, value);
-                            }
-                            else if (property.PropertyType == typeof(bool))
-                            {
-                                bool value = ReadBool();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
-                                T.GetProperty(property.Name).SetValue(obj, value);
-                            }
-                            else if (property.PropertyType.IsEnum)
-                            {
-                                int value = ReadVarInt();
-                                Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
-                                T.GetProperty(property.Name).SetValue(obj, value);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"{T.Name}.{member.Name}");
-                                Console.WriteLine($"==== Woops! =====: trying to read property of type {property.PropertyType.Name}");
-                                T.GetProperty(property.Name).SetValue(obj, ReadGeneral());
-                            }
+                            long value = ReadLong();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            T.GetField(field.Name).SetValue(obj, value);
                         }
-                        else {
-                            // Not a property and not a field, should do nothing
-                            //Console.WriteLine($"what teh heck is a {member.MemberType.GetTypeCode()}");
+                        else if (field.FieldType == typeof(Int32) || field.FieldType == typeof(int))
+                        {
+                            int value = ReadVarInt();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            T.GetField(field.Name).SetValue(obj, value);
+                        }
+                        else if (field.FieldType.IsEnum)
+                        {
+                            int value = ReadVarInt();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            T.GetField(field.Name).SetValue(obj, value);
+                        }
+                        else if (field.FieldType == typeof(bool))
+                        {
+                            bool value = ReadBool();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            T.GetField(field.Name).SetValue(obj, value);
+                        }
+                        else if (field.FieldType == typeof(DateTime))
+                        {
+                            DateTime value = ReadDateTime();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            T.GetField(field.Name).SetValue(obj, value);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"==== Woops! =====: I dont know how to read {field.GetType().Name}");
+                            T.GetField(field.Name).SetValue(obj, ReadGeneral());
+                        }
+                    }
+                    else if (member.MemberType == MemberTypes.Property)
+                    {
+                        PropertyInfo property = (PropertyInfo)member;
+
+                        if (property.PropertyType == typeof(String))
+                        {
+                            String value = ReadString();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            T.GetProperty(property.Name).SetValue(obj, value);
+                        }
+                        else if (property.PropertyType == typeof(long))
+                        {
+                            long value = ReadLong();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            T.GetProperty(property.Name).SetValue(obj, value);
+                        }
+                        else if (property.PropertyType == typeof(Int32) || property.PropertyType == typeof(int))
+                        {
+                            int value = ReadVarInt();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            T.GetProperty(property.Name).SetValue(obj, value);
+                        }
+                        else if (property.PropertyType.IsEnum)
+                        {
+                            int value = ReadVarInt();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            T.GetProperty(property.Name).SetValue(obj, value);
+                        }
+                        else if (property.PropertyType == typeof(bool))
+                        {
+                            bool value = ReadBool();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            T.GetProperty(property.Name).SetValue(obj, value);
+                        }
+                        else if (property.PropertyType == typeof(DateTime))
+                        {
+                            DateTime value = ReadDateTime();
+                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            T.GetProperty(property.Name).SetValue(obj, value);
                         }
                         
+                        else
+                        {
+                            Console.WriteLine($"{T.Name}.{member.Name}");
+                            Console.WriteLine($"==== Woops! =====: trying to read property of type {property.PropertyType.Name}");
+                            T.GetProperty(property.Name).SetValue(obj, ReadGeneral());
+                        }
+                    }   
+                }
+
+                return obj;
+            }
+        }
+
+        public void WriteGeneral(object responseObject)
+        {
+            Type responseType;
+
+            /*
+             * TODO: See later:
+             *      LobbyStatusNotification.ErrorReportRate (System.Nullable`1[System.TimeSpan]) =
+             *      ==== Woops! =====: I dont know how to write Nullable`1
+             */
+
+            ILog Log = new Log();
+            //int type_id = ReadVarInt();
+            
+            if (responseObject == null){
+                Console.WriteLine("NULL!");
+                WriteVarInt(0);
+                return;
+            } else if (responseObject.GetType() == typeof(object)) {
+                WriteVarInt(1);
+                return;
+            } else {
+                responseType = responseObject.GetType();
+                Console.WriteLine("Serializing " + responseType.Name);
+
+                try {
+                    //If is a registered type (not a primitive), write type id
+                    int type_id = EvosMessageStream.GetIdFromType(responseType);
+                    WriteVarInt(type_id);
+                }catch (Exception e) { }
+                
+                //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
+                MemberInfo[] members = responseType.GetMembers();
+
+                for (int i = 0; i < members.Length; i++) {
+                    MemberInfo member = members[i];
+                    Type fieldPropertyType = null;
+                    object value;
+
+                    if (member.MemberType == MemberTypes.Field && !(((FieldInfo)member).IsNotSerialized))
+                    {
+                        FieldInfo field = (FieldInfo)member;
+                        fieldPropertyType = field.FieldType;
+                        if (field.Attributes.HasFlag(FieldAttributes.InitOnly))
+                            continue;
+                        value = responseType.GetField(field.Name).GetValue(responseObject);
+                    }
+                    else if (member.MemberType == MemberTypes.Property)
+                    {
+                        PropertyInfo property = (PropertyInfo)member;
+                        fieldPropertyType = property.PropertyType;
+                        value = responseType.GetProperty(property.Name).GetValue(responseObject);
+                    }
+                    else {
+                        continue; // Not a property and not a field, should do nothing
                     }
 
-                    return obj;
-                }
-                else
-                {
-                    throw new EvosMessageStreamException($"Can't Deserialize TypeID {type_id}: Not registered");
+                    // Write based on data type
+
+                    Console.WriteLine($"{responseType.Name}.{member.Name} ({fieldPropertyType}) = {value}");
+                    if (fieldPropertyType == typeof(String))
+                        WriteString((String)value);
+
+                    else if (fieldPropertyType == typeof(long) || fieldPropertyType == typeof(Int64))
+                        WriteLong((long)value);
+
+                    else if (fieldPropertyType == typeof(Int32) || fieldPropertyType == typeof(int))
+                        WriteVarInt((int)value);
+
+                    else if (fieldPropertyType.IsEnum)
+                        WriteVarInt((int)value);
+
+                    else if (fieldPropertyType == typeof(bool))
+                        WriteBool((bool)value);
+
+                    else if (fieldPropertyType == typeof(DateTime))
+                        WriteDateTime((DateTime)value);
+
+                    else if (fieldPropertyType == typeof(Double))
+                        WriteDouble((Double)value);
+
+                    else if (fieldPropertyType == typeof(float))
+                        WriteFloat((float)value);
+
+                    else
+                    {
+                        Console.WriteLine($"==== Woops! =====: I dont know how to write {fieldPropertyType.Name}");
+                        
+                        WriteGeneral(value);
+                    }
+
                 }
             }
+        }
+
+        private static void LoadTypeAndId(int id_, Type T)
+        {
+            typesByIds.Add(id_, T);
+            idsByType.Add(T, id_);
+        }
+
+        private static void LoadTypesAndIds()
+        {
+            typesAndIdsLoaded = true;
+
+            /*LoadTypeAndId(757, typeof(JoinGameRequest);
+            LoadTypeAndId(758, typeof(CreateGameResponse);
+            LoadTypeAndId(759, typeof(CreateGameRequest);
+            LoadTypeAndId(760, typeof(SyncNotification);
+            LoadTypeAndId(761, typeof(SetRegionRequest);
+            LoadTypeAndId(762, typeof(UnsubscribeFromCustomGamesRequest);
+            LoadTypeAndId(763, typeof(SubscribeToCustomGamesRequest);
+            LoadTypeAndId(764, typeof(LobbyCustomGamesNotification);
+            LoadTypeAndId(765, typeof(List`1);
+            LoadTypeAndId(766, typeof(LobbyGameInfo[]);
+            LoadTypeAndId(767, typeof(LobbyGameplayOverridesNotification),// */
+            LoadTypeAndId(768, typeof(LobbyStatusNotification));
+            LoadTypeAndId(769, typeof(ServerMessageOverrides));
+            LoadTypeAndId(770, typeof(ServerMessage));
+            LoadTypeAndId(771, typeof(ServerLockState));
+            LoadTypeAndId(772, typeof(ConnectionQueueInfo));
+            /*LoadTypeAndId(773, typeof(LobbyServerReadyNotification));
+            LoadTypeAndId(774, typeof(LobbyPlayerGroupInfo));
+            LoadTypeAndId(775, typeof(EnvironmentType));
+            LoadTypeAndId(776, typeof(List`1));
+            LoadTypeAndId(777, typeof(PersistedCharacterData[])),// */
+            LoadTypeAndId(778, typeof(RegisterGameClientResponse));
+            LoadTypeAndId(779, typeof(LobbySessionInfo));
+            LoadTypeAndId(780, typeof(ProcessType));
+            LoadTypeAndId(781, typeof(AuthInfo));
+            LoadTypeAndId(782, typeof(AuthType));
+            LoadTypeAndId(783, typeof(RegisterGameClientRequest));
+            LoadTypeAndId(784, typeof(LobbyGameClientSystemInfo));
+            //LoadTypeAndId(785, typeof(AssignGameClientResponse));
+            LoadTypeAndId(786, typeof(LobbyGameClientProxyInfo));
+            //LoadTypeAndId(787, typeof(LobbyGameClientProxyStatus));
+            //LoadTypeAndId(788, typeof(AssignGameClientRequest));
         }
     }
 }

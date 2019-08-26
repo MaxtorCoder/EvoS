@@ -18,20 +18,11 @@ namespace EvoS.LobbyServer
     class ClientConnection
     {
         private WebSocket Socket;
-        private Dictionary<int, Type> typeDict;
         ILog Log = new Log();
 
         public ClientConnection(WebSocket socket)
         {
             Socket = socket;
-
-            InitTypeDict();
-        }
-
-        private void InitTypeDict()
-        {
-            typeDict = new Dictionary<int, Type>();
-            typeDict.Add(RegisterGameClientRequest.MessageTypeID, typeof(RegisterGameClientRequest));
         }
 
         public void Disconnect()
@@ -52,7 +43,6 @@ namespace EvoS.LobbyServer
             {
                 Console.WriteLine("while");
                 WebSocketMessageReadStream message = await Socket.ReadMessageAsync(CancellationToken.None);
-                Type networkMessage = null;
 
                 if (message == null)
                 {
@@ -65,10 +55,8 @@ namespace EvoS.LobbyServer
                 if (message.MessageType == WebSocketMessageType.Text)
                 {
                     var msgContent = string.Empty;
-
                     using (var sr = new StreamReader(message, Encoding.UTF8))
                         msgContent = await sr.ReadToEndAsync();
-
                     Console.WriteLine(msgContent);
                 }
                 else if (message.MessageType == WebSocketMessageType.Binary)
@@ -77,49 +65,26 @@ namespace EvoS.LobbyServer
                     {
                         await message.CopyToAsync(ms);
                         await ms.FlushAsync();
-
+                        
                         EvosMessageStream messageStream = new EvosMessageStream(ms);
+                        object requestData = messageStream.ReadGeneral();
+                        Type requestType = requestData.GetType();
+                        Log.Print(LogType.Network, $"Received {requestType.Name}");
 
-                        messageStream.ReadGeneral();
-                        /*
-                        // Get the Type of NetworkMessage received
-                        int typeId = messageStream.ReadVarInt();
+                        // Create Response
+                        Type responseHandlerType = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{requestType.Name}Handler");
+                        object responseHandler = responseHandlerType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
+                        responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new object[] { requestData, messageStream });
 
-                        networkMessage = null;
-                        typeDict.TryGetValue(typeId, out networkMessage);
+                        // Write Response
+                        await messageStream.GetOutputStream().CopyToAsync(writeStream);
 
-                        if (networkMessage != null)
+                        // Log received data bytes
+                        if (false)
                         {
-                            Log.Print(LogType.Network, $"Received {networkMessage.Name}. ID {typeId}");
-
-                            Type handler = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{networkMessage.Name}Handler");
-
-                            // Create an instance of the handler by calling its constructor
-                            object wsm = handler.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-
-                            // Log Packet data?
-                            if ((bool)(handler.GetMethod("DoLogPacket").Invoke(wsm, new object[] { })))
-                            {
-                                byte[] msg = ms.ToArray();
-                                Log.Print(LogType.Packet, Encoding.Default.GetString(msg));
-                            }
-
-                            // Execute handler.OnMessage()
-                            //handler.GetMethod("OnMessage").Invoke(wsm, new object[] { messageStream });
-
-
-                            await messageStream.GetOutputStream().CopyToAsync(writeStream);
-                        }
-                        else
-                        {
-                            //Received an unknown/not implemented yet NetworkMessage
-                            Log.Print(LogType.Network, "------------- UNKNOWN NETWORK MESSAGE START " + typeId + " ---------------");
                             byte[] msg = ms.ToArray();
-                            Log.Print(LogType.Network, Encoding.Default.GetString(msg));
-                            Log.Print(LogType.Network, "------------- UNKNOWN NETWORK MESSAGE END ---------------");
+                            Log.Print(LogType.Packet, Encoding.Default.GetString(msg));
                         }
-                        */
-
 
                     }
 

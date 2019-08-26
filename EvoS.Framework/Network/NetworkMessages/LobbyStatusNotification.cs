@@ -9,23 +9,18 @@ namespace EvoS.Framework.Network.NetworkMessages
     [Serializable]
     public class LobbyStatusNotification : WebSocketMessage
     {
-        public LocalizationPayload LocalizedFailure;
-        public bool AllowRelogin;
-        public ServerLockState ServerLockState;
-        public ConnectionQueueInfo ConnectionQueueInfo;
-        public ClientAccessLevel ClientAccessLevel;
-        public bool HasPurchasedGame;
-        public int HighestPurchasedGamePack;
-        public ServerMessageOverrides ServerMessageOverrides;
-        public LobbyGameplayOverrides GameplayOverrides;
-        public DateTime UtcNow;
-        public DateTime PacificNow;
-        public TimeSpan TimeOffset;
-        public TimeSpan? ErrorReportRate;
-
-        public override void CreateFromStream(EvosMessageStream message)
-        {
-            throw new NotImplementedException();
-        }
+        public bool                     AllowRelogin;
+        public ClientAccessLevel        ClientAccessLevel;
+        public ConnectionQueueInfo      ConnectionQueueInfo;
+        public TimeSpan?                ErrorReportRate;
+        public LobbyGameplayOverrides   GameplayOverrides;
+        public bool                     HasPurchasedGame;
+        public int                      HighestPurchasedGamePack;
+        public LocalizationPayload      LocalizedFailure;
+        public DateTime                 PacificNow;
+        public ServerLockState          ServerLockState;
+        public ServerMessageOverrides   ServerMessageOverrides;
+        public TimeSpan                 TimeOffset;
+        public DateTime                 UtcNow;
     }
 }

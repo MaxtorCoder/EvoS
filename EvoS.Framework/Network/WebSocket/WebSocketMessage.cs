@@ -21,17 +21,5 @@ namespace EvoS.Framework.Network.WebSocket
         public long DeserializationTicks;
         [NonSerialized]
         public long SerializedLength;
-
-        public abstract void CreateFromStream(EvosMessageStream message);
-
-        public void ReadHeader(EvosMessageStream message)
-        {
-            RequestId = message.ReadVarInt();
-            ResponseId = message.ReadVarInt();
-
-            Console.WriteLine("request: " + RequestId + ", response: " + ResponseId);
-        }
-
-
     }
 }

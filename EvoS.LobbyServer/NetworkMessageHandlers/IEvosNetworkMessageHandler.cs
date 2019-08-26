@@ -7,7 +7,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     interface IEvosNetworkMessageHandler
     {
-        void OnMessage(EvosMessageStream stream);
+        void OnMessage(object requestData, EvosMessageStream stream);
         bool DoLogPacket();
     }
 }

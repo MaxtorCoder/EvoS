@@ -10,11 +10,9 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
     {
         public bool DoLogPacket() { return true; }
 
-        public void OnMessage(EvosMessageStream stream)
+        public void OnMessage(object requestData, EvosMessageStream stream)
         {
-            RegisterGameClientRequest request = new RegisterGameClientRequest();
-            request.CreateFromStream(stream);
-
+            RegisterGameClientRequest request = (RegisterGameClientRequest)requestData;
             RegisterGameClientResponse response = new RegisterGameClientResponse();
 
             response.SessionInfo = request.SessionInfo;
@@ -24,8 +22,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             response.DevServerConnectionUrl = "127.0.0.1"; // What is this?
             response.LocalizedFailure = null;
 
-            response.WriteData(stream);
-
+            stream.WriteGeneral(response);
         }
     }
 }

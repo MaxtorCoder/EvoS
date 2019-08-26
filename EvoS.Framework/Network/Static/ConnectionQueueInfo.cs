@@ -4,9 +4,9 @@
 [Serializable]
 public class ConnectionQueueInfo
 {
-    public ClientAccessLevel QueueType;
+    public int QueueEstimatedSeconds;
+    public int QueueMultiplier;
     public int QueuePosition;
     public int QueueSize;
-    public int QueueMultiplier;
-    public int QueueEstimatedSeconds;
+    public ClientAccessLevel QueueType;
 }

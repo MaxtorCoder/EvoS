@@ -14,18 +14,5 @@ namespace EvoS.Framework.Network.NetworkMessages
         public LobbySessionInfo SessionInfo;
         public string SteamUserId;
         public LobbyGameClientSystemInfo SystemInfo;
-
-        public override void CreateFromStream(EvosMessageStream message)
-        {
-            ReadHeader(message);
-            Console.WriteLine("auth");
-            this.AuthInfo = AuthInfo.CreateFromStream(message);
-            Console.WriteLine("session info");
-            this.SessionInfo = LobbySessionInfo.CreateFromStream(message);
-            Console.WriteLine("steam");
-            this.SteamUserId = message.ReadString();
-            Console.WriteLine("sysinfo");
-            this.SystemInfo = LobbyGameClientSystemInfo.CreateFromStream(message);
-        }
     }
 }
