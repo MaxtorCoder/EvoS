@@ -7,6 +7,7 @@ using EvoS.Framework.Network.Static;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using System.Reflection;
+using System.Linq;
 
 namespace EvoS.Framework.Network
 {
@@ -16,7 +17,6 @@ namespace EvoS.Framework.Network
         private MemoryStream outputStream;
         private static Dictionary<Type, int> idsByType = new Dictionary<Type, int>();
         private static Dictionary<int, Type> typesByIds = new Dictionary<int, Type>();
-        private static bool typesAndIdsLoaded = false;
 
         public EvosMessageStream(MemoryStream ms)
         {
@@ -25,11 +25,24 @@ namespace EvoS.Framework.Network
             outputStream = new MemoryStream();
         }
 
+        public static void InitializeMembers()
+        {
+            foreach (var type in Assembly.GetExecutingAssembly().GetTypes()
+                .Concat(Assembly.GetEntryAssembly().GetTypes()))
+            {
+                var attribute = type.GetCustomAttribute<EvosMessageAttribute>();
+                if (attribute == null)
+                    continue;
+
+                idsByType.Add(attribute.Type, attribute.TypeID);
+                typesByIds.Add(attribute.TypeID, attribute.Type);
+            }
+
+            Log.Print(LogType.Server, $"Loaded {idsByType.Count} {(idsByType.Count == 1 ? "ID" : "IDs")} and " +
+                $"loaded {typesByIds.Count} {(typesByIds.Count == 1 ? "type" : "types")}");        }
+
         private static Type GetTypeFromId(int id_)
         {
-            if (!typesAndIdsLoaded)
-                LoadTypesAndIds();
-
             Type ret;
             if (typesByIds.TryGetValue(id_, out ret))
                 return ret;
@@ -39,9 +52,6 @@ namespace EvoS.Framework.Network
 
         private static int GetIdFromType(Type T)
         {
-            if (!typesAndIdsLoaded)
-                LoadTypesAndIds();
-
             int ret;
             if (idsByType.TryGetValue(T, out ret))
                 return ret;
@@ -444,42 +454,42 @@ namespace EvoS.Framework.Network
             idsByType.Add(T, id_);
         }
 
-        private static void LoadTypesAndIds()
-        {
-            typesAndIdsLoaded = true;
-
-            /*LoadTypeAndId(757, typeof(JoinGameRequest);
-            LoadTypeAndId(758, typeof(CreateGameResponse);
-            LoadTypeAndId(759, typeof(CreateGameRequest);
-            LoadTypeAndId(760, typeof(SyncNotification);
-            LoadTypeAndId(761, typeof(SetRegionRequest);
-            LoadTypeAndId(762, typeof(UnsubscribeFromCustomGamesRequest);
-            LoadTypeAndId(763, typeof(SubscribeToCustomGamesRequest);
-            LoadTypeAndId(764, typeof(LobbyCustomGamesNotification);
-            LoadTypeAndId(765, typeof(List`1);
-            LoadTypeAndId(766, typeof(LobbyGameInfo[]);
-            LoadTypeAndId(767, typeof(LobbyGameplayOverridesNotification),// */
-            LoadTypeAndId(768, typeof(LobbyStatusNotification));
-            LoadTypeAndId(769, typeof(ServerMessageOverrides));
-            LoadTypeAndId(770, typeof(ServerMessage));
-            LoadTypeAndId(771, typeof(ServerLockState));
-            LoadTypeAndId(772, typeof(ConnectionQueueInfo));
-            /*LoadTypeAndId(773, typeof(LobbyServerReadyNotification));
-            LoadTypeAndId(774, typeof(LobbyPlayerGroupInfo));
-            LoadTypeAndId(775, typeof(EnvironmentType));
-            LoadTypeAndId(776, typeof(List`1));
-            LoadTypeAndId(777, typeof(PersistedCharacterData[])),// */
-            LoadTypeAndId(778, typeof(RegisterGameClientResponse));
-            LoadTypeAndId(779, typeof(LobbySessionInfo));
-            LoadTypeAndId(780, typeof(ProcessType));
-            LoadTypeAndId(781, typeof(AuthInfo));
-            LoadTypeAndId(782, typeof(AuthType));
-            LoadTypeAndId(783, typeof(RegisterGameClientRequest));
-            LoadTypeAndId(784, typeof(LobbyGameClientSystemInfo));
-            //LoadTypeAndId(785, typeof(AssignGameClientResponse));
-            LoadTypeAndId(786, typeof(LobbyGameClientProxyInfo));
-            //LoadTypeAndId(787, typeof(LobbyGameClientProxyStatus));
-            //LoadTypeAndId(788, typeof(AssignGameClientRequest));
-        }
+        #region Save keeping
+        //private static void LoadTypesAndIds()
+        //{
+        //    LoadTypeAndId(757, typeof(JoinGameRequest);
+        //    LoadTypeAndId(758, typeof(CreateGameResponse);
+        //    LoadTypeAndId(759, typeof(CreateGameRequest);
+        //    LoadTypeAndId(760, typeof(SyncNotification);
+        //    LoadTypeAndId(761, typeof(SetRegionRequest);
+        //    LoadTypeAndId(762, typeof(UnsubscribeFromCustomGamesRequest);
+        //    LoadTypeAndId(763, typeof(SubscribeToCustomGamesRequest);
+        //    LoadTypeAndId(764, typeof(LobbyCustomGamesNotification);
+        //    LoadTypeAndId(765, typeof(List`1);
+        //    LoadTypeAndId(766, typeof(LobbyGameInfo[]);
+        //    LoadTypeAndId(767, typeof(LobbyGameplayOverridesNotification),
+        //    LoadTypeAndId(768, typeof(LobbyStatusNotification));
+        //    LoadTypeAndId(769, typeof(ServerMessageOverrides));
+        //    LoadTypeAndId(770, typeof(ServerMessage));
+        //    LoadTypeAndId(771, typeof(ServerLockState));
+        //    LoadTypeAndId(772, typeof(ConnectionQueueInfo));
+        //    LoadTypeAndId(773, typeof(LobbyServerReadyNotification));
+        //    LoadTypeAndId(774, typeof(LobbyPlayerGroupInfo));
+        //    LoadTypeAndId(775, typeof(EnvironmentType));
+        //    LoadTypeAndId(776, typeof(List`1));
+        //    LoadTypeAndId(777, typeof(PersistedCharacterData[]))
+        //    LoadTypeAndId(778, typeof(RegisterGameClientResponse));
+        //    LoadTypeAndId(779, typeof(LobbySessionInfo));
+        //    LoadTypeAndId(780, typeof(ProcessType));
+        //    LoadTypeAndId(781, typeof(AuthInfo));
+        //    LoadTypeAndId(782, typeof(AuthType));
+        //    LoadTypeAndId(783, typeof(RegisterGameClientRequest));
+        //    LoadTypeAndId(784, typeof(LobbyGameClientSystemInfo));
+        //    LoadTypeAndId(785, typeof(AssignGameClientResponse));
+        //    LoadTypeAndId(786, typeof(LobbyGameClientProxyInfo));
+        //    LoadTypeAndId(787, typeof(LobbyGameClientProxyStatus));
+        //    LoadTypeAndId(788, typeof(AssignGameClientRequest));
+        //}
+        #endregion
     }
 }

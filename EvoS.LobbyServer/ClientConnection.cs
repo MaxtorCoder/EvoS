@@ -18,6 +18,7 @@ namespace EvoS.LobbyServer
     class ClientConnection
     {
         private WebSocket Socket;
+        private EvosMessageStream MessageStream;
 
         public ClientConnection(WebSocket socket)
         {
@@ -65,26 +66,18 @@ namespace EvoS.LobbyServer
                         await message.CopyToAsync(ms);
                         await ms.FlushAsync();
 
-                        EvosMessageStream messageStream = new EvosMessageStream(ms);
-                        object requestData = messageStream.ReadGeneral();
+                        MessageStream = new EvosMessageStream(ms);
+                        object requestData = MessageStream.ReadGeneral();
                         Type requestType = requestData.GetType();
                         Log.Print(LogType.Network, $"Received {requestType.Name}");
 
                         // Create Response
                         Type responseHandlerType = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{requestType.Name}Handler");
                         object responseHandler = responseHandlerType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-                        responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new object[] { requestData, messageStream });
+                        responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new object[] { requestData, MessageStream });
 
                         // Write Response
-                        await messageStream.GetOutputStream().CopyToAsync(writeStream);
-
-                        // Log received data bytes, seems to be useless
-                        // if (false)
-                        // {
-                        //     byte[] msg = ms.ToArray();
-                        //     Log.Print(LogType.Packet, Encoding.Default.GetString(msg));
-                        // }
-
+                        await MessageStream.GetOutputStream().CopyToAsync(writeStream);
                     }
 
                 }

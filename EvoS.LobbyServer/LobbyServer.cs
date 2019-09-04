@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using vtortola.WebSockets;
 using vtortola.WebSockets.Rfc6455;
 using System.IO;
+using EvoS.Framework.Network;
 
 namespace EvoS.LobbyServer
 {
@@ -25,7 +26,7 @@ namespace EvoS.LobbyServer
 
         private static async Task StartServer()
         {
-            Console.WriteLine("Starting server");
+            Log.Print(LogType.Server, "Starting server");
             WebSocketListener server = new WebSocketListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6060));
             server.Standards.RegisterStandard(new WebSocketFactoryRfc6455());
 
@@ -35,6 +36,8 @@ namespace EvoS.LobbyServer
 #pragma warning restore CS4014
 
             Log.Print(LogType.Server, "Started webserver on '0.0.0.0:6060'");
+
+            EvosMessageStream.InitializeMembers();
 
             while (true)
             {

@@ -6,9 +6,9 @@ using System.IO;
 namespace EvoS.Framework.Network.NetworkMessages
 {
     [Serializable]
+    [EvosMessage(778, typeof(RegisterGameClientRequest))]
     public class RegisterGameClientResponse : WebSocketResponseMessage
     {
-
         public AuthInfo AuthInfo;
         public string DevServerConnectionUrl;
         public LocalizationPayload LocalizedFailure;
