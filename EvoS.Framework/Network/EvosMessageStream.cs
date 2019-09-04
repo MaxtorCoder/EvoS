@@ -55,27 +55,25 @@ namespace EvoS.Framework.Network
 
         public long ReadLong()
         {
-            long n = (long)ReadVarInt();
-            return (long)(n >> 1 ^ -(n & 1L));
+            long n = ReadVarInt();
+            return n >> 1 ^ -(n & 1L);
         }
 
         public unsafe double ReadDouble()
         {
-            long num = (long)ReadVarInt();
+            long num = ReadVarInt();
             double value = *(double*)(&num);
             return value;
         }
 
         public unsafe int WriteDouble(double value)
         {
-            /*u*/
-            long value2 = /*(ulong)*/(*(long*)(&value));
+            long value2 = *(long*)(&value);
             return WriteVarInt(value2);
         }
 
         public unsafe float ReadFloat()
         {
-            /*u*/
             int num = ReadVarInt();
             float value = *(float*)(&num);
             return value;
@@ -83,8 +81,7 @@ namespace EvoS.Framework.Network
 
         public unsafe int WriteFloat(float value)
         {
-            /*u*/
-            int value2 = (*(/*u*/int*)(&value));
+            int value2 = *(int*)(&value);
             return WriteVarInt(value2);
         }
 
