@@ -223,7 +223,7 @@ namespace EvoS.Framework.Network
 
             if (type_id == 0)
             {
-                Console.WriteLine("NULL!");
+                Log.Print(LogType.Debug, "NULL!");
                 return null;
             }
             else if (type_id == 1)
@@ -232,7 +232,7 @@ namespace EvoS.Framework.Network
             {
                 Type T = GetTypeFromId(type_id);
 
-                Console.WriteLine("Deserializing " + T.Name);
+                Log.Print(LogType.Debug, "Deserializing " + T.Name);
                 object obj = T.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
                 //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
                 MemberInfo[] members = T.GetMembers();
@@ -242,49 +242,49 @@ namespace EvoS.Framework.Network
                 {
                     MemberInfo member = members[i];
 
-                    if (member.MemberType == MemberTypes.Field && !(((FieldInfo)member).IsNotSerialized))
+                    if (member.MemberType == MemberTypes.Field && !((FieldInfo)member).IsNotSerialized)
                     {
                         FieldInfo field = (FieldInfo)member;
 
                         if (field.FieldType == typeof(String))
                         {
                             String value = ReadString();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
                             T.GetField(field.Name).SetValue(obj, value);
                         }
                         else if (field.FieldType == typeof(long))
                         {
                             long value = ReadLong();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
                             T.GetField(field.Name).SetValue(obj, value);
                         }
                         else if (field.FieldType == typeof(Int32) || field.FieldType == typeof(int))
                         {
                             int value = ReadVarInt();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
                             T.GetField(field.Name).SetValue(obj, value);
                         }
                         else if (field.FieldType.IsEnum)
                         {
                             int value = ReadVarInt();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
                             T.GetField(field.Name).SetValue(obj, value);
                         }
                         else if (field.FieldType == typeof(bool))
                         {
                             bool value = ReadBool();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
                             T.GetField(field.Name).SetValue(obj, value);
                         }
                         else if (field.FieldType == typeof(DateTime))
                         {
                             DateTime value = ReadDateTime();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({field.FieldType}) = {value}");
                             T.GetField(field.Name).SetValue(obj, value);
                         }
                         else
                         {
-                            Console.WriteLine($"==== Woops! =====: I dont know how to read {field.GetType().Name}");
+                            Log.Print(LogType.Debug, $"==== Woops! =====: I dont know how to read {field.GetType().Name}");
                             T.GetField(field.Name).SetValue(obj, ReadGeneral());
                         }
                     }
@@ -295,44 +295,43 @@ namespace EvoS.Framework.Network
                         if (property.PropertyType == typeof(String))
                         {
                             String value = ReadString();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
                             T.GetProperty(property.Name).SetValue(obj, value);
                         }
                         else if (property.PropertyType == typeof(long))
                         {
                             long value = ReadLong();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
                             T.GetProperty(property.Name).SetValue(obj, value);
                         }
                         else if (property.PropertyType == typeof(Int32) || property.PropertyType == typeof(int))
                         {
                             int value = ReadVarInt();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
                             T.GetProperty(property.Name).SetValue(obj, value);
                         }
                         else if (property.PropertyType.IsEnum)
                         {
                             int value = ReadVarInt();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
                             T.GetProperty(property.Name).SetValue(obj, value);
                         }
                         else if (property.PropertyType == typeof(bool))
                         {
                             bool value = ReadBool();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
                             T.GetProperty(property.Name).SetValue(obj, value);
                         }
                         else if (property.PropertyType == typeof(DateTime))
                         {
                             DateTime value = ReadDateTime();
-                            Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
                             T.GetProperty(property.Name).SetValue(obj, value);
                         }
-
                         else
                         {
-                            Console.WriteLine($"{T.Name}.{member.Name}");
-                            Console.WriteLine($"==== Woops! =====: trying to read property of type {property.PropertyType.Name}");
+                            Log.Print(LogType.Debug, $"{T.Name}.{member.Name}");
+                            Log.Print(LogType.Debug, $"==== Woops! =====: trying to read property of type {property.PropertyType.Name}");
                             T.GetProperty(property.Name).SetValue(obj, ReadGeneral());
                         }
                     }
