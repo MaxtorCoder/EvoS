@@ -6,7 +6,7 @@ namespace EvoS.Framework.Network
 {
     public class EvosMessageStreamException : Exception
     {
-        public EvosMessageStreamException() {}
+        public EvosMessageStreamException() { }
 
         public EvosMessageStreamException(String message) : base(message) { }
     }

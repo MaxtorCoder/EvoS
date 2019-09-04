@@ -9,8 +9,6 @@ namespace EvoS.Framework.Network.WebSocket
     [Serializable]
     public abstract class WebSocketMessage
     {
-
-
         public static int MessageTypeID = 0;
 
         public const int INVALID_ID = 0;

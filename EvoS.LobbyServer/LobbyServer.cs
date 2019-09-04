@@ -14,7 +14,6 @@ namespace EvoS.LobbyServer
 {
     class Program
     {
-        static ILog Log = new Log();
         private static List<ClientConnection> ConnectedClients = new List<ClientConnection>();
 
         static void Main(string[] args)

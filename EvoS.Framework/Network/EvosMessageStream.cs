@@ -18,7 +18,6 @@ namespace EvoS.Framework.Network
         private static Dictionary<int, Type> typesByIds = new Dictionary<int, Type>();
         private static bool typesAndIdsLoaded = false;
 
-
         public EvosMessageStream(MemoryStream ms)
         {
             stream = ms;
@@ -26,47 +25,33 @@ namespace EvoS.Framework.Network
             outputStream = new MemoryStream();
         }
 
-
         private static Type GetTypeFromId(int id_)
         {
             if (!typesAndIdsLoaded)
-                EvosMessageStream.LoadTypesAndIds();
-            
+                LoadTypesAndIds();
+
             Type ret;
-            if (typesByIds.TryGetValue(id_, out ret)) {
+            if (typesByIds.TryGetValue(id_, out ret))
                 return ret;
-            }
             else
-            {
                 throw new EvosMessageStreamException($"Can't find a registered type from id {id_}");
-            }
         }
 
         private static int GetIdFromType(Type T)
         {
             if (!typesAndIdsLoaded)
-                EvosMessageStream.LoadTypesAndIds();
+                LoadTypesAndIds();
 
             int ret;
             if (idsByType.TryGetValue(T, out ret))
-            {
                 return ret;
-            }
             else
-            {
                 throw new EvosMessageStreamException($"Can't find a registered id from type {T.Name}");
-            }
         }
 
-        public MemoryStream GetOutputStream()
-        {
-            return outputStream;
-        }
+        public MemoryStream GetOutputStream() => outputStream;
 
-        public bool ReadBool()
-        {
-            return stream.ReadByte() != 0;
-        }
+        public bool ReadBool() => stream.ReadByte() != 0;
 
         public long ReadLong()
         {
@@ -83,20 +68,23 @@ namespace EvoS.Framework.Network
 
         public unsafe int WriteDouble(double value)
         {
-            /*u*/long value2 = /*(ulong)*/(*(long*)(&value));
+            /*u*/
+            long value2 = /*(ulong)*/(*(long*)(&value));
             return WriteVarInt(value2);
         }
 
         public unsafe float ReadFloat()
         {
-            /*u*/int num = ReadVarInt();
+            /*u*/
+            int num = ReadVarInt();
             float value = *(float*)(&num);
             return value;
         }
 
         public unsafe int WriteFloat(float value)
         {
-            /*u*/int value2 = (*(/*u*/int*)(&value));
+            /*u*/
+            int value2 = (*(/*u*/int*)(&value));
             return WriteVarInt(value2);
         }
 
@@ -126,13 +114,9 @@ namespace EvoS.Framework.Network
             byte[] buffer;
 
             if (data_length == 0)
-            {
                 return null;
-            }
             else if (data_length == 1)
-            {
                 return string.Empty;
-            }
             else
             {
                 int string_length = ReadVarInt();
@@ -156,9 +140,8 @@ namespace EvoS.Framework.Network
                 value >>= 7;
 
                 if (value != 0)
-                {
                     byteValue |= 0x80;
-                }
+
                 //Console.WriteLine("writing byte: " + byteValue);
                 outputStream.WriteByte((byte)byteValue);
                 byteCount++;
@@ -178,9 +161,8 @@ namespace EvoS.Framework.Network
                 value >>= 7;
 
                 if (value != 0)
-                {
                     byteValue |= 0x80;
-                }
+
                 //Console.WriteLine("writing byte: " + byteValue);
                 outputStream.WriteByte((byte)byteValue);
                 byteCount++;
@@ -194,13 +176,9 @@ namespace EvoS.Framework.Network
             int byteCount = 0;
 
             if (str == null)
-            {
                 return WriteVarInt(0);
-            }
             if (str.Length == 0)
-            {
                 return WriteVarInt(1);
-            }
 
             byteCount += WriteVarInt(str.Length + 1);
             byteCount += WriteVarInt(str.Length);
@@ -214,7 +192,7 @@ namespace EvoS.Framework.Network
         public int WriteLong(long value)
         {
             long a = value << 1 ^ value >> 63;
-            return WriteVarInt( a );
+            return WriteVarInt(a);
         }
 
         public int WriteBool(bool value)
@@ -241,24 +219,27 @@ namespace EvoS.Framework.Network
              * TODO: think a better name
              * Note to self: properties and fields are read by declaration order, so i should sort them by name on declaration
              */
-            ILog Log = new Log();
             int type_id = ReadVarInt();
-            
-            if (type_id == 0){
+
+            if (type_id == 0)
+            {
                 Console.WriteLine("NULL!");
                 return null;
-            } else if (type_id == 1) {
+            }
+            else if (type_id == 1)
                 return new object();
-            } else {
+            else
+            {
                 Type T = GetTypeFromId(type_id);
-                
+
                 Console.WriteLine("Deserializing " + T.Name);
                 object obj = T.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
                 //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
                 MemberInfo[] members = T.GetMembers();
 
                 // TODO?: the two ifs are repeated, maybe there is a way to merge them to make the code more readable
-                for (int i = 0; i < members.Length; i++) {
+                for (int i = 0; i < members.Length; i++)
+                {
                     MemberInfo member = members[i];
 
                     if (member.MemberType == MemberTypes.Field && !(((FieldInfo)member).IsNotSerialized))
@@ -347,14 +328,14 @@ namespace EvoS.Framework.Network
                             Console.WriteLine($"{T.Name}.{member.Name} ({property.PropertyType}) = {value}");
                             T.GetProperty(property.Name).SetValue(obj, value);
                         }
-                        
+
                         else
                         {
                             Console.WriteLine($"{T.Name}.{member.Name}");
                             Console.WriteLine($"==== Woops! =====: trying to read property of type {property.PropertyType.Name}");
                             T.GetProperty(property.Name).SetValue(obj, ReadGeneral());
                         }
-                    }   
+                    }
                 }
 
                 return obj;
@@ -371,30 +352,37 @@ namespace EvoS.Framework.Network
              *      ==== Woops! =====: I dont know how to write Nullable`1
              */
 
-            ILog Log = new Log();
             //int type_id = ReadVarInt();
-            
-            if (responseObject == null){
-                Console.WriteLine("NULL!");
+
+            if (responseObject == null)
+            {
+                Log.Print(LogType.Error, "NULL!");
                 WriteVarInt(0);
                 return;
-            } else if (responseObject.GetType() == typeof(object)) {
+            }
+            else if (responseObject.GetType() == typeof(object))
+            {
                 WriteVarInt(1);
                 return;
-            } else {
+            }
+            else
+            {
                 responseType = responseObject.GetType();
-                Console.WriteLine("Serializing " + responseType.Name);
+                Log.Print(LogType.Debug, "Serializing " + responseType.Name);
 
-                try {
+                try
+                {
                     //If is a registered type (not a primitive), write type id
-                    int type_id = EvosMessageStream.GetIdFromType(responseType);
+                    int type_id = GetIdFromType(responseType);
                     WriteVarInt(type_id);
-                }catch (Exception e) { }
-                
+                }
+                catch { }
+
                 //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
                 MemberInfo[] members = responseType.GetMembers();
 
-                for (int i = 0; i < members.Length; i++) {
+                for (int i = 0; i < members.Length; i++)
+                {
                     MemberInfo member = members[i];
                     Type fieldPropertyType = null;
                     object value;
@@ -413,13 +401,12 @@ namespace EvoS.Framework.Network
                         fieldPropertyType = property.PropertyType;
                         value = responseType.GetProperty(property.Name).GetValue(responseObject);
                     }
-                    else {
+                    else
                         continue; // Not a property and not a field, should do nothing
-                    }
 
                     // Write based on data type
 
-                    Console.WriteLine($"{responseType.Name}.{member.Name} ({fieldPropertyType}) = {value}");
+                    Log.Print(LogType.Debug, $"{responseType.Name}.{member.Name} ({fieldPropertyType}) = {value}");
                     if (fieldPropertyType == typeof(String))
                         WriteString((String)value);
 
@@ -446,8 +433,8 @@ namespace EvoS.Framework.Network
 
                     else
                     {
-                        Console.WriteLine($"==== Woops! =====: I dont know how to write {fieldPropertyType.Name}");
-                        
+                        Log.Print(LogType.Debug, $"==== Woops! =====: I dont know how to write {fieldPropertyType.Name}");
+
                         WriteGeneral(value);
                     }
 

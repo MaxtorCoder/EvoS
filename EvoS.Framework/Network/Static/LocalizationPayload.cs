@@ -10,8 +10,8 @@ public class LocalizationPayload
     public byte[][] ArgumentsAsBinaryData;
     public string Context;
     public string Term = "unset";
-    
-    
+
+
     /*
     [NonSerialized]
     private static Serializer s_serializer;

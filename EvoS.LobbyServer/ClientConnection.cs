@@ -18,7 +18,6 @@ namespace EvoS.LobbyServer
     class ClientConnection
     {
         private WebSocket Socket;
-        ILog Log = new Log();
 
         public ClientConnection(WebSocket socket)
         {
@@ -65,7 +64,7 @@ namespace EvoS.LobbyServer
                     {
                         await message.CopyToAsync(ms);
                         await ms.FlushAsync();
-                        
+
                         EvosMessageStream messageStream = new EvosMessageStream(ms);
                         object requestData = messageStream.ReadGeneral();
                         Type requestType = requestData.GetType();
@@ -79,12 +78,12 @@ namespace EvoS.LobbyServer
                         // Write Response
                         await messageStream.GetOutputStream().CopyToAsync(writeStream);
 
-                        // Log received data bytes
-                        if (false)
-                        {
-                            byte[] msg = ms.ToArray();
-                            Log.Print(LogType.Packet, Encoding.Default.GetString(msg));
-                        }
+                        // Log received data bytes, seems to be useless
+                        // if (false)
+                        // {
+                        //     byte[] msg = ms.ToArray();
+                        //     Log.Print(LogType.Packet, Encoding.Default.GetString(msg));
+                        // }
 
                     }
 

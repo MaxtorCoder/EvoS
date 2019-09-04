@@ -17,7 +17,7 @@ namespace EvoS.Framework.Network.Static
         public AuthType Type { get; set; }
         public string UserName { get; set; }
 
-        
+
 
 
         public static AuthInfo CreateFromStream(EvosMessageStream stream)
