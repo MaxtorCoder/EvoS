@@ -6,7 +6,7 @@ using System.IO;
 namespace EvoS.Framework.Network.NetworkMessages
 {
     [Serializable]
-    [EvosMessage(778, typeof(RegisterGameClientRequest))]
+    [EvosMessage(778, typeof(RegisterGameClientResponse))]
     public class RegisterGameClientResponse : WebSocketResponseMessage
     {
         public AuthInfo AuthInfo;

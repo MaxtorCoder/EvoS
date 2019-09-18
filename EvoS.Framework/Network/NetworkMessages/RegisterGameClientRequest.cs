@@ -6,6 +6,7 @@ using System.IO;
 namespace EvoS.Framework.Network.NetworkMessages
 {
     [Serializable]
+    [EvosMessage(783, typeof(RegisterGameClientRequest))]
     public class RegisterGameClientRequest : WebSocketMessage
     {
         public new static int MessageTypeID = 783;

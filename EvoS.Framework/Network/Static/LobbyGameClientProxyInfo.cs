@@ -4,6 +4,7 @@ using System;
 namespace EvoS.Framework.Network.Static
 {
     [Serializable]
+    [EvosMessage(786, typeof(LobbyGameClientProxyInfo))]
     public class LobbyGameClientProxyInfo
     {
         public long AccountId { get; set; }

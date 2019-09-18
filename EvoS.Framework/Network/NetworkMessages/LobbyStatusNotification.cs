@@ -7,6 +7,7 @@ namespace EvoS.Framework.Network.NetworkMessages
 {
     // Token: 0x0200080E RID: 2062
     [Serializable]
+    [EvosMessage(768, typeof(LobbyStatusNotification))]
     public class LobbyStatusNotification : WebSocketMessage
     {
         public bool AllowRelogin;

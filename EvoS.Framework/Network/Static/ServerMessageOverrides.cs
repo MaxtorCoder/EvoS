@@ -1,7 +1,9 @@
-﻿using System;
+﻿using EvoS.Framework.Network;
+using System;
 
 // Token: 0x020009D9 RID: 2521
 [Serializable]
+[EvosMessage(769, typeof(ServerMessageOverrides))]
 public class ServerMessageOverrides
 {
     public ServerMessage FacebookOAuthRedirectUriContent { get; set; }

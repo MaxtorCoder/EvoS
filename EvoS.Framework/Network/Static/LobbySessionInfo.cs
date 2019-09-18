@@ -4,6 +4,7 @@ using System;
 namespace EvoS.Framework.Network.Static
 {
     [Serializable]
+    [EvosMessage(779, typeof(LobbySessionInfo))]
     public class LobbySessionInfo
     {
         public long AccountId { get; set; }

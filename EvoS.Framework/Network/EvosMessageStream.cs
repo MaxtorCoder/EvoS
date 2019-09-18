@@ -241,7 +241,6 @@ namespace EvoS.Framework.Network
 
                 Log.Print(LogType.Debug, "Deserializing " + T.Name);
                 object obj = T.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-                //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
                 MemberInfo[] members = T.GetMembers();
 
                 // TODO?: the two ifs are repeated, maybe there is a way to merge them to make the code more readable
@@ -252,7 +251,7 @@ namespace EvoS.Framework.Network
                     if (member.MemberType == MemberTypes.Field && !((FieldInfo)member).IsNotSerialized)
                     {
                         FieldInfo field = (FieldInfo)member;
-
+                        
                         if (field.FieldType == typeof(String))
                         {
                             String value = ReadString();
@@ -448,48 +447,42 @@ namespace EvoS.Framework.Network
             }
         }
 
-        private static void LoadTypeAndId(int id_, Type T)
-        {
-            typesByIds.Add(id_, T);
-            idsByType.Add(T, id_);
-        }
-
         #region Save keeping
-        //private static void LoadTypesAndIds()
-        //{
-        //    LoadTypeAndId(757, typeof(JoinGameRequest);
-        //    LoadTypeAndId(758, typeof(CreateGameResponse);
-        //    LoadTypeAndId(759, typeof(CreateGameRequest);
-        //    LoadTypeAndId(760, typeof(SyncNotification);
-        //    LoadTypeAndId(761, typeof(SetRegionRequest);
-        //    LoadTypeAndId(762, typeof(UnsubscribeFromCustomGamesRequest);
-        //    LoadTypeAndId(763, typeof(SubscribeToCustomGamesRequest);
-        //    LoadTypeAndId(764, typeof(LobbyCustomGamesNotification);
-        //    LoadTypeAndId(765, typeof(List`1);
-        //    LoadTypeAndId(766, typeof(LobbyGameInfo[]);
-        //    LoadTypeAndId(767, typeof(LobbyGameplayOverridesNotification),
-        //    LoadTypeAndId(768, typeof(LobbyStatusNotification));
-        //    LoadTypeAndId(769, typeof(ServerMessageOverrides));
-        //    LoadTypeAndId(770, typeof(ServerMessage));
-        //    LoadTypeAndId(771, typeof(ServerLockState));
-        //    LoadTypeAndId(772, typeof(ConnectionQueueInfo));
-        //    LoadTypeAndId(773, typeof(LobbyServerReadyNotification));
-        //    LoadTypeAndId(774, typeof(LobbyPlayerGroupInfo));
-        //    LoadTypeAndId(775, typeof(EnvironmentType));
-        //    LoadTypeAndId(776, typeof(List`1));
-        //    LoadTypeAndId(777, typeof(PersistedCharacterData[]))
-        //    LoadTypeAndId(778, typeof(RegisterGameClientResponse));
-        //    LoadTypeAndId(779, typeof(LobbySessionInfo));
-        //    LoadTypeAndId(780, typeof(ProcessType));
-        //    LoadTypeAndId(781, typeof(AuthInfo));
-        //    LoadTypeAndId(782, typeof(AuthType));
-        //    LoadTypeAndId(783, typeof(RegisterGameClientRequest));
-        //    LoadTypeAndId(784, typeof(LobbyGameClientSystemInfo));
-        //    LoadTypeAndId(785, typeof(AssignGameClientResponse));
-        //    LoadTypeAndId(786, typeof(LobbyGameClientProxyInfo));
-        //    LoadTypeAndId(787, typeof(LobbyGameClientProxyStatus));
-        //    LoadTypeAndId(788, typeof(AssignGameClientRequest));
-        //}
+        // private static void LoadTypesAndIds()
+        // {
+        //     LoadTypeAndId(757, typeof(JoinGameRequest);
+        //     LoadTypeAndId(758, typeof(CreateGameResponse);
+        //     LoadTypeAndId(759, typeof(CreateGameRequest);
+        //     LoadTypeAndId(760, typeof(SyncNotification);
+        //     LoadTypeAndId(761, typeof(SetRegionRequest);
+        //     LoadTypeAndId(762, typeof(UnsubscribeFromCustomGamesRequest);
+        //     LoadTypeAndId(763, typeof(SubscribeToCustomGamesRequest);
+        //     LoadTypeAndId(764, typeof(LobbyCustomGamesNotification);
+        //     LoadTypeAndId(765, typeof(List`1);
+        //     LoadTypeAndId(766, typeof(LobbyGameInfo[]);
+        //     LoadTypeAndId(767, typeof(LobbyGameplayOverridesNotification),
+        //     LoadTypeAndId(768, typeof(LobbyStatusNotification));
+        //     LoadTypeAndId(769, typeof(ServerMessageOverrides));
+        //     LoadTypeAndId(770, typeof(ServerMessage));
+        //     LoadTypeAndId(771, typeof(ServerLockState));
+        //     LoadTypeAndId(772, typeof(ConnectionQueueInfo));
+        //     LoadTypeAndId(773, typeof(LobbyServerReadyNotification));
+        //     LoadTypeAndId(774, typeof(LobbyPlayerGroupInfo));
+        //     LoadTypeAndId(775, typeof(EnvironmentType));
+        //     LoadTypeAndId(776, typeof(List`1));
+        //     LoadTypeAndId(777, typeof(PersistedCharacterData[]))
+        //     LoadTypeAndId(778, typeof(RegisterGameClientResponse));
+        //     LoadTypeAndId(779, typeof(LobbySessionInfo));
+        //     LoadTypeAndId(780, typeof(ProcessType));
+        //     LoadTypeAndId(781, typeof(AuthInfo));
+        //     LoadTypeAndId(782, typeof(AuthType));
+        //     LoadTypeAndId(783, typeof(RegisterGameClientRequest));
+        //     LoadTypeAndId(784, typeof(LobbyGameClientSystemInfo));
+        //     LoadTypeAndId(785, typeof(AssignGameClientResponse));
+        //     LoadTypeAndId(786, typeof(LobbyGameClientProxyInfo));
+        //     LoadTypeAndId(787, typeof(LobbyGameClientProxyStatus));
+        //     LoadTypeAndId(788, typeof(AssignGameClientRequest));
+        // }
         #endregion
     }
 }

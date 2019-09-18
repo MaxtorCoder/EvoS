@@ -5,6 +5,7 @@ using System.IO;
 namespace EvoS.Framework.Network.Static
 {
     [Serializable]
+    [EvosMessage(781, typeof(AuthInfo))]
     public class AuthInfo
     {
         public string AccountCurrency { get; set; }
@@ -16,9 +17,6 @@ namespace EvoS.Framework.Network.Static
         public string TicketData { get; set; }
         public AuthType Type { get; set; }
         public string UserName { get; set; }
-
-
-
 
         public static AuthInfo CreateFromStream(EvosMessageStream stream)
         {

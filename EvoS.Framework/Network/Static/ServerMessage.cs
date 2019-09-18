@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using EvoS.Framework.Network;
 using Newtonsoft.Json;
 
 // Token: 0x020009D7 RID: 2519
 [Serializable]
+[EvosMessage(770, typeof(ServerMessage))]
 public class ServerMessage
 {
     public static implicit operator ServerMessage(string value)

@@ -6,6 +6,7 @@ using System.IO;
 namespace EvoS.Framework.Network.NetworkMessages
 {
     [Serializable]
+    [EvosMessage(788, typeof(AssignGameClientRequest))]
     public class AssignGameClientRequest : WebSocketMessage
     {
         public LobbySessionInfo SessionInfo { get; set; }
