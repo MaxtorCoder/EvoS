@@ -290,7 +290,7 @@ namespace EvoS.Framework.Network
                         }
                         else
                         {
-                            Log.Print(LogType.Debug, $"==== Woops! =====: I dont know how to read {field.GetType().Name}");
+                            Log.Print(LogType.Debug, $"==== Woops! =====: I dont know how to read {field.DeclaringType}.{field.Name} of type {field.FieldType.Name}");
                             T.GetField(field.Name).SetValue(obj, ReadGeneral());
                         }
                     }
@@ -337,7 +337,7 @@ namespace EvoS.Framework.Network
                         else
                         {
                             Log.Print(LogType.Debug, $"{T.Name}.{member.Name}");
-                            Log.Print(LogType.Debug, $"==== Woops! =====: trying to read property of type {property.PropertyType.Name}");
+                            Log.Print(LogType.Debug, $"==== Woops! =====: I dont know how to read {property.DeclaringType}.{property.Name} of type {property.PropertyType.Name}");
                             T.GetProperty(property.Name).SetValue(obj, ReadGeneral());
                         }
                     }
@@ -438,7 +438,7 @@ namespace EvoS.Framework.Network
 
                     else
                     {
-                        Log.Print(LogType.Debug, $"==== Woops! =====: I dont know how to write {fieldPropertyType.Name}");
+                        Log.Print(LogType.Debug,$"==== Woops! =====: I dont know how to write {member.DeclaringType}.{member.Name} of type {fieldPropertyType.Name}");
 
                         WriteGeneral(value);
                     }
