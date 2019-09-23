@@ -77,7 +77,9 @@ namespace EvoS.LobbyServer
                         responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new object[] { requestData, MessageStream });
 
                         // Write Response
+                        MessageStream.GetOutputStream().Seek(0, SeekOrigin.Begin);
                         await MessageStream.GetOutputStream().CopyToAsync(writeStream);
+                        await writeStream.FlushAsync();
                     }
 
                 }
