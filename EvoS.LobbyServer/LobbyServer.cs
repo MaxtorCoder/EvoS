@@ -37,8 +37,6 @@ namespace EvoS.LobbyServer
 
             Log.Print(LogType.Server, "Started webserver on '0.0.0.0:6060'");
 
-            EvosMessageStream.InitializeMembers();
-
             while (true)
             {
                 Log.Print(LogType.Server, "Waiting for clients to connect...");

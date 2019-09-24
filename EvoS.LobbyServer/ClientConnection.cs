@@ -18,7 +18,6 @@ namespace EvoS.LobbyServer
     class ClientConnection
     {
         private WebSocket Socket;
-        private EvosMessageStream MessageStream;
 
         public ClientConnection(WebSocket socket)
         {
