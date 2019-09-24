@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using EvoS.Framework.Network;
 
 // Token: 0x02000951 RID: 2385
 [Serializable]
+[EvosMessage(663)]
 public class CharacterConfig
 {
     // Token: 0x060042D1 RID: 17105 RVA: 0x0003827A File Offset: 0x0003647A

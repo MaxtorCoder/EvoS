@@ -1,5 +1,7 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
+[EvosMessage(714)]
 public enum ClientAccessLevel
 {
     Unknown,

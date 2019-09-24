@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using EvoS.Framework.Network;
+
 //using NetSerializer;
 
 // Token: 0x020009EE RID: 2542
 [Serializable]
+[EvosMessage(25)]
 public class LocalizationPayload
 {
     public byte[][] ArgumentsAsBinaryData;

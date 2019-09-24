@@ -1,7 +1,9 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x02000952 RID: 2386
 [Serializable]
+[EvosMessage(681)]
 public class CardConfigOverride
 {
     // Token: 0x060042D3 RID: 17107 RVA: 0x00038287 File Offset: 0x00036487

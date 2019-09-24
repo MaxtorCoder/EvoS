@@ -1,7 +1,9 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x02000959 RID: 2393
 [Serializable]
+[EvosMessage(659)]
 public class SkinConfigOverride
 {
     // Token: 0x060042E5 RID: 17125 RVA: 0x00038373 File Offset: 0x00036573

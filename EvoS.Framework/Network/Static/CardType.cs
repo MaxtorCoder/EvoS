@@ -1,6 +1,8 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x0200077E RID: 1918
+[EvosMessage(542)]
 public enum CardType
 {
     // Token: 0x04003911 RID: 14609

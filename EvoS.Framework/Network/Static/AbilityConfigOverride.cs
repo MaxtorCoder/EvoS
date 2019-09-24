@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using EvoS.Framework.Network;
 
 // Token: 0x02000954 RID: 2388
 [Serializable]
+[EvosMessage(669)]
 public class AbilityConfigOverride
 {
     // Token: 0x060042D8 RID: 17112 RVA: 0x000382E9 File Offset: 0x000364E9
@@ -40,8 +42,10 @@ public class AbilityConfigOverride
     public int AbilityIndex;
 
     // Token: 0x04004080 RID: 16512
+    [EvosMessage(674)]
     public Dictionary<int, AbilityModConfigOverride> AbilityModConfigs = new Dictionary<int, AbilityModConfigOverride>();
 
     // Token: 0x04004081 RID: 16513
+    [EvosMessage(670)]
     public Dictionary<int, AbilityTauntConfigOverride> AbilityTauntConfigs = new Dictionary<int, AbilityTauntConfigOverride>();
 }

@@ -1,7 +1,9 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x02000953 RID: 2387
 [Serializable]
+[EvosMessage(667)]
 public class CharacterAbilityConfigOverride
 {
     // Token: 0x060042D4 RID: 17108 RVA: 0x00038294 File Offset: 0x00036494
@@ -40,5 +42,6 @@ public class CharacterAbilityConfigOverride
     public CharacterType CharacterType;
 
     // Token: 0x0400407D RID: 16509
+    [EvosMessage(668)]
     public AbilityConfigOverride[] AbilityConfigs;
 }

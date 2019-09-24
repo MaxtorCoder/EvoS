@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using EvoS.Framework.Network;
 
 // Token: 0x02000958 RID: 2392
 [Serializable]
+[EvosMessage(656)]
 public class CharacterSkinConfigOverride
 {
     // Token: 0x060042E2 RID: 17122 RVA: 0x0003834C File Offset: 0x0003654C
@@ -22,5 +24,6 @@ public class CharacterSkinConfigOverride
     public CharacterType CharacterType;
 
     // Token: 0x0400408D RID: 16525
+    [EvosMessage(657)]
     public List<SkinConfigOverride> SkinConfigs;
 }

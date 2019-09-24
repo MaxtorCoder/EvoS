@@ -1,7 +1,9 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x02000956 RID: 2390
 [Serializable]
+[EvosMessage(673)]
 public class AbilityTauntConfigOverride
 {
     // Token: 0x060042DF RID: 17119 RVA: 0x00038332 File Offset: 0x00036532
