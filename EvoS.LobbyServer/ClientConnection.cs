@@ -66,19 +66,20 @@ namespace EvoS.LobbyServer
                         await message.CopyToAsync(ms);
                         await ms.FlushAsync();
 
-                        MessageStream = new EvosMessageStream(ms);
-                        object requestData = MessageStream.ReadGeneral();
+                        ms.Seek(0, SeekOrigin.Begin);
+                        object requestData = EvosSerializer.Instance.Deserialize(ms);
                         Type requestType = requestData.GetType();
                         Log.Print(LogType.Network, $"Received {requestType.Name}");
 
                         // Create Response
                         Type responseHandlerType = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{requestType.Name}Handler");
                         object responseHandler = responseHandlerType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-                        responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new object[] { requestData, MessageStream });
+                        var responseStream = new MemoryStream();
+                        responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new[] { requestData, responseStream });
 
                         // Write Response
-                        MessageStream.GetOutputStream().Seek(0, SeekOrigin.Begin);
-                        await MessageStream.GetOutputStream().CopyToAsync(writeStream);
+                        responseStream.Seek(0, SeekOrigin.Begin);
+                        await responseStream.CopyToAsync(writeStream);
                         await writeStream.FlushAsync();
                     }
 
