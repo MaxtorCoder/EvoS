@@ -12,6 +12,7 @@ namespace EvoS.Framework.Network
     {
         private readonly Serializer _serializer = new Serializer(new Dictionary<Type, uint>());
 
+        private readonly Dictionary<uint, Type> _typesById = new Dictionary<uint, Type>();
         private readonly Dictionary<Type, uint> _idsByType = new Dictionary<Type, uint>
         {
             {typeof(object), 1},
@@ -43,6 +44,10 @@ namespace EvoS.Framework.Network
 
         private EvosSerializer()
         {
+            foreach (var (key, value) in _idsByType)
+            {
+                _typesById.Add(value, key);
+            }
         }
 
         public EvosSerializer FindTypes()
@@ -209,6 +214,11 @@ namespace EvoS.Framework.Network
             {
                 throw new EvosSerializerTypeException(
                     $"Cannot map {messageType} to {typeId}, as it is already mapped to {_idsByType[messageType]}");
+            }
+            if (!_typesById.TryAdd(typeId, messageType) && _typesById[typeId] != messageType)
+            {
+                throw new EvosSerializerTypeException(
+                    $"Cannot map {typeId} to {messageType}, as it is already mapped to {_typesById[typeId]}");
             }
         }
 
