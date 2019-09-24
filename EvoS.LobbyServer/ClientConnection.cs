@@ -94,6 +94,11 @@ namespace EvoS.LobbyServer
 
                         // Handle Response
                         Type responseHandlerType = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{requestType.Name}Handler");
+                        if (responseHandlerType == null)
+                        {
+                            Log.Print(LogType.Warning, $"No Handler for {requestType.Name}");
+                            continue;
+                        }
                         object responseHandler = responseHandlerType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
                         var task = (Task) responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new[] { this, requestData });
                         await task.ConfigureAwait(false);
