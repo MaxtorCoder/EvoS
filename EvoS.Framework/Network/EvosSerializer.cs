@@ -97,8 +97,9 @@ namespace EvoS.Framework.Network
                 if (type.IsGenericType)
                 {
                     // TODO: This might not be what we want for all generic types
-                    var typeAttribute = type.GetCustomAttribute<EvosMessageAttribute>();
-                    if (typeAttribute == null || !typeAttribute.IgnoreGenericArgs)
+                    var typeIgnore = type.GetCustomAttribute<EvosMessageAttribute>()?.IgnoreGenericArgs;
+                    var baseTypeIgnore = type.GetGenericTypeDefinition().GetCustomAttribute<EvosMessageAttribute>()?.IgnoreGenericArgs;
+                    if (typeIgnore != true && baseTypeIgnore != true)
                     {
                         types.AddRange(type.GetGenericArguments());
                     }
