@@ -1,7 +1,9 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x02000957 RID: 2391
 [Serializable]
+[EvosMessage(677)]
 public class AbilityModConfigOverride
 {
     // Token: 0x060042E1 RID: 17121 RVA: 0x0003833F File Offset: 0x0003653F

@@ -1,6 +1,8 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x02000767 RID: 1895
+[EvosMessage(47)]
 public enum CharacterType
 {
     // Token: 0x0400386A RID: 14442

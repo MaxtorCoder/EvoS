@@ -1,7 +1,9 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x0200095A RID: 2394
 [Serializable]
+[EvosMessage(643)]
 public class QuestConfigOverride
 {
     // Token: 0x060042E7 RID: 17127 RVA: 0x00038380 File Offset: 0x00036580

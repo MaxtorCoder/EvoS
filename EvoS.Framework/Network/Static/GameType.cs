@@ -1,6 +1,8 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x0200076C RID: 1900
+[EvosMessage(52)]
 public enum GameType
 {
     // Token: 0x0400389F RID: 14495

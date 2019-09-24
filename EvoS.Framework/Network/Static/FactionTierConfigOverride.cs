@@ -1,7 +1,9 @@
 ﻿using System;
+using EvoS.Framework.Network;
 
 // Token: 0x0200095B RID: 2395
 [Serializable]
+[EvosMessage(650)]
 public class FactionTierConfigOverride
 {
     // Token: 0x060042E9 RID: 17129 RVA: 0x0003838D File Offset: 0x0003658D
