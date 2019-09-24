@@ -17,24 +17,5 @@ namespace EvoS.Framework.Network.Static
         public string TicketData { get; set; }
         public AuthType Type { get; set; }
         public string UserName { get; set; }
-
-        public static AuthInfo CreateFromStream(EvosMessageStream stream)
-        {
-            AuthInfo ret = new AuthInfo();
-            BinarySerializer bs = new BinarySerializer();
-            int typeId = stream.ReadVarInt();
-
-            ret.AccountCurrency = stream.ReadString();
-            ret.AccountId = stream.ReadLong();
-            ret.AccountStatus = stream.ReadString();
-            ret.Handle = stream.ReadString();
-            ret.Password = stream.ReadString();
-            ret.SteamId = stream.ReadVarInt();
-            ret.TicketData = stream.ReadString();
-            ret.Type = (AuthType)stream.ReadVarInt();
-            ret.UserName = stream.ReadString();
-
-            return ret;
-        }
     }
 }
