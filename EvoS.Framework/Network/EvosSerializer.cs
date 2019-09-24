@@ -106,7 +106,8 @@ namespace EvoS.Framework.Network
                     // NetSerializer handles Dictionaries and Lists specially
                     if (type.GetGenericTypeDefinition() == typeof(Dictionary<,>) ||
                         type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>) ||
-                        type.GetGenericTypeDefinition() == typeof(List<>))
+                        type.GetGenericTypeDefinition() == typeof(List<>) ||
+                        type.GetGenericTypeDefinition() == typeof(Queue<>))
                     {
                         continue;
                     }
@@ -145,7 +146,10 @@ namespace EvoS.Framework.Network
                 var typeId = _idsByType[type];
                 types.RemoveAt(0);
 
-                if (!type.IsGenericType || type.GetGenericTypeDefinition() != typeof(List<>))
+                if (!type.IsGenericType || !(
+                        type.GetGenericTypeDefinition() == typeof(List<>) ||
+                        type.GetGenericTypeDefinition() == typeof(Queue<>) 
+                        ))
                 {
                     continue;
                 }
