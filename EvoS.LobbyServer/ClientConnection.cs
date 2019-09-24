@@ -78,7 +78,16 @@ namespace EvoS.LobbyServer
                         await ms.FlushAsync();
 
                         ms.Seek(0, SeekOrigin.Begin);
-                        object requestData = EvosSerializer.Instance.Deserialize(ms);
+                        object requestData;
+                        try
+                        {
+                            requestData = EvosSerializer.Instance.Deserialize(ms);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Print(LogType.Error, e.ToString());
+                            continue;
+                        }
                         Type requestType = requestData.GetType();
                         Log.Print(LogType.Network, $"Received {JsonConvert.SerializeObject(requestData)}");
                         Log.Print(LogType.Network, $"Received {requestType.Name}");
