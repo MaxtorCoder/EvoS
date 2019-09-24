@@ -4,7 +4,7 @@ using EvoS.Framework.Constants.Enums;
 namespace EvoS.Framework.Network.Static
 {
     [Serializable]
-    [EvosMessage(501, typeof(SchemaVersion<CharacterSchemaChange>), true)]
+    [EvosMessage(-1, ignoreGenericArgs: true)]
     public class SchemaVersion<TEnum> : SchemaVersionBase where TEnum : IConvertible
     {
         public SchemaVersion() : base(0UL)
