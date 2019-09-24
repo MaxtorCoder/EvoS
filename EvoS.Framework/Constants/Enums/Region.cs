@@ -8,7 +8,7 @@ namespace EvoS.Framework.Constants.Enums
     [EvosMessage(94)]
     public enum Region
     {
-        EN,
+        US,
         EU
     }
 }
