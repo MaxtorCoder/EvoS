@@ -209,7 +209,10 @@ namespace EvoS.Framework.Network
                     memberType = ((PropertyInfo) member).PropertyType;
                 }
 
-                AddType(memberAttribute, memberType);
+                if (memberType != null)
+                {
+                    AddType(memberAttribute, memberType);
+                }
             }
         }
 
