@@ -5,7 +5,7 @@ using System.Text;
 namespace EvoS.Framework.Network
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field |
-                    AttributeTargets.Property)]
+                    AttributeTargets.Property | AttributeTargets.Struct)]
     public class EvosMessageAttribute : Attribute
     {
         public int TypeID { get; set; }
