@@ -12,6 +12,8 @@ using EvoS.Framework.Network.WebSocket;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.LobbyServer.NetworkMessageHandlers;
 using System.Reflection;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace EvoS.LobbyServer
 {
@@ -33,10 +35,21 @@ namespace EvoS.LobbyServer
             Socket.Dispose();
         }
 
+        public async Task SendMessage(object message)
+        {
+            var responseStream = new MemoryStream();
+            EvosSerializer.Instance.Serialize(responseStream, message);
+            
+            using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
+            {
+                await writer.WriteAsync(responseStream.ToArray());
+                await writer.FlushAsync();
+            }    
+        }
+
         public async void HandleConnection()
         {
             Console.WriteLine("Handling Connection");
-            WebSocketMessageWriteStream writeStream = Socket.CreateMessageWriter(WebSocketMessageType.Binary);
 
             while (true)
             {
@@ -46,7 +59,6 @@ namespace EvoS.LobbyServer
                 if (message == null)
                 {
                     Console.WriteLine("Message is null");
-                    writeStream.Dispose();
                     Disconnect();
                     return;
                 }
@@ -68,18 +80,15 @@ namespace EvoS.LobbyServer
                         ms.Seek(0, SeekOrigin.Begin);
                         object requestData = EvosSerializer.Instance.Deserialize(ms);
                         Type requestType = requestData.GetType();
+                        Log.Print(LogType.Network, $"Received {JsonConvert.SerializeObject(requestData)}");
                         Log.Print(LogType.Network, $"Received {requestType.Name}");
 
-                        // Create Response
+                        // Handle Response
                         Type responseHandlerType = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{requestType.Name}Handler");
                         object responseHandler = responseHandlerType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-                        var responseStream = new MemoryStream();
-                        responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new[] { requestData, responseStream });
-
-                        // Write Response
-                        responseStream.Seek(0, SeekOrigin.Begin);
-                        await responseStream.CopyToAsync(writeStream);
-                        await writeStream.FlushAsync();
+                        var task = (Task) responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new[] { this, requestData });
+                        await task.ConfigureAwait(false);
+                        await task;
                     }
 
                 }
