@@ -83,6 +83,11 @@ namespace EvoS.Framework.Network
 
                 typesProcessed.Add(type);
 
+                if (type.IsAbstract)
+                {
+                    continue;
+                }
+
                 // Check the type itself as we may add arguments from generic types
                 if (!_idsByType.ContainsKey(type))
                 {
