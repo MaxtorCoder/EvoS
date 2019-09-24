@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using EvoS.Framework.Logging;
-using EvoS.Framework.Network.NetworkMessages;
+using EvoS.Framework.Network.Static;
 using NetSerializer;
 
 namespace EvoS.Framework.Network
@@ -39,7 +39,10 @@ namespace EvoS.Framework.Network
             {typeof(string[]), 260},
             {typeof(Guid), 278},
             {typeof(ulong), 319},
-            {typeof(DateTime[]), 571}
+            {typeof(DateTime[]), 571},
+            {typeof(Dictionary<int, FactionTierAndVersion>), 582},
+            {typeof(KeyValuePair<int, FactionTierAndVersion>[]), 583},
+            {typeof(KeyValuePair<int, FactionTierAndVersion>), 584},
         };
 
         private EvosSerializer()
