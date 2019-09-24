@@ -10,11 +10,13 @@ namespace EvoS.Framework.Network
     {
         public int TypeID { get; set; }
         public Type Type { get; set; }
+        public bool IgnoreGenericArgs { get; set; }
 
-        public EvosMessageAttribute(int typeId, Type type = null)
+        public EvosMessageAttribute(int typeId, Type type = null, bool ignoreGenericArgs = false)
         {
             TypeID = typeId;
             Type = type;
+            IgnoreGenericArgs = ignoreGenericArgs;
         }
     }
 }
