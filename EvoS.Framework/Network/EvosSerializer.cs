@@ -56,7 +56,7 @@ namespace EvoS.Framework.Network
                 .Concat(Assembly.GetEntryAssembly().GetTypes()))
             {
                 var attribute = type.GetCustomAttribute<EvosMessageAttribute>();
-                if (attribute == null)
+                if (attribute == null || attribute.TypeID < 0)
                     continue;
 
                 AddType(attribute, type);
