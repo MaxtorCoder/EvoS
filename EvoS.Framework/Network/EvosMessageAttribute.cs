@@ -10,7 +10,7 @@ namespace EvoS.Framework.Network
         public int TypeID { get; set; }
         public Type Type { get; set; }
 
-        public EvosMessageAttribute(int typeId, Type type)
+        public EvosMessageAttribute(int typeId, Type type = null)
         {
             TypeID = typeId;
             Type = type;

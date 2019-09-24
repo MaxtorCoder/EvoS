@@ -34,8 +34,10 @@ namespace EvoS.Framework.Network
                 if (attribute == null)
                     continue;
 
-                idsByType.Add(attribute.Type, attribute.TypeID);
-                typesByIds.Add(attribute.TypeID, attribute.Type);
+                var packetType = attribute.Type != null ? attribute.Type : type; 
+                
+                idsByType.Add(packetType, attribute.TypeID);
+                typesByIds.Add(attribute.TypeID, packetType);
             }
 
             Log.Print(LogType.Server, $"Loaded {idsByType.Count} {(idsByType.Count == 1 ? "ID" : "IDs")} and " +
