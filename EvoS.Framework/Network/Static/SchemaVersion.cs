@@ -10,6 +10,10 @@ namespace EvoS.Framework.Network.Static
         public SchemaVersion() : base(0UL)
         {
         }
+        
+        public SchemaVersion(ulong value) : base(value)
+        {
+        }
 
         public bool IsChangeApplied(TEnum change)
         {
