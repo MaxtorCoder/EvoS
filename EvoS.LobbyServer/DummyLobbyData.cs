@@ -175,5 +175,26 @@ namespace EvoS.LobbyServer
                 CharacterLoadouts = new List<CharacterLoadout>()
             };
         }
+
+        public static Dictionary<CharacterType, CharacterConfig> CreateCharacterConfigs()
+        {
+            var data = new Dictionary<CharacterType, CharacterConfig>();
+
+            foreach (CharacterType characterType in Enum.GetValues(typeof(CharacterType)))
+            {
+                data.Add(characterType, new CharacterConfig
+                {
+                    CharacterType = characterType,
+                    Difficulty = 1,
+                    CharacterRole = CharacterRole.Assassin,
+                    IsHidden = false,
+                    AllowForBots = true,
+                    AllowForPlayers = true,
+                    IsHiddenFromFreeRotationUntil = DateTime.UnixEpoch
+                });
+            }
+
+            return data;
+        }
     }
 }
