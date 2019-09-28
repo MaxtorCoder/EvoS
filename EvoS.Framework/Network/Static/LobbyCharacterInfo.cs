@@ -7,30 +7,27 @@ namespace EvoS.Framework.Network.Static
     [EvosMessage(552)]
     public class LobbyCharacterInfo
     {
-                public LobbyCharacterInfo Clone()
+        public LobbyCharacterInfo Clone()
         {
-            return (LobbyCharacterInfo)base.MemberwiseClone();
+            return (LobbyCharacterInfo) base.MemberwiseClone();
         }
 
-                public CharacterType CharacterType;
+        public CharacterType CharacterType;
 
-                public CharacterVisualInfo CharacterSkin = default(CharacterVisualInfo);
+        public CharacterVisualInfo CharacterSkin = default(CharacterVisualInfo);
 
-                public CharacterCardInfo CharacterCards = default(CharacterCardInfo);
+        public CharacterCardInfo CharacterCards = default(CharacterCardInfo);
 
-                public CharacterModInfo CharacterMods = default(CharacterModInfo);
+        public CharacterModInfo CharacterMods = default(CharacterModInfo);
 
-                public CharacterAbilityVfxSwapInfo CharacterAbilityVfxSwaps = default(CharacterAbilityVfxSwapInfo);
+        public CharacterAbilityVfxSwapInfo CharacterAbilityVfxSwaps = default(CharacterAbilityVfxSwapInfo);
 
-                [EvosMessage(528)]
-                public List<PlayerTauntData> CharacterTaunts = new List<PlayerTauntData>();
+        [EvosMessage(528)] public List<PlayerTauntData> CharacterTaunts = new List<PlayerTauntData>();
 
-                [EvosMessage(544)]
-                public List<CharacterLoadout> CharacterLoadouts = new List<CharacterLoadout>();
+        [EvosMessage(544)] public List<CharacterLoadout> CharacterLoadouts = new List<CharacterLoadout>();
 
-                public int CharacterMatches;
+        public int CharacterMatches;
 
-                public int CharacterLevel;
+        public int CharacterLevel;
     }
-
 }
