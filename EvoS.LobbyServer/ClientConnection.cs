@@ -85,6 +85,7 @@ namespace EvoS.LobbyServer
                         }
                         catch (Exception e)
                         {
+                            Log.Print(LogType.Error, Convert.ToBase64String(ms.ToArray()));
                             Log.Print(LogType.Error, e.ToString());
                             continue;
                         }
