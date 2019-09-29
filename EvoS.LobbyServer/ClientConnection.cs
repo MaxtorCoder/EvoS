@@ -52,16 +52,15 @@ namespace EvoS.LobbyServer
 
         public async void HandleConnection()
         {
-            Console.WriteLine("Handling Connection");
+            Log.Print(LogType.Debug, "Handling Connection");
 
             while (true)
             {
-                Console.WriteLine("while");
                 WebSocketMessageReadStream message = await Socket.ReadMessageAsync(CancellationToken.None);
 
                 if (message == null)
                 {
-                    Console.WriteLine("Message is null");
+                    Log.Print(LogType.Debug, "Message is null");
                     Disconnect();
                     return;
                 }
@@ -71,7 +70,7 @@ namespace EvoS.LobbyServer
                     var msgContent = string.Empty;
                     using (var sr = new StreamReader(message, Encoding.UTF8))
                         msgContent = await sr.ReadToEndAsync();
-                    Console.WriteLine(msgContent);
+                    Log.Print(LogType.Debug, msgContent);
                 }
                 else if (message.MessageType == WebSocketMessageType.Binary)
                 {

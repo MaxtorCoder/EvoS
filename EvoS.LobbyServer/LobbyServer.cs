@@ -61,7 +61,7 @@ namespace EvoS.LobbyServer
                     client.Dispose();
                     return;
                 }
-                Console.WriteLine($"RECV {message.MessageType} {(message.MessageType == WebSocketMessageType.Text ? message.ReadText() : message.ReadBinary())}");
+                Log.Print(LogType.Debug, $"RECV {message.MessageType} {(message.MessageType == WebSocketMessageType.Text ? message.ReadText() : message.ReadBinary())}");
                 message.Dispose();
             }
 
