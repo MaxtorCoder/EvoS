@@ -81,6 +81,7 @@ namespace EvoS.LobbyServer
 
                         ms.Seek(0, SeekOrigin.Begin);
                         object requestData;
+
                         try
                         {
                             requestData = EvosSerializer.Instance.Deserialize(ms);
@@ -91,6 +92,7 @@ namespace EvoS.LobbyServer
                             Log.Print(LogType.Error, e.ToString());
                             continue;
                         }
+
                         Type requestType = requestData.GetType();
                         Log.Print(LogType.Network, $"Received {JsonConvert.SerializeObject(requestData)}");
                         Log.Print(LogType.Network, $"Received {requestType.Name}");
@@ -102,12 +104,12 @@ namespace EvoS.LobbyServer
                             Log.Print(LogType.Warning, $"No Handler for {requestType.Name}");
                             continue;
                         }
+
                         object responseHandler = responseHandlerType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
                         var task = (Task) responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new[] { this, requestData });
                         await task.ConfigureAwait(false);
                         await task;
                     }
-
                 }
                 //Console.WriteLine($"RECV {message.MessageType} {(message.MessageType == WebSocketMessageType.Text ? message.ReadText() : message.ReadBinary())}");
                 message.Dispose();
