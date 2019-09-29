@@ -31,6 +31,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                     return;
                 }
             }
+
             if (request.PlayerInfoUpdate.CharacterType == null)
             {
                 Log.Print(LogType.Warning, "CharacterType is null in PlayerInfoUpdateRequest");
@@ -48,22 +49,19 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             var response = new PlayerInfoUpdateResponse
             {
                 CharacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(request.PlayerInfoUpdate.CharacterType.Value),
-//                PlayerInfo = DummyLobbyData.CreateLobbyPlayerInfo(),
+                // PlayerInfo = DummyLobbyData.CreateLobbyPlayerInfo(),
                 OriginalPlayerInfoUpdate = request.PlayerInfoUpdate,
                 ResponseId = request.RequestId
             };
+
             if (request.PlayerInfoUpdate.CharacterCards != null)
-            {
                 response.CharacterInfo.CharacterCards = request.PlayerInfoUpdate.CharacterCards.Value;
-            }
 
             if (request.PlayerInfoUpdate.CharacterMods != null)
-            {
                 response.CharacterInfo.CharacterMods = request.PlayerInfoUpdate.CharacterMods.Value;
-            }
 
-//            response.PlayerInfo.PlayerId = request.PlayerInfoUpdate.PlayerId;
-//            response.PlayerInfo.CharacterInfo = response.CharacterInfo;
+            // response.PlayerInfo.PlayerId = request.PlayerInfoUpdate.PlayerId;
+            // response.PlayerInfo.CharacterInfo = response.CharacterInfo;
             Log.Print(LogType.Network, $"Responding {JsonConvert.SerializeObject(response)}");
             await connection.SendMessage(response);
         }

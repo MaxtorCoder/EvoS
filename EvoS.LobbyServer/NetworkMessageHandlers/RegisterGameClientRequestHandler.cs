@@ -41,7 +41,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 {
                     SelectedQueueType = GameType.Practice,
                     MemberDisplayName = connection.SessionInfo.Handle,
-//                    ChararacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(CharacterType.Archer),
+                    // ChararacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(CharacterType.Archer),
                     Members = new List<UpdateGroupMemberData>()
                 },
                 SeasonChapterQuests =
