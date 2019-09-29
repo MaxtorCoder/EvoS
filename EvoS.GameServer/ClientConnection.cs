@@ -47,17 +47,15 @@ namespace EvoS.GameServer
 
         public async void HandleConnection()
         {
-            Console.WriteLine("Handling Connection");
             var unetMessage = new UNetMessage();
 
             while (true)
             {
-                Console.WriteLine("while");
                 var message = await Socket.ReadMessageAsync(CancellationToken.None);
 
                 if (message == null)
                 {
-                    Console.WriteLine("Message is null");
+                    Log.Print(LogType.Warning, "Message is null");
                     Disconnect();
                     return;
                 }

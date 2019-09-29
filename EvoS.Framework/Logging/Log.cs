@@ -6,11 +6,7 @@ namespace EvoS.Framework.Logging
 {
     public static class Log
     {
-#if DEBUG
         public static bool Debug = true;
-#else
-        public static bool Debug = false;
-#endif
 
         public static readonly Dictionary<LogType, (ConsoleColor Color, string Name)> TypeColor = new Dictionary<LogType, (ConsoleColor Color, string Name)>()
         {
@@ -29,11 +25,10 @@ namespace EvoS.Framework.Logging
 
             if (showLogLevel)
             {
-
                 if (_type == LogType.Debug)
                 {
                     if (!Debug)
-                        throw new Exception("Not in debug build..");
+                        return;
                     else
                     {
                         Console.ForegroundColor = TypeColor[LogType.Debug].Color;
@@ -60,7 +55,7 @@ namespace EvoS.Framework.Logging
             if (_type == LogType.Debug)
             {
                 if (!Debug)
-                    throw new Exception("Not in debug build..");
+                    return;
                 else
                 {
                     Console.ForegroundColor = TypeColor[LogType.Debug].Color;
