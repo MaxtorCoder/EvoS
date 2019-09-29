@@ -28,13 +28,13 @@ namespace EvoS.Sandbox
 
         static void StartLobbyServer()
         {
-            Thread.Sleep(1500);
+            Thread.Sleep(1750);
             LobbyServer.Program.Main();
         }
         
         static void StartGameServer()
         {
-            Thread.Sleep(2500);
+            Thread.Sleep(2750);
             GameServer.GameServer.Main();
         }
     }
