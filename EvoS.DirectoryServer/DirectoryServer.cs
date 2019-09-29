@@ -14,11 +14,11 @@ using Newtonsoft.Json;
 
 namespace EvoS.DirectoryServer
 {
-    class Program
+    public class Server
     {
-        static void Main(string[] args)
+        public static void Start()
         {
-            var host = WebHost.CreateDefaultBuilder(args)
+            var host = WebHost.CreateDefaultBuilder()
                 .SuppressStatusMessages(true)
                 .UseKestrel(koptions => koptions.Listen(IPAddress.Parse("127.0.0.1"), 6050))
                 .UseStartup<DirectoryServer>()

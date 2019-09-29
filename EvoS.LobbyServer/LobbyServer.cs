@@ -13,11 +13,11 @@ using EvoS.Framework.Network;
 
 namespace EvoS.LobbyServer
 {
-    class Program
+    public class LobbyServer
     {
         private static List<ClientConnection> ConnectedClients = new List<ClientConnection>();
 
-        static void Main(string[] args)
+        public static void Start()
         {
             Task server = Task.Run(StartServer);
             server.Wait();
@@ -57,7 +57,7 @@ namespace EvoS.LobbyServer
                 WebSocketMessageReadStream message = await client.ReadMessageAsync(CancellationToken.None);
                 if (!client.IsConnected || message == null)
                 {
-                    Log.Print(LogType.Server, "a client disconnected");
+                    Log.Print(LogType.Server, "A client disconnected");
                     client.Dispose();
                     return;
                 }
