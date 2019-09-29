@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvoS.DirectoryServer", "Evo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoS.LobbyServer", "EvoS.LobbyServer\EvoS.LobbyServer.csproj", "{9C408431-2BDE-43F3-94F4-3414286EB074}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoS.GameServer", "EvoS.GameServer\EvoS.GameServer.csproj", "{BE0A5732-5E24-4B4C-B27A-46C440EBDB8F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{9C408431-2BDE-43F3-94F4-3414286EB074}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C408431-2BDE-43F3-94F4-3414286EB074}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C408431-2BDE-43F3-94F4-3414286EB074}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE0A5732-5E24-4B4C-B27A-46C440EBDB8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE0A5732-5E24-4B4C-B27A-46C440EBDB8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE0A5732-5E24-4B4C-B27A-46C440EBDB8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE0A5732-5E24-4B4C-B27A-46C440EBDB8F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
