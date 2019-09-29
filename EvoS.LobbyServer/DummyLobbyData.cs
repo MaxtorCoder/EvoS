@@ -168,8 +168,8 @@ namespace EvoS.LobbyServer
             {
                 CharacterType = characterType,
                 CharacterSkin = new CharacterVisualInfo(),
-                CharacterCards = new CharacterCardInfo(),
-                CharacterMods = new CharacterModInfo(),
+                CharacterCards = new CharacterCardInfo().Reset(),
+                CharacterMods = new CharacterModInfo().Reset(),
                 CharacterAbilityVfxSwaps = new CharacterAbilityVfxSwapInfo(),
                 CharacterTaunts = new List<PlayerTauntData>(),
                 CharacterLoadouts = new List<CharacterLoadout>()
