@@ -6,11 +6,12 @@ namespace EvoS.Framework.Network.Static
     [EvosMessage(541)]
     public struct CharacterCardInfo
     {
-        public void Reset()
+        public CharacterCardInfo Reset()
         {
             PrepCard = CardType.None;
             CombatCard = CardType.None;
             DashCard = CardType.None;
+            return this;
         }
 
         public string ToIdString()

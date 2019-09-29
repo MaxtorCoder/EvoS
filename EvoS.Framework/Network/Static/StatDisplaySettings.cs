@@ -57,6 +57,7 @@ namespace EvoS.Framework.Network.Static
             float? GetFreelancerStat(int FreelancerStatIndex);
         }
 
+        [EvosMessage(35)]
         public enum StatType
         {
             TotalAssists,

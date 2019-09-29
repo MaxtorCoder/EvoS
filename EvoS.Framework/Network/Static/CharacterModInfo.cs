@@ -6,13 +6,14 @@ namespace EvoS.Framework.Network.Static
     [EvosMessage(540)]
     public struct CharacterModInfo
     {
-        public void Reset()
+        public CharacterModInfo Reset()
         {
             ModForAbility0 = -1;
             ModForAbility1 = -1;
             ModForAbility2 = -1;
             ModForAbility3 = -1;
             ModForAbility4 = -1;
+            return this;
         }
 
         public int GetModForAbility(int abilityIndex)

@@ -38,65 +38,7 @@ namespace EvoS.LobbyServer
                             QueueableGroupSizes = new Dictionary<int, RequirementCollection> {{1, null}},
                             IsActive = true,
                             TeamAPlayers = 1,
-                            SubTypes = new List<GameSubType>
-                            {
-                                new GameSubType
-                                {
-                                    LocalizedName = "GenericPractice@SubTypes",
-                                    GameMapConfigs = new List<GameMapConfig>
-                                    {
-                                        new GameMapConfig
-                                        {
-                                            IsActive = true,
-                                            Map = "VR_Practice"
-                                        }
-                                    },
-                                    Mods = new List<GameSubType.SubTypeMods>
-                                    {
-                                        GameSubType.SubTypeMods.AllowPlayingLockedCharacters,
-                                        GameSubType.SubTypeMods.HumansHaveFirstSlots
-                                    },
-                                    RewardBucket = GameBalanceVars.GameRewardBucketType.NoRewards,
-                                    PersistedStatBucket = PersistedStatBucket.DoNotPersist,
-                                    TeamABots = -1,
-                                    TeamBBots = -1,
-                                    TeamAPlayers = -1,
-                                    TeamBPlayers = -1,
-                                    TeamComposition = new TeamCompositionRules
-                                    {
-                                        Rules = new Dictionary<TeamCompositionRules.SlotTypes, FreelancerSet>
-                                        {
-                                            {
-                                                TeamCompositionRules.SlotTypes.A1, new FreelancerSet
-                                                {
-                                                    Roles = new List<CharacterRole>
-                                                    {
-                                                        CharacterRole.Tank,
-                                                        CharacterRole.Assassin,
-                                                        CharacterRole.Support
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                TeamCompositionRules.SlotTypes.A2, new FreelancerSet
-                                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
-                                            },
-                                            {
-                                                TeamCompositionRules.SlotTypes.A4, new FreelancerSet
-                                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
-                                            },
-                                            {
-                                                TeamCompositionRules.SlotTypes.A3, new FreelancerSet
-                                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
-                                            },
-                                            {
-                                                TeamCompositionRules.SlotTypes.TeamB, new FreelancerSet
-                                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            SubTypes = CreatePracticeGameSubTypes()
                         }
                     },
                     {
@@ -162,17 +104,89 @@ namespace EvoS.LobbyServer
             };
         }
 
+        private static List<GameSubType> CreatePracticeGameSubTypes()
+        {
+            return new List<GameSubType>
+            {
+                new GameSubType
+                {
+                    LocalizedName = "GenericPractice@SubTypes",
+                    GameMapConfigs = new List<GameMapConfig>
+                    {
+                        new GameMapConfig
+                        {
+                            IsActive = true,
+                            Map = "VR_Practice"
+                        }
+                    },
+                    Mods = new List<GameSubType.SubTypeMods>
+                    {
+                        GameSubType.SubTypeMods.AllowPlayingLockedCharacters,
+                        GameSubType.SubTypeMods.HumansHaveFirstSlots
+                    },
+                    RewardBucket = GameBalanceVars.GameRewardBucketType.NoRewards,
+                    PersistedStatBucket = PersistedStatBucket.DoNotPersist,
+                    TeamABots = -1,
+                    TeamBBots = -1,
+                    TeamAPlayers = -1,
+                    TeamBPlayers = -1,
+                    TeamComposition = new TeamCompositionRules
+                    {
+                        Rules = new Dictionary<TeamCompositionRules.SlotTypes, FreelancerSet>
+                        {
+                            {
+                                TeamCompositionRules.SlotTypes.A1, new FreelancerSet
+                                {
+                                    Roles = new List<CharacterRole>
+                                    {
+                                        CharacterRole.Tank,
+                                        CharacterRole.Assassin,
+                                        CharacterRole.Support
+                                    }
+                                }
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A2, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A4, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A3, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.TeamB, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
         public static LobbyCharacterInfo CreateLobbyCharacterInfo(CharacterType characterType)
         {
             return new LobbyCharacterInfo
             {
                 CharacterType = characterType,
                 CharacterSkin = new CharacterVisualInfo(),
-                CharacterCards = new CharacterCardInfo(),
-                CharacterMods = new CharacterModInfo(),
+                CharacterCards = new CharacterCardInfo().Reset(),
+                CharacterMods = new CharacterModInfo().Reset(),
                 CharacterAbilityVfxSwaps = new CharacterAbilityVfxSwapInfo(),
                 CharacterTaunts = new List<PlayerTauntData>(),
-                CharacterLoadouts = new List<CharacterLoadout>()
+                CharacterLoadouts = CreateCharacterLoadouts()
+            };
+        }
+
+        private static List<CharacterLoadout> CreateCharacterLoadouts()
+        {
+            return new List<CharacterLoadout>
+            {
+                new CharacterLoadout(new CharacterModInfo().Reset(), new CharacterAbilityVfxSwapInfo(), "Loadout #1"),
+                new CharacterLoadout(new CharacterModInfo().Reset(), new CharacterAbilityVfxSwapInfo(), "Loadout #2")
             };
         }
 
@@ -195,6 +209,114 @@ namespace EvoS.LobbyServer
             }
 
             return data;
+        }
+
+        public static PersistedAccountData CreateAccountData(ClientConnection connection)
+        {
+            return new PersistedAccountData
+            {
+                QuestComponent = new QuestComponent {ActiveSeason = 9},
+                AccountId = connection.AuthInfo.AccountId,
+                UserName = connection.AuthInfo.UserName,
+                Handle = connection.AuthInfo.Handle,
+                SchemaVersion = new SchemaVersion<AccountSchemaChange>(0x1FFFF),
+                CreateDate = DateTime.Now.AddHours(-1),
+                UpdateDate = DateTime.Now,
+            };
+        }
+
+        public static GameAssignmentNotification CreatePracticeGameNotification(ClientConnection connection)
+        {
+            return new GameAssignmentNotification
+            {
+                Observer = false,
+                Reconnection = false,
+                GameInfo = CreatePracticeGameLobbyInfo(),
+                GameResult = GameResult.NoResult,
+                GameplayOverrides = CreateLobbyGameplayOverrides(),
+                PlayerInfo = CreateLobbyPlayerInfo(connection)
+            };
+        }
+
+        public static LobbyGameplayOverrides CreateLobbyGameplayOverrides()
+        {
+            return new LobbyGameplayOverrides
+            {
+                CharacterConfigs = CreateCharacterConfigs(),
+                EnableHiddenCharacters = true,
+                EnableAllMods = true,
+                EnableQuests = false,
+                EnableSeasons = false
+            };
+        }
+
+        public static LobbyGameInfo CreatePracticeGameLobbyInfo()
+        {
+            return new LobbyGameInfo
+            {
+                AcceptTimeout = TimeSpan.Zero,
+                GameResult = GameResult.NoResult,
+                GameServerAddress = null,
+                GameServerHost = null,
+                GameStatus = GameStatus.Launching,
+                GameServerProcessCode = "",
+                MonitorServerProcessCode = "",
+                LoadoutSelectTimeout = TimeSpan.FromMinutes(1),
+                SelectSubPhaseBan1Timeout = TimeSpan.FromMinutes(1),
+                SelectSubPhaseBan2Timeout = TimeSpan.FromSeconds(30),
+                SelectSubPhaseFreelancerSelectTimeout = TimeSpan.FromSeconds(30),
+                SelectSubPhaseTradeTimeout = TimeSpan.FromSeconds(30),
+                GameConfig = CreatePracticeGameConfig()
+            };
+        }
+
+        public static LobbyGameConfig CreatePracticeGameConfig()
+        {
+            return new LobbyGameConfig
+            {
+                GameOptionFlags = GameOptionFlag.AutoLaunch | GameOptionFlag.NoInputIdleDisconnect |
+                                  GameOptionFlag.EnableTeamAIOutput,
+                GameType = GameType.Practice,
+                InstanceSubTypeBit = 1,
+                IsActive =  true,
+                ResolveTimeoutLimit = 160,
+                TeamAPlayers = 1,
+                SubTypes = CreatePracticeGameSubTypes()
+            };
+        }
+
+        public static LobbyPlayerInfo CreateLobbyPlayerInfo(ClientConnection connection)
+        {
+            return new LobbyPlayerInfo
+            {
+                PlayerId = 0, // TODO
+                CharacterInfo = CreateLobbyCharacterInfo(CharacterType.Scoundrel),
+                Handle = connection.AuthInfo.Handle,
+                AccountId = connection.AuthInfo.AccountId,
+                IsGameOwner = true,
+                EffectiveClientAccessLevel = ClientAccessLevel.Full
+            };
+        }
+
+        public static GameInfoNotification CreatePracticeGameInfoNotification(ClientConnection connection)
+        {
+            var response = new GameInfoNotification
+            {
+                GameInfo = CreatePracticeGameLobbyInfo(),
+                PlayerInfo = CreateLobbyPlayerInfo(connection),
+                TeamInfo = new LobbyTeamInfo
+                {
+                    TeamPlayerInfo = new List<LobbyPlayerInfo>
+                    {
+                        CreateLobbyPlayerInfo(connection)
+                    }
+                }
+            };
+            response.GameInfo.GameServerAddress = "ws://127.0.0.1:6061";
+            response.GameInfo.GameStatus = GameStatus.Launched;
+            response.GameInfo.GameServerHost = "Practice Game Host";
+
+            return response;
         }
     }
 }
