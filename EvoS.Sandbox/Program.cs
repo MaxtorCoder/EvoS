@@ -10,9 +10,7 @@ namespace EvoS.Sandbox
             Banner.PrintBanner();
 
             // Directory Server
-            var thread = new Thread(() => StartDirServer());
-            thread.Priority = ThreadPriority.Highest;
-            thread.Start();
+            new Thread(() => StartDirServer()).Start();
 
             // Lobby Server
             new Thread(() => StartLobbyServer()).Start();
