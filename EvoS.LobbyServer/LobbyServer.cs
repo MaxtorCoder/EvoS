@@ -13,11 +13,11 @@ using EvoS.Framework.Network;
 
 namespace EvoS.LobbyServer
 {
-    public class LobbyServer
+    public class Program
     {
         private static List<ClientConnection> ConnectedClients = new List<ClientConnection>();
 
-        public static void Start()
+        public static void Main(string[] args = null)
         {
             Task server = Task.Run(StartServer);
             server.Wait();

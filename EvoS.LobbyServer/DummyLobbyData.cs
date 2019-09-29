@@ -294,7 +294,7 @@ namespace EvoS.LobbyServer
                 Handle = connection.AuthInfo.Handle,
                 AccountId = connection.AuthInfo.AccountId,
                 IsGameOwner = true,
-                EffectiveClientAccessLevel = ClientAccessLevel.Full
+                EffectiveClientAccessLevel = ClientAccessLevel.Admin
             };
         }
 

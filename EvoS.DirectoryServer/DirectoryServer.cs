@@ -10,13 +10,13 @@ using System;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json;
-
+using EvoS.Framework.Logging;
 
 namespace EvoS.DirectoryServer
 {
-    public class Server
+    public class Program
     {
-        public static void Start()
+        public static void Main(string[] args = null)
         {
             var host = WebHost.CreateDefaultBuilder()
                 .SuppressStatusMessages(true)
@@ -39,7 +39,7 @@ namespace EvoS.DirectoryServer
         public void Configure(IApplicationBuilder app)
         {
             var serverAddressesFeature = app.ServerFeatures.Get<IServerAddressesFeature>();
-            Console.WriteLine("Started DirectoryServer on '0.0.0.0:6050'");
+            Log.Print(LogType.Server, "Started DirectoryServer on '0.0.0.0:6050'");
 
             app.Run((context) =>
             {
