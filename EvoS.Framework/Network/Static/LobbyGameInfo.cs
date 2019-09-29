@@ -20,6 +20,25 @@ namespace EvoS.Framework.Network.Static
             return (LobbyGameInfo) MemberwiseClone();
         }
 
+        [JsonIgnore]
+        public string Name
+        {
+            get
+            {
+                if (GameServerProcessCode.IsNullOrEmpty() || GameConfig == null)
+                {
+                    return "unknown";
+                }
+
+//                if (!GameConfig.HasSelectedSubType)
+//                {
+                return $"{GameServerProcessCode} ({GameServerAddress}) [{GameConfig.Map} {GameConfig.GameType}]";
+//                }
+
+//                return $"{GameServerProcessCode} ({GameServerAddress}) [{GameConfig.Map} {GameConfig.GameType} {GameConfig.InstanceSubType.GetNameAsPayload().Term}]";
+            }
+        }
+
         public string MonitorServerProcessCode;
         public string GameServerProcessCode;
         public string GameServerAddress;
@@ -47,10 +66,8 @@ namespace EvoS.Framework.Network.Static
         public int AcceptedPlayers;
         public BotDifficulty SelectedBotSkillTeamA;
         public BotDifficulty SelectedBotSkillTeamB;
-        [EvosMessage(477)]
-        public Dictionary<long, int> ggPackUsedAccountIDs;
-        [EvosMessage(483)]
-        public Dictionary<long, Dictionary<int, int>> AccountIdToOverconIdToCount;
+        [EvosMessage(477)] public Dictionary<long, int> ggPackUsedAccountIDs;
+        [EvosMessage(483)] public Dictionary<long, Dictionary<int, int>> AccountIdToOverconIdToCount;
         public LobbyGameConfig GameConfig;
     }
 }
