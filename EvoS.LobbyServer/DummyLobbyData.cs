@@ -24,7 +24,6 @@ namespace EvoS.LobbyServer
             return data;
         }
 
-
         public static ServerQueueConfigurationUpdateNotification CreateServerQueueConfiguration()
         {
             return new ServerQueueConfigurationUpdateNotification
@@ -100,7 +99,9 @@ namespace EvoS.LobbyServer
                         }
                     }
                 },
-                TierInstanceNames = new List<LocalizationPayload>()
+                TierInstanceNames = new List<LocalizationPayload>(),
+                AllowBadges = true,
+                NewPlayerPvPQueueDuration = 0
             };
         }
 
