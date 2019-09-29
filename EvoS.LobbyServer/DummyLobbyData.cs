@@ -38,65 +38,7 @@ namespace EvoS.LobbyServer
                             QueueableGroupSizes = new Dictionary<int, RequirementCollection> {{1, null}},
                             IsActive = true,
                             TeamAPlayers = 1,
-                            SubTypes = new List<GameSubType>
-                            {
-                                new GameSubType
-                                {
-                                    LocalizedName = "GenericPractice@SubTypes",
-                                    GameMapConfigs = new List<GameMapConfig>
-                                    {
-                                        new GameMapConfig
-                                        {
-                                            IsActive = true,
-                                            Map = "VR_Practice"
-                                        }
-                                    },
-                                    Mods = new List<GameSubType.SubTypeMods>
-                                    {
-                                        GameSubType.SubTypeMods.AllowPlayingLockedCharacters,
-                                        GameSubType.SubTypeMods.HumansHaveFirstSlots
-                                    },
-                                    RewardBucket = GameBalanceVars.GameRewardBucketType.NoRewards,
-                                    PersistedStatBucket = PersistedStatBucket.DoNotPersist,
-                                    TeamABots = -1,
-                                    TeamBBots = -1,
-                                    TeamAPlayers = -1,
-                                    TeamBPlayers = -1,
-                                    TeamComposition = new TeamCompositionRules
-                                    {
-                                        Rules = new Dictionary<TeamCompositionRules.SlotTypes, FreelancerSet>
-                                        {
-                                            {
-                                                TeamCompositionRules.SlotTypes.A1, new FreelancerSet
-                                                {
-                                                    Roles = new List<CharacterRole>
-                                                    {
-                                                        CharacterRole.Tank,
-                                                        CharacterRole.Assassin,
-                                                        CharacterRole.Support
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                TeamCompositionRules.SlotTypes.A2, new FreelancerSet
-                                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
-                                            },
-                                            {
-                                                TeamCompositionRules.SlotTypes.A4, new FreelancerSet
-                                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
-                                            },
-                                            {
-                                                TeamCompositionRules.SlotTypes.A3, new FreelancerSet
-                                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
-                                            },
-                                            {
-                                                TeamCompositionRules.SlotTypes.TeamB, new FreelancerSet
-                                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            SubTypes = CreatePracticeGameSubTypes()
                         }
                     },
                     {
@@ -159,6 +101,69 @@ namespace EvoS.LobbyServer
                     }
                 },
                 TierInstanceNames = new List<LocalizationPayload>()
+            };
+        }
+
+        private static List<GameSubType> CreatePracticeGameSubTypes()
+        {
+            return new List<GameSubType>
+            {
+                new GameSubType
+                {
+                    LocalizedName = "GenericPractice@SubTypes",
+                    GameMapConfigs = new List<GameMapConfig>
+                    {
+                        new GameMapConfig
+                        {
+                            IsActive = true,
+                            Map = "VR_Practice"
+                        }
+                    },
+                    Mods = new List<GameSubType.SubTypeMods>
+                    {
+                        GameSubType.SubTypeMods.AllowPlayingLockedCharacters,
+                        GameSubType.SubTypeMods.HumansHaveFirstSlots
+                    },
+                    RewardBucket = GameBalanceVars.GameRewardBucketType.NoRewards,
+                    PersistedStatBucket = PersistedStatBucket.DoNotPersist,
+                    TeamABots = -1,
+                    TeamBBots = -1,
+                    TeamAPlayers = -1,
+                    TeamBPlayers = -1,
+                    TeamComposition = new TeamCompositionRules
+                    {
+                        Rules = new Dictionary<TeamCompositionRules.SlotTypes, FreelancerSet>
+                        {
+                            {
+                                TeamCompositionRules.SlotTypes.A1, new FreelancerSet
+                                {
+                                    Roles = new List<CharacterRole>
+                                    {
+                                        CharacterRole.Tank,
+                                        CharacterRole.Assassin,
+                                        CharacterRole.Support
+                                    }
+                                }
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A2, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A4, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A3, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.TeamB, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            }
+                        }
+                    }
+                }
             };
         }
 
