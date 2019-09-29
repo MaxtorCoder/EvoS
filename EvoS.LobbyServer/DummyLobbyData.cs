@@ -224,5 +224,17 @@ namespace EvoS.LobbyServer
                 UpdateDate = DateTime.Now,
             };
         }
+
+        public static LobbyGameplayOverrides CreateLobbyGameplayOverrides()
+        {
+            return new LobbyGameplayOverrides
+            {
+                CharacterConfigs = CreateCharacterConfigs(),
+                EnableHiddenCharacters = true,
+                EnableAllMods = true,
+                EnableQuests = false,
+                EnableSeasons = false
+            };
+        }
     }
 }

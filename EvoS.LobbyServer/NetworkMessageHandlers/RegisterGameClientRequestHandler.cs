@@ -57,10 +57,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                     ServerMessageOverrides = new ServerMessageOverrides(),
                     ClientAccessLevel = ClientAccessLevel.Full,
                     HasPurchasedGame = true,
-                    GameplayOverrides = new LobbyGameplayOverrides
-                    {
-                        CharacterConfigs = DummyLobbyData.CreateCharacterConfigs()
-                    },
+                    GameplayOverrides = DummyLobbyData.CreateLobbyGameplayOverrides(),
                     UtcNow = DateTime.UtcNow,
                     PacificNow = DateTime.Now, // TODO: Should be pacific time
                     ErrorReportRate = TimeSpan.FromMinutes(3)
