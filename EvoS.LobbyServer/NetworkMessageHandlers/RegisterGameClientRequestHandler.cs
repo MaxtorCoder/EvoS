@@ -22,24 +22,15 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             
             var response = RegisterGameClient(request);
             await connection.SendMessage(response);
-            var lobbyServerReady = LobbyServerReady(request);
+            var lobbyServerReady = LobbyServerReady(connection);
             await connection.SendMessage(lobbyServerReady);
         }
 
-        private LobbyServerReadyNotification LobbyServerReady(RegisterGameClientRequest request)
+        private LobbyServerReadyNotification LobbyServerReady(ClientConnection connection)
         {
             return new LobbyServerReadyNotification
             {
-                AccountData = new PersistedAccountData
-                {
-                    QuestComponent = new QuestComponent {ActiveSeason = 9},
-                    AccountId = request.AuthInfo.AccountId,
-                    UserName = request.AuthInfo.UserName,
-                    Handle = request.AuthInfo.Handle,
-                    SchemaVersion = new SchemaVersion<AccountSchemaChange>(0x1FFFF),
-                    CreateDate = DateTime.Now.AddHours(-1),
-                    UpdateDate = DateTime.Now,
-                },
+                AccountData = DummyLobbyData.CreateAccountData(connection),
                 AlertMissionData = new LobbyAlertMissionDataNotification(),
                 CharacterDataList = DummyLobbyData.CreateCharacterDataList(),
                 CommerceURL = "http://127.0.0.1/AtlasCommerce",
@@ -49,7 +40,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 GroupInfo = new LobbyPlayerGroupInfo
                 {
                     SelectedQueueType = GameType.Practice,
-                    MemberDisplayName = request.SessionInfo.Handle,
+                    MemberDisplayName = connection.SessionInfo.Handle,
 //                    ChararacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(CharacterType.Archer),
                     Members = new List<UpdateGroupMemberData>()
                 },

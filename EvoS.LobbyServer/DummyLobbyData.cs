@@ -205,5 +205,19 @@ namespace EvoS.LobbyServer
 
             return data;
         }
+
+        public static PersistedAccountData CreateAccountData(ClientConnection connection)
+        {
+            return new PersistedAccountData
+            {
+                QuestComponent = new QuestComponent {ActiveSeason = 9},
+                AccountId = connection.AuthInfo.AccountId,
+                UserName = connection.AuthInfo.UserName,
+                Handle = connection.AuthInfo.Handle,
+                SchemaVersion = new SchemaVersion<AccountSchemaChange>(0x1FFFF),
+                CreateDate = DateTime.Now.AddHours(-1),
+                UpdateDate = DateTime.Now,
+            };
+        }
     }
 }
