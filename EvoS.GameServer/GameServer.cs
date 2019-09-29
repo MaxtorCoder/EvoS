@@ -12,11 +12,11 @@ using EvoS.Framework.Network;
 
 namespace EvoS.GameServer
 {
-    class GameServer
+    public class GameServer
     {
         private static List<ClientConnection> ConnectedClients = new List<ClientConnection>();
 
-        static void Main(string[] args)
+        public static void Main()
         {
             Task server = Task.Run(StartServer);
             server.Wait();
@@ -25,7 +25,7 @@ namespace EvoS.GameServer
 
         private static async Task StartServer()
         {
-            Log.Print(LogType.Server, "Starting server");
+            Log.Print(LogType.Server, "Starting GameServer");
             WebSocketListener server = new WebSocketListener(new IPEndPoint(IPAddress.Parse("0.0.0.0"), 6061));
             server.Standards.RegisterStandard(new WebSocketFactoryRfc6455());
 
@@ -34,7 +34,7 @@ namespace EvoS.GameServer
             server.StartAsync();
 #pragma warning restore CS4014
 
-            Log.Print(LogType.Server, "Started webserver on '0.0.0.0:6061'");
+            Log.Print(LogType.Server, "Started GameServer on '0.0.0.0:6061'");
 
             while (true)
             {

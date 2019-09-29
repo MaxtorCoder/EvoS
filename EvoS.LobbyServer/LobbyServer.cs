@@ -26,7 +26,7 @@ namespace EvoS.LobbyServer
 
         private static async Task StartServer()
         {
-            Log.Print(LogType.Server, "Starting server");
+            Log.Print(LogType.Server, "Starting LobbyServer");
             WebSocketListener server = new WebSocketListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6060));
             server.Standards.RegisterStandard(new WebSocketFactoryRfc6455());
 
@@ -35,7 +35,7 @@ namespace EvoS.LobbyServer
             server.StartAsync();
 #pragma warning restore CS4014
 
-            Log.Print(LogType.Server, "Started webserver on '0.0.0.0:6060'");
+            Log.Print(LogType.Server, "Started LobbyServer on '0.0.0.0:6060'");
 
             while (true)
             {
