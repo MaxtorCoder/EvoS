@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.NetworkMessages;
 using Newtonsoft.Json;
@@ -16,6 +17,20 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         {
             PlayerInfoUpdateRequest request = (PlayerInfoUpdateRequest) requestData;
 
+            if (request.PlayerInfoUpdate.ContextualReadyState != null)
+            {
+                if (request.PlayerInfoUpdate.ContextualReadyState.Value.ReadyState == ReadyState.Ready)
+                {
+                    var practice = DummyLobbyData.CreatePracticeGameNotification(connection);
+                    Log.Print(LogType.Network, $"Responding {JsonConvert.SerializeObject(practice)}");
+                    await connection.SendMessage(practice);
+                    
+                    var practiceGameInfo = DummyLobbyData.CreatePracticeGameInfoNotification(connection);
+                    Log.Print(LogType.Network, $"Responding {JsonConvert.SerializeObject(practiceGameInfo)}");
+                    await connection.SendMessage(practiceGameInfo);
+                    return;
+                }
+            }
             if (request.PlayerInfoUpdate.CharacterType == null)
             {
                 Log.Print(LogType.Warning, "CharacterType is null in PlayerInfoUpdateRequest");

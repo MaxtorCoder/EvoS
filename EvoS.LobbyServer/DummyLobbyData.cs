@@ -225,6 +225,19 @@ namespace EvoS.LobbyServer
             };
         }
 
+        public static GameAssignmentNotification CreatePracticeGameNotification(ClientConnection connection)
+        {
+            return new GameAssignmentNotification
+            {
+                Observer = false,
+                Reconnection = false,
+                GameInfo = CreatePracticeGameLobbyInfo(),
+                GameResult = GameResult.NoResult,
+                GameplayOverrides = CreateLobbyGameplayOverrides(),
+                PlayerInfo = CreateLobbyPlayerInfo(connection)
+            };
+        }
+
         public static LobbyGameplayOverrides CreateLobbyGameplayOverrides()
         {
             return new LobbyGameplayOverrides
@@ -235,6 +248,75 @@ namespace EvoS.LobbyServer
                 EnableQuests = false,
                 EnableSeasons = false
             };
+        }
+
+        public static LobbyGameInfo CreatePracticeGameLobbyInfo()
+        {
+            return new LobbyGameInfo
+            {
+                AcceptTimeout = TimeSpan.Zero,
+                GameResult = GameResult.NoResult,
+                GameServerAddress = null,
+                GameServerHost = null,
+                GameStatus = GameStatus.Launching,
+                GameServerProcessCode = "",
+                MonitorServerProcessCode = "",
+                LoadoutSelectTimeout = TimeSpan.FromMinutes(1),
+                SelectSubPhaseBan1Timeout = TimeSpan.FromMinutes(1),
+                SelectSubPhaseBan2Timeout = TimeSpan.FromSeconds(30),
+                SelectSubPhaseFreelancerSelectTimeout = TimeSpan.FromSeconds(30),
+                SelectSubPhaseTradeTimeout = TimeSpan.FromSeconds(30),
+                GameConfig = CreatePracticeGameConfig()
+            };
+        }
+
+        public static LobbyGameConfig CreatePracticeGameConfig()
+        {
+            return new LobbyGameConfig
+            {
+                GameOptionFlags = GameOptionFlag.AutoLaunch | GameOptionFlag.NoInputIdleDisconnect |
+                                  GameOptionFlag.EnableTeamAIOutput,
+                GameType = GameType.Practice,
+                InstanceSubTypeBit = 1,
+                IsActive =  true,
+                ResolveTimeoutLimit = 160,
+                TeamAPlayers = 1,
+                SubTypes = CreatePracticeGameSubTypes()
+            };
+        }
+
+        public static LobbyPlayerInfo CreateLobbyPlayerInfo(ClientConnection connection)
+        {
+            return new LobbyPlayerInfo
+            {
+                PlayerId = 0, // TODO
+                CharacterInfo = CreateLobbyCharacterInfo(CharacterType.Scoundrel),
+                Handle = connection.AuthInfo.Handle,
+                AccountId = connection.AuthInfo.AccountId,
+                IsGameOwner = true,
+                EffectiveClientAccessLevel = ClientAccessLevel.Full
+            };
+        }
+
+        public static GameInfoNotification CreatePracticeGameInfoNotification(ClientConnection connection)
+        {
+            var response = new GameInfoNotification
+            {
+                GameInfo = CreatePracticeGameLobbyInfo(),
+                PlayerInfo = CreateLobbyPlayerInfo(connection),
+                TeamInfo = new LobbyTeamInfo
+                {
+                    TeamPlayerInfo = new List<LobbyPlayerInfo>
+                    {
+                        CreateLobbyPlayerInfo(connection)
+                    }
+                }
+            };
+            response.GameInfo.GameServerAddress = "ws://127.0.0.1:6061";
+            response.GameInfo.GameStatus = GameStatus.Launched;
+            response.GameInfo.GameServerHost = "Practice Game Host";
+
+            return response;
         }
     }
 }
