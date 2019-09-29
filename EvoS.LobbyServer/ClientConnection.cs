@@ -17,9 +17,12 @@ using Newtonsoft.Json;
 
 namespace EvoS.LobbyServer
 {
-    class ClientConnection
+    public class ClientConnection
     {
         private WebSocket Socket;
+        public RegisterGameClientRequest RegistrationInfo;
+        public AuthInfo AuthInfo => RegistrationInfo.AuthInfo;
+        public LobbySessionInfo SessionInfo => RegistrationInfo.SessionInfo;
 
         public ClientConnection(WebSocket socket)
         {

@@ -18,6 +18,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             RegisterGameClientRequest request = (RegisterGameClientRequest) requestData;
+            connection.RegistrationInfo = request;
             
             var response = RegisterGameClient(request);
             await connection.SendMessage(response);
