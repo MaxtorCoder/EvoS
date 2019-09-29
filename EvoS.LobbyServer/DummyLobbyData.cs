@@ -172,7 +172,16 @@ namespace EvoS.LobbyServer
                 CharacterMods = new CharacterModInfo().Reset(),
                 CharacterAbilityVfxSwaps = new CharacterAbilityVfxSwapInfo(),
                 CharacterTaunts = new List<PlayerTauntData>(),
-                CharacterLoadouts = new List<CharacterLoadout>()
+                CharacterLoadouts = CreateCharacterLoadouts()
+            };
+        }
+
+        private static List<CharacterLoadout> CreateCharacterLoadouts()
+        {
+            return new List<CharacterLoadout>
+            {
+                new CharacterLoadout(new CharacterModInfo().Reset(), new CharacterAbilityVfxSwapInfo(), "Loadout #1"),
+                new CharacterLoadout(new CharacterModInfo().Reset(), new CharacterAbilityVfxSwapInfo(), "Loadout #2")
             };
         }
 
