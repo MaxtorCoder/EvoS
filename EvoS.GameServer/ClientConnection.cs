@@ -26,7 +26,7 @@ namespace EvoS.GameServer
 
         public void Disconnect()
         {
-            Log.Print(LogType.Server, "Client disconnected.");
+            Log.Print(LogType.GameServer, "Client disconnected.");
             if (Socket.IsConnected)
                 Socket.Close();
 
