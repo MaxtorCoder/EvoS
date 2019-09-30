@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(55, 65)]
+    [UNetMessage(clientMsgIds: new short[] {65, 55})]
     public class PlayerObjectStartedOnClientNotification : MessageBase
     {
         public long AccountId;

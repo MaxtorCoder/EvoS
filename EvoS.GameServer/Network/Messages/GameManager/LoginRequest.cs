@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(51)]
+    [UNetMessage(clientMsgIds: new short[]{51})]
     public class LoginRequest : MessageBase
     {
         public string AccountId;

@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(48)]
+    [UNetMessage(serverMsgIds: new short[] {48})]
     public class ReplayManagerFile : MessageBase
     {
         public string Fragment;

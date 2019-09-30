@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(53)]
+    [UNetMessage(clientMsgIds: new short[]{53})]
     public class AssetsLoadedNotification : MessageBase
     {
         public long AccountId;

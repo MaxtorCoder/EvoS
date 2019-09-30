@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(54)]
+    [UNetMessage(serverMsgIds: new short[] {54})]
     public class SpawningObjectsNotification : MessageBase
     {
         public int PlayerId;

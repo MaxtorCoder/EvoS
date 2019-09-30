@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(52)]
+    [UNetMessage(serverMsgIds: new short[] {52})]
     public class LoginResponse : MessageBase
     {
         public bool Success;

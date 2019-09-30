@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(61, 62)]
+    [UNetMessage(new short[]{62}, new short[]{61})]
     public class AssetsLoadingProgress : MessageBase
     {
         public long AccountId;

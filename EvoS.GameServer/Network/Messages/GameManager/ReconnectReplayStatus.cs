@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(56)]
+    [UNetMessage(serverMsgIds: new short[] {56})]
     public class ReconnectReplayStatus : MessageBase
     {
         public bool WithinReconnectReplay;

@@ -1,8 +1,8 @@
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(68)]
+    [UNetMessage(serverMsgIds: new short[]{68})]
     public class EndGameNotification : MessageBase
     {
     }

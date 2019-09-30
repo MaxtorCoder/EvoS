@@ -5,11 +5,13 @@ namespace EvoS.GameServer.Network
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class UNetMessageAttribute : Attribute
     {
-        public int[] MsgIds { get; }
+        public short[] ServerMsgIds { get; }
+        public short[] ClientMsgIds { get; }
 
-        public UNetMessageAttribute(params int[] msgIds)
+        public UNetMessageAttribute(short[] serverMsgIds = null, short[] clientMsgIds = null)
         {
-            MsgIds = msgIds;
+            ServerMsgIds = serverMsgIds ?? new short[0];
+            ClientMsgIds = clientMsgIds ?? new short[0];
         }
     }
 }

@@ -1,9 +1,9 @@
 using EvoS.Framework.Constants.Enums;
 using EvoS.GameServer.Network.Unity;
 
-namespace EvoS.GameServer.Network
+namespace EvoS.GameServer.Network.Messages.GameManager
 {
-    [UNetMessage(67)]
+    [UNetMessage(clientMsgIds: new short[]{67})]
     public class LeaveGameNotification : MessageBase
     {
         public int PlayerId;

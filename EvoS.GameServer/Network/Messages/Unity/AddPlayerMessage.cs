@@ -2,7 +2,7 @@ using EvoS.GameServer.Network.Unity;
 
 namespace EvoS.GameServer.Network.Messages.Unity
 {
-    [UNetMessage(37)]
+    [UNetMessage(clientMsgIds: new short[] {37})]
     public class AddPlayerMessage : MessageBase
     {
         public short playerControllerId;
