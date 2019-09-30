@@ -2,9 +2,6 @@
 using System;
 using System.IO;
 using System.Threading;
-using EvoS.Framework.Network.Static;
-using EvoS.Framework.Network;
-using EvoS.Framework.Network.NetworkMessages;
 using System.Threading.Tasks;
 using EvoS.GameServer.Network.Unity;
 using WebSocket = vtortola.WebSockets.WebSocket;
@@ -15,9 +12,6 @@ namespace EvoS.GameServer
     public class ClientConnection
     {
         private WebSocket Socket;
-        public RegisterGameClientRequest RegistrationInfo;
-        public AuthInfo AuthInfo => RegistrationInfo.AuthInfo;
-        public LobbySessionInfo SessionInfo => RegistrationInfo.SessionInfo;
 
         public ClientConnection(WebSocket socket)
         {
@@ -35,14 +29,7 @@ namespace EvoS.GameServer
 
         public async Task SendMessage(object message)
         {
-            var responseStream = new MemoryStream();
-            EvosSerializer.Instance.Serialize(responseStream, message);
-
-            using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
-            {
-                await writer.WriteAsync(responseStream.ToArray());
-                await writer.FlushAsync();
-            }
+            throw new NotImplementedException();
         }
 
         public async void HandleConnection()
