@@ -7,17 +7,36 @@ using EvoS.Framework.Network;
 using EvoS.Framework.Network.Static;
 using EvoS.GameServer.Network.Unity;
 using NetSerializer;
+using Newtonsoft.Json;
 
 namespace EvoS.GameServer.Network
 {
+    public delegate void UNetMessageDelegate(MessageBase msg);
+
     public sealed class UNetSerializer
     {
-        private readonly Dictionary<short, Type> _serverTypesById = new Dictionary<short, Type>();
-        private readonly Dictionary<short, Type> _clientTypesById = new Dictionary<short, Type>();
-        private readonly Dictionary<Type, HashSet<short>> _serverIdsByType = new Dictionary<Type, HashSet<short>>();
-        private readonly Dictionary<Type, HashSet<short>> _clientIdsByType = new Dictionary<Type, HashSet<short>>();
+        private static readonly Dictionary<short, Type> ServerTypesById = new Dictionary<short, Type>();
+        private static readonly Dictionary<short, Type> ClientTypesById = new Dictionary<short, Type>();
 
-        private UNetSerializer()
+        private static readonly Dictionary<Type, HashSet<short>> ServerIdsByType =
+            new Dictionary<Type, HashSet<short>>();
+
+        private static readonly Dictionary<Type, HashSet<short>> ClientIdsByType =
+            new Dictionary<Type, HashSet<short>>();
+
+        private readonly Dictionary<short, UNetMessageDelegate>
+            _handlers = new Dictionary<short, UNetMessageDelegate>();
+
+        public void RegisterHandler(short msgId, UNetMessageDelegate handler)
+        {
+            if (!_handlers.TryAdd(msgId, handler))
+            {
+                throw new UNetSerializerTypeException(
+                    $"Cannot map {msgId} to {handler}, as it is already mapped to {_handlers[msgId]}");
+            }
+        }
+
+        static UNetSerializer()
         {
             foreach (var type in Assembly.GetExecutingAssembly().GetTypes()
                 .Concat(Assembly.GetEntryAssembly().GetTypes()))
@@ -28,20 +47,20 @@ namespace EvoS.GameServer.Network
 
                 foreach (var msgId in attribute.ClientMsgIds)
                 {
-                    AddType(type, msgId, "Client", _clientTypesById, _clientIdsByType);
+                    AddType(type, msgId, "Client", ClientTypesById, ClientIdsByType);
                 }
 
                 foreach (var msgId in attribute.ServerMsgIds)
                 {
-                    AddType(type, msgId, "Server", _serverTypesById, _serverIdsByType);
+                    AddType(type, msgId, "Server", ServerTypesById, ServerIdsByType);
                 }
             }
 
             Log.Print(LogType.GameServer,
-                $"Loaded {_clientIdsByType.Count} client {(_clientIdsByType.Count == 1 ? "type" : "types")} and {_serverIdsByType.Count} server {(_serverIdsByType.Count == 1 ? "type" : "types")}");
+                $"Loaded {ClientIdsByType.Count} client {(ClientIdsByType.Count == 1 ? "type" : "types")} and {ServerIdsByType.Count} server {(ServerIdsByType.Count == 1 ? "type" : "types")}");
         }
 
-        public IEnumerable<MessageBase> ProcessUNetMessage(byte[] rawPacket)
+        public void ProcessUNetMessage(byte[] rawPacket)
         {
             var unetBytes = UNetMessage.Deserialize(rawPacket);
 
@@ -59,19 +78,29 @@ namespace EvoS.GameServer.Network
 
                 if (deserialized != null)
                 {
-                    yield return deserialized;
+                    if (_handlers.ContainsKey(deserialized.msgType))
+                    {
+                        _handlers[deserialized.msgType].Invoke(deserialized);
+                    }
+                    else
+                    {
+                        Log.Print(LogType.Warning,
+                            $"Unhandled {deserialized.GetType().Name} - {JsonConvert.SerializeObject(deserialized)}");
+                    }
                 }
             }
         }
 
         public MessageBase Deserialize(NetworkMessage msg, byte[] buffer)
         {
-            if (_clientTypesById.ContainsKey(msg.msgType))
+            if (ClientTypesById.ContainsKey(msg.msgType))
             {
                 try
                 {
-                    var type = _clientTypesById[msg.msgType];
+                    var type = ClientTypesById[msg.msgType];
                     var readMessage = (MessageBase) Activator.CreateInstance(type);
+                    readMessage.msgType = msg.msgType;
+                    readMessage.msgSeqNum = msg.msgSeqNum;
                     readMessage.Deserialize(msg.reader);
                     return readMessage;
                 }

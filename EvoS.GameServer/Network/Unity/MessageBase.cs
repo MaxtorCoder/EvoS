@@ -2,6 +2,9 @@ namespace EvoS.GameServer.Network.Unity
 {
     public abstract class MessageBase
     {
+        public uint msgSeqNum;
+        public short msgType;
+        
         public virtual void Deserialize(NetworkReader reader)
         {
         }
