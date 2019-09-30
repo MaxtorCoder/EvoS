@@ -95,13 +95,13 @@ namespace EvoS.GameServer.Network
         {
             if (!idsByType.TryAdd(messageType, new HashSet<short> {typeId}) && !idsByType[messageType].Add(typeId))
             {
-                throw new EvosSerializerTypeException(
+                throw new UNetSerializerTypeException(
                     $"Cannot map {mappingType} {messageType} to {typeId}, as it is already mapped to {idsByType[messageType]}");
             }
 
             if (!typesById.TryAdd(typeId, messageType) && typesById[typeId] != messageType)
             {
-                throw new EvosSerializerTypeException(
+                throw new UNetSerializerTypeException(
                     $"Cannot map {mappingType} {typeId} to {messageType}, as it is already mapped to {typesById[typeId]}");
             }
         }
