@@ -3,7 +3,9 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using EvoS.GameServer.Network;
 using EvoS.GameServer.Network.Unity;
+using Newtonsoft.Json;
 using WebSocket = vtortola.WebSockets.WebSocket;
 using WebSocketMessageType = vtortola.WebSockets.WebSocketMessageType;
 
@@ -45,53 +47,25 @@ namespace EvoS.GameServer
                     return;
                 }
 
-                switch (message.MessageType)
+                if (message.MessageType != WebSocketMessageType.Binary)
                 {
-                    case WebSocketMessageType.Text:
-                        throw new NotImplementedException();
-                    case WebSocketMessageType.Binary:
+                    throw new NotImplementedException();
+                }
+
+                using (var ms = new MemoryStream())
+                {
+                    await message.CopyToAsync(ms);
+                    await ms.FlushAsync();
+
+                    var messageBytes = ms.ToArray();
+
+                    foreach (var msg in UNetSerializer.Instance.ProcessUNetMessage(messageBytes))
                     {
-                        using (var ms = new MemoryStream())
-                        {
-                            await message.CopyToAsync(ms);
-                            await ms.FlushAsync();
-
-                            var messageBytes = ms.ToArray();
-
-                            try
-                            {
-                                var unetBytes = UNetMessage.Deserialize(messageBytes);
-                                ProcessUNetMessage(unetBytes);
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Print(LogType.Error, Convert.ToBase64String(messageBytes));
-                                Log.Print(LogType.Error, e.ToString());
-                                continue;
-                            }
-                        }
-
-                        break;
+                        Log.Print(LogType.GameServer, $"{msg.GetType().Name} - {JsonConvert.SerializeObject(msg)}");
                     }
                 }
 
                 message.Dispose();
-            }
-        }
-
-        private void ProcessUNetMessage(byte[] unetBytes)
-        {
-            var reader = new NetworkReader(unetBytes);
-            while (reader.Position < unetBytes.Length)
-            {
-                var msgSeqNum = reader.ReadUInt32();
-                var msgSize = reader.ReadUInt16();
-                var msgId = reader.ReadInt16();
-                var buffer = reader.ReadBytes(msgSize);
-                var networkReader = new NetworkReader(buffer);
-
-                Log.Print(LogType.Packet,
-                    $"Received msgSeqNum={msgSeqNum}, msgSize={msgSize}, msgId={msgId} | {Convert.ToBase64String(buffer)}");
             }
         }
     }
