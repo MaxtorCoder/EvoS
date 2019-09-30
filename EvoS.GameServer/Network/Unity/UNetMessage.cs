@@ -3,38 +3,36 @@ using EvoS.Framework.Logging;
 
 namespace EvoS.GameServer.Network.Unity
 {
-    public class UNetMessage
+    public static class UNetMessage
     {
         public const int MSG_HEADER_SIZE = 9;
-        public byte[] Bytes;
-        public int NumBytes;
 
-        public byte[] Serialize()
+        public static byte[] Serialize(byte[] bytes)
         {
-            if (Bytes == null || NumBytes + 1 < MSG_HEADER_SIZE)
+            if (bytes == null || bytes.Length + 1 < MSG_HEADER_SIZE)
             {
-                Log.Print(LogType.Error, $"BinaryMessage.Serialize invalid message numBytes={NumBytes}");
+                Log.Print(LogType.Error, $"BinaryMessage.Serialize invalid message numBytes={bytes.Length}");
                 return null;
             }
 
-            byte[] numArray = new byte[NumBytes + 1];
+            var numArray = new byte[bytes.Length + 1];
             numArray[0] = 0;
-            Buffer.BlockCopy(Bytes, 0, numArray, 1, NumBytes);
+            Buffer.BlockCopy(bytes, 0, numArray, 1, bytes.Length);
             return numArray;
         }
 
-        public void Deserialize(byte[] rawData)
+        public static byte[]? Deserialize(byte[] rawData)
         {
             if (rawData == null || rawData.Length < MSG_HEADER_SIZE)
             {
                 Log.Print(LogType.Error, $"BinaryMessage.Deserialize invalid message bytes {rawData?.Length ?? -1}");
+                return null;
             }
-            else
-            {
-                NumBytes = rawData.Length - 1;
-                Bytes = new byte[NumBytes];
-                Buffer.BlockCopy(rawData, 1, Bytes, 0, NumBytes);
-            }
+
+            var numBytes = rawData.Length - 1;
+            var bytes = new byte[numBytes];
+            Buffer.BlockCopy(rawData, 1, bytes, 0, numBytes);
+            return bytes;
         }
     }
 }

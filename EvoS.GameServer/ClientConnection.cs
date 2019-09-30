@@ -34,8 +34,6 @@ namespace EvoS.GameServer
 
         public async void HandleConnection()
         {
-            var unetMessage = new UNetMessage();
-
             while (true)
             {
                 var message = await Socket.ReadMessageAsync(CancellationToken.None);
@@ -62,8 +60,8 @@ namespace EvoS.GameServer
 
                             try
                             {
-                                unetMessage.Deserialize(messageBytes);
-                                ProcessUNetMessage(unetMessage);
+                                var unetBytes = UNetMessage.Deserialize(messageBytes);
+                                ProcessUNetMessage(unetBytes);
                             }
                             catch (Exception e)
                             {
@@ -81,10 +79,10 @@ namespace EvoS.GameServer
             }
         }
 
-        private void ProcessUNetMessage(UNetMessage unetMessage)
+        private void ProcessUNetMessage(byte[] unetBytes)
         {
-            var reader = new NetworkReader(unetMessage.Bytes);
-            while (reader.Position < unetMessage.NumBytes)
+            var reader = new NetworkReader(unetBytes);
+            while (reader.Position < unetBytes.Length)
             {
                 var msgSeqNum = reader.ReadUInt32();
                 var msgSize = reader.ReadUInt16();
