@@ -12,6 +12,8 @@ using vtortola.WebSockets;
 
 namespace EvoS.GameServer
 {
+    public delegate void UNetGameMessageDelegate<T>(GamePlayer player, T msg) where T : MessageBase;
+
     public class ClientConnection
     {
         private WebSocket Socket;
@@ -33,6 +35,12 @@ namespace EvoS.GameServer
             isReady = true;
 
             SetupLoginHandler();
+        }
+
+        public void RegisterHandler<T>(short msgId, GamePlayer player, UNetGameMessageDelegate<T> handler)
+            where T : MessageBase
+        {
+            Serializer.RegisterHandler(msgId, msg => handler(player, (T) msg));
         }
 
         private void SetupLoginHandler()
