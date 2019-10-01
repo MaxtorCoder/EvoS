@@ -28,6 +28,7 @@ namespace EvoS.GameServer
         private static int _connectionIdCounter;
         private uint lastMessageOutgoingSeqNum;
         public readonly int connectionId = Interlocked.Increment(ref _connectionIdCounter);
+        private NetworkWriter m_Writer = new NetworkWriter();
 
         public ClientConnection(WebSocket socket)
         {
@@ -128,13 +129,19 @@ namespace EvoS.GameServer
             Socket.Dispose();
         }
 
-        public virtual bool SendByChannel(short msgType, MessageBase msg, int channelId)
+        public virtual void SendByChannel(short msgType, MessageBase msg, int channelId)
         {
-//            this.m_Writer.StartMessage(msgType);
-//            msg.Serialize(this.m_Writer);
-//            this.m_Writer.FinishMessage();
-//            return this.SendWriter(this.m_Writer, channelId);
-            throw new NotImplementedException();
+            m_Writer.StartMessage(msgType);
+            msg.Serialize(m_Writer);
+            m_Writer.FinishMessage();
+            SendWriter(m_Writer, channelId);
+        }
+
+        public virtual void SendWriter(NetworkWriter writer, int channelId)
+        {
+            writer.WriteSeqNum(++lastMessageOutgoingSeqNum);
+            channelId = 0;
+            SendWSMessage(writer);
         }
 
         public virtual bool SendBytes(byte[] bytes, int numBytes, int channelId)
@@ -148,9 +155,21 @@ namespace EvoS.GameServer
             throw new NotImplementedException();
         }
 
-        public void Send(short msgId, object message)
+        public void Send(short msgType, MessageBase msg)
         {
-            throw new NotImplementedException();
+            SendByChannel(msgType, msg, 0);
+        }
+
+        public async Task SendWSMessage(NetworkWriter msg)
+        {
+            var responseStream = new MemoryStream();
+            responseStream.Write(msg.AsArraySegment().Array, 0, msg.AsArraySegment().Count);
+
+            using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
+            {
+                await writer.WriteAsync(UNetMessage.Serialize(responseStream.ToArray()));
+                await writer.FlushAsync();
+            }
         }
 
         public async Task SendAsync(short msgId, object message)
