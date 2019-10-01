@@ -311,6 +311,7 @@ namespace EvoS.LobbyServer
                 IsActive =  true,
                 ResolveTimeoutLimit = 160,
                 TeamAPlayers = 1,
+                Map = "VR_Practice",
                 SubTypes = CreatePracticeGameSubTypes()
             };
         }
