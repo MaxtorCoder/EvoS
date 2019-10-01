@@ -1,6 +1,6 @@
 namespace EvoS.GameServer.Network.Unity
 {
-    public class MonoBehaviour
+    public class MonoBehaviour : Component
     {
         
     }

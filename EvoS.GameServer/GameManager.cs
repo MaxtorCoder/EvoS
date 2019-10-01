@@ -4,23 +4,20 @@ using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Static;
+using EvoS.GameServer.Network.Messages.Unity;
 using EvoS.GameServer.Network.Unity;
 
 namespace EvoS.GameServer.Network
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager
     {
-        private static GameManager s_instance;
+        public NetworkServer NetworkServer = new NetworkServer();
         private bool s_quitting;
         private GameStatus m_gameStatus;
         private LobbyGameplayOverrides m_gameplayOverrides;
         private LobbyGameplayOverrides m_gameplayOverridesForCurrentGame;
         public Dictionary<int, ForbiddenDevKnowledge> ForbiddenDevKnowledge;
-
-        public static GameManager Get()
-        {
-            return s_instance;
-        }
+        private Dictionary<short, GamePlayer> _players = new Dictionary<short, GamePlayer>();
 
         public event Action OnGameAssembling = () => { };
 
@@ -73,17 +70,6 @@ namespace EvoS.GameServer.Network
 
         public float GameStatusTime { get; private set; }
 
-        private void Awake()
-        {
-            s_instance = this;
-            Reset();
-        }
-
-        private void Start()
-        {
-            Reset();
-        }
-
         internal static bool IsEditorAndNotGame()
         {
             return false;
@@ -100,16 +86,6 @@ namespace EvoS.GameServer.Network
 //            if (!((UnityEngine.Object) GameWideData.Get() != (UnityEngine.Object) null))
 //                return;
 //            this.GameplayOverrides.SetBaseCharacterConfigs(GameWideData.Get());
-        }
-
-        private void OnDestroy()
-        {
-            s_instance = null;
-        }
-
-        private void OnApplicationQuit()
-        {
-            s_quitting = true;
         }
 
         internal void SetGameStatus(GameStatus gameStatus, GameResult gameResult = GameResult.NoResult,
@@ -221,6 +197,11 @@ namespace EvoS.GameServer.Network
             if (gameType != GameType.Tutorial && gameType != GameType.Practice)
                 return gameType != GameType.Custom;
             return false;
+        }
+
+        public void AddPlayer(ClientConnection connection, AddPlayerMessage msg)
+        {
+            
         }
 
 //        public class ObserverMessage : MessageBase

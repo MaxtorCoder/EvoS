@@ -37,8 +37,8 @@ namespace EvoS.GameServer.Network.Unity
         public byte[] ToArray()
         {
             byte[] numArray = new byte[m_Buffer.AsArraySegment().Count];
-            Array.Copy((Array) m_Buffer.AsArraySegment().Array, numArray,
-                (int) m_Buffer.AsArraySegment().Count);
+            Array.Copy(m_Buffer.AsArraySegment().Array, numArray,
+                m_Buffer.AsArraySegment().Count);
             return numArray;
         }
 
@@ -185,47 +185,47 @@ namespace EvoS.GameServer.Network.Unity
 
         public void Write(short value)
         {
-            m_Buffer.WriteByte2((byte) ((uint) value & (uint) byte.MaxValue),
-                (byte) ((int) value >> 8 & (int) byte.MaxValue));
+            m_Buffer.WriteByte2((byte) ((uint) value & byte.MaxValue),
+                (byte) (value >> 8 & byte.MaxValue));
         }
 
         public void Write(ushort value)
         {
-            m_Buffer.WriteByte2((byte) ((uint) value & (uint) byte.MaxValue),
-                (byte) ((int) value >> 8 & (int) byte.MaxValue));
+            m_Buffer.WriteByte2((byte) (value & (uint) byte.MaxValue),
+                (byte) (value >> 8 & byte.MaxValue));
         }
 
         public void Write(int value)
         {
-            m_Buffer.WriteByte4((byte) (value & (int) byte.MaxValue), (byte) (value >> 8 & (int) byte.MaxValue),
-                (byte) (value >> 16 & (int) byte.MaxValue), (byte) (value >> 24 & (int) byte.MaxValue));
+            m_Buffer.WriteByte4((byte) (value & byte.MaxValue), (byte) (value >> 8 & byte.MaxValue),
+                (byte) (value >> 16 & byte.MaxValue), (byte) (value >> 24 & byte.MaxValue));
         }
 
         public void Write(uint value)
         {
-            m_Buffer.WriteByte4((byte) (value & (uint) byte.MaxValue), (byte) (value >> 8 & (uint) byte.MaxValue),
-                (byte) (value >> 16 & (uint) byte.MaxValue), (byte) (value >> 24 & (uint) byte.MaxValue));
+            m_Buffer.WriteByte4((byte) (value & byte.MaxValue), (byte) (value >> 8 & byte.MaxValue),
+                (byte) (value >> 16 & byte.MaxValue), (byte) (value >> 24 & byte.MaxValue));
         }
 
         public void Write(long value)
         {
-            m_Buffer.WriteByte8((byte) ((ulong) value & (ulong) byte.MaxValue),
-                (byte) ((ulong) (value >> 8) & (ulong) byte.MaxValue),
-                (byte) ((ulong) (value >> 16) & (ulong) byte.MaxValue),
-                (byte) ((ulong) (value >> 24) & (ulong) byte.MaxValue),
-                (byte) ((ulong) (value >> 32) & (ulong) byte.MaxValue),
-                (byte) ((ulong) (value >> 40) & (ulong) byte.MaxValue),
-                (byte) ((ulong) (value >> 48) & (ulong) byte.MaxValue),
-                (byte) ((ulong) (value >> 56) & (ulong) byte.MaxValue));
+            m_Buffer.WriteByte8((byte) ((ulong) value & byte.MaxValue),
+                (byte) ((ulong) (value >> 8) & byte.MaxValue),
+                (byte) ((ulong) (value >> 16) & byte.MaxValue),
+                (byte) ((ulong) (value >> 24) & byte.MaxValue),
+                (byte) ((ulong) (value >> 32) & byte.MaxValue),
+                (byte) ((ulong) (value >> 40) & byte.MaxValue),
+                (byte) ((ulong) (value >> 48) & byte.MaxValue),
+                (byte) ((ulong) (value >> 56) & byte.MaxValue));
         }
 
         public void Write(ulong value)
         {
-            m_Buffer.WriteByte8((byte) (value & (ulong) byte.MaxValue),
-                (byte) (value >> 8 & (ulong) byte.MaxValue), (byte) (value >> 16 & (ulong) byte.MaxValue),
-                (byte) (value >> 24 & (ulong) byte.MaxValue), (byte) (value >> 32 & (ulong) byte.MaxValue),
-                (byte) (value >> 40 & (ulong) byte.MaxValue), (byte) (value >> 48 & (ulong) byte.MaxValue),
-                (byte) (value >> 56 & (ulong) byte.MaxValue));
+            m_Buffer.WriteByte8((byte) (value & byte.MaxValue),
+                (byte) (value >> 8 & byte.MaxValue), (byte) (value >> 16 & byte.MaxValue),
+                (byte) (value >> 24 & byte.MaxValue), (byte) (value >> 32 & byte.MaxValue),
+                (byte) (value >> 40 & byte.MaxValue), (byte) (value >> 48 & byte.MaxValue),
+                (byte) (value >> 56 & byte.MaxValue));
         }
 
         public void Write(float value)
@@ -253,7 +253,7 @@ namespace EvoS.GameServer.Network.Unity
         {
             if (value == null)
             {
-                m_Buffer.WriteByte2((byte) 0, (byte) 0);
+                m_Buffer.WriteByte2(0, 0);
             }
             else
             {
@@ -270,9 +270,9 @@ namespace EvoS.GameServer.Network.Unity
         public void Write(bool value)
         {
             if (value)
-                m_Buffer.WriteByte((byte) 1);
+                m_Buffer.WriteByte(1);
             else
-                m_Buffer.WriteByte((byte) 0);
+                m_Buffer.WriteByte(0);
         }
 
         public void Write(byte[] buffer, int count)
@@ -358,6 +358,14 @@ namespace EvoS.GameServer.Network.Unity
             Write(value.A);
         }
 
+        public void Write(Quaternion value)
+        {
+            Write(value.X);
+            Write(value.Y);
+            Write(value.Z);
+            Write(value.W);
+        }
+
         public void Write(NetworkHash128 value)
         {
             Write(value.i0);
@@ -391,7 +399,7 @@ namespace EvoS.GameServer.Network.Unity
         public void StartMessage(short msgType)
         {
             SeekZero();
-            m_Buffer.WriteByte2((byte) 0, (byte) 0);
+            m_Buffer.WriteByte2(0, 0);
             Write(msgType);
         }
 

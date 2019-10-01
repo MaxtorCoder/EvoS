@@ -250,6 +250,11 @@ namespace EvoS.GameServer.Network.Unity
             return new Vector4(ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle());
         }
 
+        public Quaternion ReadQuaternion()
+        {
+            return new Quaternion(ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle());
+        }
+
         public NetworkHash128 ReadNetworkHash128()
         {
             NetworkHash128 networkHash128;
