@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Static;
+using EvoS.GameServer.Network.Messages.GameManager;
 using EvoS.GameServer.Network.Messages.Unity;
 using EvoS.GameServer.Network.Unity;
 
@@ -17,7 +19,7 @@ namespace EvoS.GameServer.Network
         private LobbyGameplayOverrides m_gameplayOverrides;
         private LobbyGameplayOverrides m_gameplayOverridesForCurrentGame;
         public Dictionary<int, ForbiddenDevKnowledge> ForbiddenDevKnowledge;
-        private Dictionary<short, GamePlayer> _players = new Dictionary<short, GamePlayer>();
+        private Dictionary<int, GamePlayer> _players = new Dictionary<int, GamePlayer>();
 
         public event Action OnGameAssembling = () => { };
 
@@ -199,9 +201,84 @@ namespace EvoS.GameServer.Network
             return false;
         }
 
-        public void AddPlayer(ClientConnection connection, AddPlayerMessage msg)
+        public void AddPlayer(ClientConnection connection, LoginRequest loginReq, AddPlayerMessage msg)
         {
-            
+            _players.Add(loginReq.PlayerId, new GamePlayer(connection, loginReq, msg));
+
+            // This isn't actually correct, but the client logs a warning with what it expected and continues
+            connection.Send(14, new CRCMessage
+            {
+                scripts = new[]
+                {
+                    new CRCMessageEntry("ActorData", 0),
+                    new CRCMessageEntry("BrushCoordinator", 0),
+                    new CRCMessageEntry("ActorController", 0),
+                    new CRCMessageEntry("AbilityData", 0),
+                    new CRCMessageEntry("ActorStats", 0),
+                    new CRCMessageEntry("ActorStatus", 0),
+                    new CRCMessageEntry("ActorBehavior", 0),
+                    new CRCMessageEntry("PlayerData", 0),
+                    new CRCMessageEntry("PowerUp", 0),
+                    new CRCMessageEntry("GameFlow", 0),
+                    new CRCMessageEntry("TeamStatusDisplay", 0),
+                    new CRCMessageEntry("BarrierManager", 0),
+                    new CRCMessageEntry("GameFlowData", 0),
+                    new CRCMessageEntry("ObjectivePoints", 0),
+                    new CRCMessageEntry("CoinCarnageManager", 0),
+                    new CRCMessageEntry("ActorTeamSensitiveData", 0),
+                    new CRCMessageEntry("ActorAdditionalVisionProviders", 0),
+                    new CRCMessageEntry("ActorCinematicRequests", 0),
+                    new CRCMessageEntry("FreelancerStats", 0),
+                    new CRCMessageEntry("Manta_SyncComponent", 0),
+                    new CRCMessageEntry("Rampart_SyncComponent", 0),
+                    new CRCMessageEntry("SinglePlayerManager", 0),
+                }
+            });
+
+            connection.RegisterHandler<AssetsLoadingProgress>(61, _players[loginReq.PlayerId], OnAssetLoadingProgress);
+            connection.RegisterHandler<AssetsLoadedNotification>(53, _players[loginReq.PlayerId],
+                OnAssetsLoadedNotification);
+        }
+
+        private void OnAssetLoadingProgress(GamePlayer player, AssetsLoadingProgress msg)
+        {
+            // TODO should send to all
+            player.Connection.Send(62, msg);
+        }
+
+        private void OnAssetsLoadedNotification(GamePlayer player, AssetsLoadedNotification msg)
+        {
+            player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = true});
+            player.Connection.Send(54, new SpawningObjectsNotification
+            {
+                PlayerId = player.LoginRequest.PlayerId,
+                SpawnableObjectCount = 43
+            });
+            player.Connection.Send(12, new ObjectSpawnFinishedMessage {state = 0});
+            player.Connection.Send(10, new ObjectSpawnSceneMessage
+            {
+                netId = new NetworkInstanceId(5),
+                sceneId = new NetworkSceneId(1),
+                position = Vector3.Zero,
+                payload = Convert.FromBase64String("AAAAAAAAAwAAAAADAAAAAA==")
+            });
+            player.Connection.Send(10, new ObjectSpawnSceneMessage
+            {
+                netId = new NetworkInstanceId(6),
+                sceneId = new NetworkSceneId(2),
+                position = new Vector3(18.7f, 2.0f, 19.4f),
+                payload = Convert.FromBase64String("CwD7//////v/////+//////7//////v/////+//////7//////v/////+//////7//////v/////")
+            });
+            player.Connection.Send(10, new ObjectSpawnSceneMessage
+            {
+                netId = new NetworkInstanceId(7),
+                sceneId = new NetworkSceneId(3),
+                position = Vector3.Zero,
+                payload = Convert.FromBase64String("AAAAAAAAAAAAAIA/AADgQAAAoEEAANBBAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=")
+            });
+            player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = false});
+            player.Connection.Send(12, new ObjectSpawnFinishedMessage {state = 1});
+
         }
 
 //        public class ObserverMessage : MessageBase

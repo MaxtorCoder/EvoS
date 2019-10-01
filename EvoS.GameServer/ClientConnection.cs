@@ -69,7 +69,13 @@ namespace EvoS.GameServer
                     return;
                 }
 
-                gameManager.AddPlayer(this, addPlayerMessage);
+                Send(52, new LoginResponse
+                {
+                    Reconnecting = false,
+                    Success = true
+                });
+
+                gameManager.AddPlayer(this, loginReq, addPlayerMessage);
             });
         }
 
