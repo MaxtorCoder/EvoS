@@ -80,6 +80,8 @@ namespace EvoS.GameServer.Network
                 {
                     if (_handlers.ContainsKey(deserialized.msgType))
                     {
+                        Log.Print(LogType.GameServer,
+                            $"{deserialized.GetType().Name} - {JsonConvert.SerializeObject(deserialized)}");
                         _handlers[deserialized.msgType].Invoke(deserialized);
                     }
                     else
