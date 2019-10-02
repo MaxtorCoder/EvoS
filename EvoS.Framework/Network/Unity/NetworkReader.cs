@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Text;
 
-namespace EvoS.GameServer.Network.Unity
+namespace EvoS.Framework.Network.Unity
 {
     public class NetworkReader
     {

@@ -1,7 +1,7 @@
 using System;
 using EvoS.Framework.Logging;
 
-namespace EvoS.GameServer.Network.Unity
+namespace EvoS.Framework.Network.Unity
 {
     public static class UNetMessage
     {

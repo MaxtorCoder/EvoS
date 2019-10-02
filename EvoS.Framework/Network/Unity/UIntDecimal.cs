@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace EvoS.GameServer.Network.Unity
+namespace EvoS.Framework.Network.Unity
 {
     [StructLayout(LayoutKind.Explicit)]
     internal struct UIntDecimal

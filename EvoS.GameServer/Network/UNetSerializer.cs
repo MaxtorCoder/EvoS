@@ -5,7 +5,7 @@ using System.Reflection;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network;
 using EvoS.Framework.Network.Static;
-using EvoS.GameServer.Network.Unity;
+using EvoS.Framework.Network.Unity;
 using NetSerializer;
 using Newtonsoft.Json;
 

@@ -1,12 +1,12 @@
 using System;
 
-namespace EvoS.GameServer.Network.Unity
+namespace EvoS.Framework.Network.Unity
 {
     [Serializable]
     public struct NetworkInstanceId
     {
         public static NetworkInstanceId Invalid = new NetworkInstanceId(uint.MaxValue);
-        internal static NetworkInstanceId Zero = new NetworkInstanceId(0U);
+        public static NetworkInstanceId Zero = new NetworkInstanceId(0U);
         [SerializeField] private readonly uint m_Value;
 
         public NetworkInstanceId(uint value)

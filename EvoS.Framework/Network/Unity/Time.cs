@@ -1,6 +1,6 @@
 using System;
 
-namespace EvoS.GameServer.Network.Unity
+namespace EvoS.Framework.Network.Unity
 {
     public class Time
     {

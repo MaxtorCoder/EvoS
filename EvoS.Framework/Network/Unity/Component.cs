@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Security;
 
-namespace EvoS.GameServer.Network.Unity
+namespace EvoS.Framework.Network.Unity
 {
     public class Component
     {

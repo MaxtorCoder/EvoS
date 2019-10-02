@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Text;
 using EvoS.Framework.Logging;
 
-namespace EvoS.GameServer.Network.Unity
+namespace EvoS.Framework.Network.Unity
 {
     public class NetworkWriter
     {
@@ -47,7 +47,7 @@ namespace EvoS.GameServer.Network.Unity
             return AsArraySegment().Array;
         }
 
-        internal ArraySegment<byte> AsArraySegment()
+        public ArraySegment<byte> AsArraySegment()
         {
             return m_Buffer.AsArraySegment();
         }

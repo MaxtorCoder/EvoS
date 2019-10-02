@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.GameServer.Network.Unity
 {
@@ -86,7 +87,7 @@ namespace EvoS.GameServer.Network.Unity
             m_SceneId = new NetworkSceneId((uint) newSceneId);
         }
 
-        internal void RemoveObserverInternal(ClientConnection conn)
+        public void RemoveObserverInternal(ClientConnection conn)
         {
             if (m_Observers != null)
             {

@@ -1,4 +1,4 @@
-namespace EvoS.GameServer.Network.Unity
+namespace EvoS.Framework.Network.Unity
 {
     public abstract class MessageBase
     {

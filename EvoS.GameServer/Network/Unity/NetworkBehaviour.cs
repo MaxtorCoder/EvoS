@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.GameServer.Network.Unity
 {

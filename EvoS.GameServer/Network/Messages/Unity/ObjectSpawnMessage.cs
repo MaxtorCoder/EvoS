@@ -1,5 +1,5 @@
 using System.Numerics;
-using EvoS.GameServer.Network.Unity;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.GameServer.Network.Messages.Unity
 {
