@@ -1,4 +1,5 @@
 using System;
+using EvoS.Framework.Assets.Serialized;
 
 namespace EvoS.Framework.Network.Unity
 {
@@ -21,6 +22,26 @@ namespace EvoS.Framework.Network.Unity
         public byte i13;
         public byte i14;
         public byte i15;
+
+        public NetworkHash128(byte[] hash)
+        {
+            i0 = hash[0];
+            i1 = hash[1];
+            i2 = hash[2];
+            i3 = hash[3];
+            i4 = hash[4];
+            i5 = hash[5];
+            i6 = hash[6];
+            i7 = hash[7];
+            i8 = hash[8];
+            i9 = hash[9];
+            i10 = hash[10];
+            i11 = hash[11];
+            i12 = hash[12];
+            i13 = hash[13];
+            i14 = hash[14];
+            i15 = hash[15];
+        }
 
         public void Reset()
         {

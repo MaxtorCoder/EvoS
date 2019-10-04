@@ -4,6 +4,7 @@
     {
         None,
         Debug,
+        Misc,
         Server,
         Lobby,
         Game,
