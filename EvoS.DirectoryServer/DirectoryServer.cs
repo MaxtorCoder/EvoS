@@ -1,4 +1,4 @@
-﻿using EvoS.Framework.Network.NetworkMessages;
+using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Constants.Enums;
 using Microsoft.AspNetCore;
@@ -63,6 +63,7 @@ namespace EvoS.DirectoryServer
                 response.SessionInfo.ProcessCode = "This is the process code";
                 response.LobbyServerAddress = "127.0.0.1";
                 response.SessionInfo.FakeEntitlements = "";
+                response.SessionInfo.LanguageCode = "EN"; // Needs to be uppercase
 
                 LobbyGameClientProxyInfo proxyInfo = new LobbyGameClientProxyInfo();
                 proxyInfo.AccountId = request.SessionInfo.AccountId;
