@@ -1,10 +1,12 @@
 using System;
+using EvoS.Framework.Assets;
+using EvoS.Framework.Assets.Serialized;
 
 namespace EvoS.Framework.Network.Static
 {
     [Serializable]
     [EvosMessage(541)]
-    public struct CharacterCardInfo
+    public struct CharacterCardInfo : ISerializedItem
     {
         public CharacterCardInfo Reset()
         {
@@ -16,7 +18,7 @@ namespace EvoS.Framework.Network.Static
 
         public string ToIdString()
         {
-            return string.Format("{0}/{1}/{2}", (int) PrepCard, (int) CombatCard, (int) DashCard);
+            return $"{PrepCard}/{CombatCard}/{DashCard}";
         }
 
         public override bool Equals(object obj)
@@ -46,6 +48,13 @@ namespace EvoS.Framework.Network.Static
         public override int GetHashCode()
         {
             return PrepCard.GetHashCode() ^ CombatCard.GetHashCode() ^ DashCard.GetHashCode();
+        }
+
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        {
+            PrepCard = (CardType) stream.ReadInt32();
+            CombatCard = (CardType) stream.ReadInt32();
+            DashCard = (CardType) stream.ReadInt32();
         }
 
         public CardType PrepCard;

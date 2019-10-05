@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Assets
@@ -15,7 +16,19 @@ namespace EvoS.Framework.Assets
         public Dictionary<NetworkHash128, SerializedGameObject> NetObjsByAssetId =
             new Dictionary<NetworkHash128, SerializedGameObject>();
 
+        private TypeEntry _gameObjectType;
+
         public Dictionary<string, SerializedGameObject>.ValueCollection NetworkedObjects => NetObjsByName.Values;
+
+        public SerializedGameObject GetNetObj(string assetId)
+        {
+            return GetNetObj(new NetworkHash128(Utils.ToByteArray(assetId)));
+        }
+
+        public SerializedGameObject GetNetObj(NetworkHash128 assetId)
+        {
+            return NetObjsByAssetId[assetId];
+        }
 
         public void Load(string join)
         {
@@ -23,8 +36,14 @@ namespace EvoS.Framework.Assets
             NetObjsByAssetId.Clear();
             MainAssetFile = new AssetFile(join);
 
-            var gameObjectType = MainAssetFile.FindTypeById(1);
-            foreach (var gameObject in MainAssetFile.GetObjectInfosByType(gameObjectType))
+            _gameObjectType = MainAssetFile.FindTypeById(1);
+            
+            LoadNetworkedObjects();
+        }
+
+        private void LoadNetworkedObjects()
+        {
+            foreach (var gameObject in MainAssetFile.GetObjectInfosByType(_gameObjectType))
             {
                 var obj = (SerializedGameObject) MainAssetFile.ReadObject(gameObject);
 

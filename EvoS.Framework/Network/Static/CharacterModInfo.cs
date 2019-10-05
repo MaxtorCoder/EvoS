@@ -1,10 +1,12 @@
 using System;
+using EvoS.Framework.Assets;
+using EvoS.Framework.Assets.Serialized;
 
 namespace EvoS.Framework.Network.Static
 {
     [Serializable]
     [EvosMessage(540)]
-    public struct CharacterModInfo
+    public struct CharacterModInfo : ISerializedItem
     {
         public int ModForAbility0;
         public int ModForAbility1;
@@ -64,10 +66,9 @@ namespace EvoS.Framework.Network.Static
             }
         }
 
-        public string ToIdString()
+        public override string ToString()
         {
-            return string.Format("{0}/{1}/{2}/{3}/{4}", ModForAbility0.ToString(), ModForAbility1.ToString(),
-                ModForAbility2.ToString(), ModForAbility3.ToString(), ModForAbility4.ToString());
+            return $"{ModForAbility0}/{ModForAbility1}/{ModForAbility2}/{ModForAbility3}/{ModForAbility4}";
         }
 
         public override bool Equals(object obj)
@@ -91,6 +92,13 @@ namespace EvoS.Framework.Network.Static
                    ModForAbility3.GetHashCode() ^ ModForAbility4.GetHashCode();
         }
 
-        
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        {
+            ModForAbility0 = stream.ReadInt32();
+            ModForAbility1 = stream.ReadInt32();
+            ModForAbility2 = stream.ReadInt32();
+            ModForAbility3 = stream.ReadInt32();
+            ModForAbility4 = stream.ReadInt32();
+        }
     }
 }

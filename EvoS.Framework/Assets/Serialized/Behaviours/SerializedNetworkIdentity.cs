@@ -2,6 +2,7 @@ using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Assets.Serialized.Behaviours
 {
+    [SerializedMonoBehaviour("NetworkIdentity")]
     public class SerializedNetworkIdentity : SerializedMonoChildBase
     {
         public NetworkSceneId SceneId { get; set; }

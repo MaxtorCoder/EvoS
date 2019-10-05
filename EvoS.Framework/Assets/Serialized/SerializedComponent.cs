@@ -10,6 +10,15 @@ namespace EvoS.Framework.Assets.Serialized
         private WeakReference<AssetFile> _assetFile;
         private WeakReference<ISerializedItem> _cachedValue = new WeakReference<ISerializedItem>(null);
 
+        public SerializedComponent()
+        {
+            
+        }
+        public SerializedComponent(AssetFile assetFile, StreamReader stream)
+        {
+            DeserializeAsset(assetFile, stream);
+        }
+
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             _assetFile = new WeakReference<AssetFile>(assetFile);
@@ -33,6 +42,14 @@ namespace EvoS.Framework.Assets.Serialized
             value = assetFile.ReadObject(PathId, FileId);
             _cachedValue.SetTarget(value);
             return value;
+        }
+
+        public override string ToString()
+        {
+            return "Component(" +
+                   (FileId != 0 ? $"{nameof(FileId)}: {FileId}, " : "") +
+                   (PathId != 0 ? $"{nameof(PathId)}: {PathId}" : "null") +
+                   ")";
         }
     }
 }

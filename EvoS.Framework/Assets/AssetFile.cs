@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Logging;
+using EvoS.Framework.Network;
 
 namespace EvoS.Framework.Assets
 {
@@ -22,8 +26,20 @@ namespace EvoS.Framework.Assets
         };
         private static Dictionary<string, Type> _scriptTypeMap = new Dictionary<string, Type>
         {
-            {"NetworkIdentity", typeof(SerializedNetworkIdentity)},
         };
+
+        static AssetFile()
+        {
+            foreach (var type in Assembly.GetExecutingAssembly().GetTypes()
+                .Concat(Assembly.GetEntryAssembly().GetTypes()))
+            {
+                var attribute = type.GetCustomAttribute<SerializedMonoBehaviourAttribute>();
+                if (attribute == null)
+                    continue;
+
+                _scriptTypeMap.Add(attribute.ClassName, type);
+            }
+        }
 
         public AssetFile(string filePath)
         {
