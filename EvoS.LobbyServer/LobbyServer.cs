@@ -1,4 +1,4 @@
-using EvoS.Framework;
+﻿using EvoS.Framework;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Logging;
 using System;
@@ -10,6 +10,7 @@ using vtortola.WebSockets;
 using vtortola.WebSockets.Rfc6455;
 using System.IO;
 using EvoS.Framework.Network;
+using EvoS.Framework.Network.NetworkMessages;
 
 namespace EvoS.LobbyServer
 {
@@ -21,12 +22,12 @@ namespace EvoS.LobbyServer
         {
             Task server = Task.Run(StartServer);
             server.Wait();
-            Log.Print(LogType.Server, "Server Stopped");
+            Log.Print(LogType.Lobby, "Server Stopped");
         }
 
         private static async Task StartServer()
         {
-            Log.Print(LogType.Server, "Starting LobbyServer");
+            Log.Print(LogType.Lobby, "Starting LobbyServer");
             WebSocketListener server = new WebSocketListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 6060));
             server.Standards.RegisterStandard(new WebSocketFactoryRfc6455());
 
@@ -39,9 +40,9 @@ namespace EvoS.LobbyServer
 
             while (true)
             {
-                Log.Print(LogType.Server, "Waiting for clients to connect...");
+                Log.Print(LogType.Lobby, "Waiting for clients to connect...");
                 WebSocket socket = await server.AcceptWebSocketAsync(CancellationToken.None);
-                Log.Print(LogType.Server, "Client connected");
+                Log.Print(LogType.Lobby, "Client connected");
                 ClientConnection newClient = new ClientConnection(socket);
                 ConnectedClients.Add(newClient);
 
@@ -57,7 +58,7 @@ namespace EvoS.LobbyServer
                 WebSocketMessageReadStream message = await client.ReadMessageAsync(CancellationToken.None);
                 if (!client.IsConnected || message == null)
                 {
-                    Log.Print(LogType.Server, "A client disconnected");
+                    Log.Print(LogType.Lobby, "A client disconnected");
                     client.Dispose();
                     return;
                 }

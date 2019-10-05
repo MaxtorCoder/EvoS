@@ -20,12 +20,12 @@ namespace EvoS.GameServer
         {
             Task server = Task.Run(StartServer);
             server.Wait();
-            Log.Print(LogType.Server, "Server Stopped");
+            Log.Print(LogType.Game, "Server Stopped");
         }
 
         private static async Task StartServer()
         {
-            Log.Print(LogType.Server, "Starting GameServer");
+            Log.Print(LogType.Game, "Starting GameServer");
             WebSocketListener server = new WebSocketListener(new IPEndPoint(IPAddress.Parse("0.0.0.0"), 6061));
             server.Standards.RegisterStandard(new WebSocketFactoryRfc6455());
 
@@ -34,13 +34,13 @@ namespace EvoS.GameServer
             server.StartAsync();
 #pragma warning restore CS4014
 
-            Log.Print(LogType.Server, "Started GameServer on '0.0.0.0:6061'");
+            Log.Print(LogType.Game, "Started GameServer on '0.0.0.0:6061'");
 
             while (true)
             {
-                Log.Print(LogType.Server, "Waiting for clients to connect...");
+                Log.Print(LogType.Game, "Waiting for clients to connect...");
                 WebSocket socket = await server.AcceptWebSocketAsync(CancellationToken.None);
-                Log.Print(LogType.Server, "Client connected");
+                Log.Print(LogType.Game, "Client connected");
                 ClientConnection newClient = new ClientConnection(socket);
                 ConnectedClients.Add(newClient);
 

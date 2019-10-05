@@ -5,6 +5,8 @@
         None,
         Debug,
         Server,
+        Lobby,
+        Game,
         Packet,
         Error,
         Warning,

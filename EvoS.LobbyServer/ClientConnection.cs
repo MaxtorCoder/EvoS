@@ -94,8 +94,7 @@ namespace EvoS.LobbyServer
                         }
 
                         Type requestType = requestData.GetType();
-                        Log.Print(LogType.Network, $"Received {JsonConvert.SerializeObject(requestData)}");
-                        Log.Print(LogType.Network, $"Received {requestType.Name}");
+                        Log.Print(LogType.Network, $"Received {requestType.Name} : {JsonConvert.SerializeObject(requestData)}");
 
                         // Handle Response
                         Type responseHandlerType = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{requestType.Name}Handler");

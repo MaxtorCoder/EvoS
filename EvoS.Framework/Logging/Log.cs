@@ -10,12 +10,14 @@ namespace EvoS.Framework.Logging
 
         public static readonly Dictionary<LogType, (ConsoleColor Color, string Name)> TypeColor = new Dictionary<LogType, (ConsoleColor Color, string Name)>()
         {
-            { LogType.Debug,    (ConsoleColor.DarkMagenta,  " Debug   ") },
-            { LogType.Server,   (ConsoleColor.Green,        " Server  ") },
-            { LogType.Error,    (ConsoleColor.Red,          " Error   ") },
-            { LogType.Packet,   (ConsoleColor.Cyan,         " Packet  ") },
-            { LogType.Warning,  (ConsoleColor.Yellow,       " Warning ") },
-            { LogType.Network,  (ConsoleColor.DarkCyan,     " Network ") }
+            { LogType.Debug,   (ConsoleColor.DarkMagenta,  "  Debug  ") },
+            { LogType.Server,  (ConsoleColor.Green,        "  Server ") },
+            { LogType.Lobby,   (ConsoleColor.Green,        "  Lobby  ") },
+            { LogType.Game,    (ConsoleColor.Green,        "  Game   ") },
+            { LogType.Error,   (ConsoleColor.Red,          "  Error  ") },
+            { LogType.Packet,  (ConsoleColor.Cyan,         "  Packet ") },
+            { LogType.Warning, (ConsoleColor.Yellow,       " Warning ") },
+            { LogType.Network, (ConsoleColor.DarkCyan,     " Network ") }
         };
 
         public static void Print(LogType _type, object _obj, bool showTime = false, bool showLogLevel = false)
