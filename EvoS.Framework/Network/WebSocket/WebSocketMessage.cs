@@ -19,5 +19,7 @@ namespace EvoS.Framework.Network.WebSocket
         public long DeserializationTicks;
         [NonSerialized]
         public long SerializedLength;
+        [NonSerialized]
+        public static bool LogData = true;
     }
 }

@@ -53,6 +53,7 @@ namespace EvoS.LobbyServer
         public async void HandleConnection()
         {
             Log.Print(LogType.Debug, "Handling Connection");
+            BindingFlags bindingFlags = BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Static;
 
             while (true)
             {
@@ -94,13 +95,19 @@ namespace EvoS.LobbyServer
                         }
 
                         Type requestType = requestData.GetType();
-                        Log.Print(LogType.Network, $"Received {requestType.Name} : {JsonConvert.SerializeObject(requestData)}");
+#if DEBUG
+                        //Log data or hide it?
+                        String packetDataToLog = (bool)requestType.GetField("LogData", bindingFlags).GetValue(null) ? JsonConvert.SerializeObject(requestData) :"{...}";
 
+                        Log.Print(LogType.Network, $"Received {requestType.Name} : {packetDataToLog}");
+#endif
                         // Handle Response
                         Type responseHandlerType = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{requestType.Name}Handler");
                         if (responseHandlerType == null)
                         {
+#if DEBUG
                             Log.Print(LogType.Warning, $"No Handler for {requestType.Name}");
+#endif
                             continue;
                         }
 
