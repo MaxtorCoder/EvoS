@@ -1,4 +1,4 @@
-﻿using EvoS.Framework.Network;
+using EvoS.Framework.Network;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -86,7 +86,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 LocalizedFailure = null,
                 PacificNow = DateTime.UtcNow, // TODO: Originally had "0001-01-01T00:00:00"
                 ServerLockState = ServerLockState.Unlocked,
-                ServerMessageOverrides = null,
+                ServerMessageOverrides = new ServerMessageOverrides().FillDummyData(),
                 TimeOffset = TimeSpan.Zero,
                 UtcNow = DateTime.UtcNow, // TODO: Originally had "0001-01-01T00:00:00"
                 RequestId = 0,

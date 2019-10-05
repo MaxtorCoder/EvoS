@@ -1,4 +1,5 @@
-﻿using EvoS.Framework.Network;
+﻿using EvoS.Framework.DataAccess;
+using EvoS.Framework.Network;
 using System;
 
 // Token: 0x020009D9 RID: 2521
@@ -19,4 +20,26 @@ public class ServerMessageOverrides
     public ServerMessage WhatsNewDescription { get; set; }
     public ServerMessage WhatsNewHeader { get; set; }
     public ServerMessage WhatsNewText { get; set; }
+
+    public ServerMessageOverrides FillDummyData()
+    {
+        MOTDText = DataAccess.GetMOTD();
+        MOTDPopUpText = DataAccess.GetMOTD();
+
+        ReleaseNotesHeader = DataAccess.GetReleaseNotesHeader();
+        ReleaseNotesDescription = DataAccess.GetReleaseNotesDescription();
+        ReleaseNotesText = DataAccess.GetReleaseNotesText();
+
+        WhatsNewHeader = DataAccess.GetWhatsNewHeader();
+        WhatsNewDescription = DataAccess.GetWhatsNewDescription();
+        WhatsNewText = DataAccess.GetWhatsNewText();
+
+        LockScreenText = "LockScreenText";
+        LockScreenButtonText = "LockScreenButtonText";
+
+        FacebookOAuthRedirectUriContent = "FacebookOAuthRedirectUriContent";
+        FreeUpsellExternalBrowserSteamUrl = "FreeUpsellExternalBrowserSteamUrl";
+        FreeUpsellExternalBrowserUrl = "FreeUpsellExternalBrowserUrl";
+        return this;
+    }
 }
