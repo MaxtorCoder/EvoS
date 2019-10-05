@@ -1,4 +1,4 @@
-﻿using EvoS.Framework;
+using EvoS.Framework;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Logging;
 using System;
@@ -65,6 +65,16 @@ namespace EvoS.LobbyServer
                 message.Dispose();
             }
 
+        }
+
+        public static async Task sendChatAsync(ChatNotification chat, ClientConnection sender)
+        {
+            chat.DisplayDevTag = true;
+            chat.SenderHandle = sender.RegistrationInfo.AuthInfo.Handle;
+
+            foreach (ClientConnection con in ConnectedClients) {
+                await con.SendMessage(chat);
+            }
         }
     }
 }
