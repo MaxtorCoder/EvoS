@@ -3,23 +3,21 @@ using System.Collections.Generic;
 
 namespace EvoS.Framework.Assets
 {
-    public class ExternalReferencesTable
+    public class ExternalReferencesTable : List<ExternalReference>
     {
-        public List<ExternalReference> Entries { get; set; } = new List<ExternalReference>();
-
         public ExternalReferencesTable(StreamReader stream)
         {
             var entryCount = stream.ReadInt32();
             for (var i = 0; i < entryCount; i++)
             {
-                Entries.Add(new ExternalReference(stream));
+                Add(new ExternalReference(stream));
             }
         }
 
         public override string ToString()
         {
             return $"{nameof(ExternalReferencesTable)}(" +
-                   $"{nameof(Entries)}: {String.Join(", ", Entries)}" +
+                   $"{String.Join(", ", this)}" +
                    ")";
         }
     }

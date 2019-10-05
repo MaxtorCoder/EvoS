@@ -3,10 +3,9 @@ using System.Collections.Generic;
 
 namespace EvoS.Framework.Assets
 {
-    public class ObjectInfoTable
+    public class ObjectInfoTable : Dictionary<long, ObjectInfoEntry>
     {
         public List<ObjectInfoEntry> Entries { get; set; } = new List<ObjectInfoEntry>();
-        public Dictionary<long, ObjectInfoEntry> EntryMap { get; set; } = new Dictionary<long, ObjectInfoEntry>();
 
         public ObjectInfoTable(StreamReader stream)
         {
@@ -17,7 +16,7 @@ namespace EvoS.Framework.Assets
 
                 var entry = new ObjectInfoEntry(stream);
                 Entries.Add(entry);
-                EntryMap.Add(entry.PathId, entry);
+                Add(entry.PathId, entry);
             }
         }
 

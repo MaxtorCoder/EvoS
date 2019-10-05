@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace EvoS.Framework.Assets
 {
-    public class ObjectIdTable
+    public class ObjectIdTable : List<ObjectIdentifier>
     {
-        public List<ObjectIdentifier> Entries { get; set; } = new List<ObjectIdentifier>();
-
         public ObjectIdTable(StreamReader stream)
         {
             var entryCount = stream.ReadInt32();
@@ -14,14 +12,14 @@ namespace EvoS.Framework.Assets
             {
                 stream.AlignTo();
 
-                Entries.Add(new ObjectIdentifier(stream));
+                Add(new ObjectIdentifier(stream));
             }
         }
 
         public override string ToString()
         {
             return $"{nameof(ObjectIdTable)}(" +
-                   $"{nameof(Entries)}: {String.Join(", ", Entries)}" +
+                   $"{String.Join(", ", this)}" +
                    ")";
         }
     }

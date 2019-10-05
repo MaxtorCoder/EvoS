@@ -49,7 +49,7 @@ namespace EvoS.Framework.Assets
 
         private void LoadExternalReferences(string filePath)
         {
-            foreach (var externalReference in Metadata.ExternalReferencesTable.Entries)
+            foreach (var externalReference in Metadata.ExternalReferencesTable)
             {
                 var fileName = externalReference.FileName;
                 if (fileName.StartsWith("library/"))
@@ -118,7 +118,7 @@ namespace EvoS.Framework.Assets
             var assetFile = _fileMap[fileId];
             var savedPos = assetFile._stream.Position;
 
-            var objInfo = assetFile.Metadata.ObjectInfoTable.EntryMap[pathId];
+            var objInfo = assetFile.Metadata.ObjectInfoTable[pathId];
 
             var objType = assetFile.Metadata.TypeTree.BaseClasses[objInfo.TypeId];
 
