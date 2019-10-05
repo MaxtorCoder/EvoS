@@ -89,7 +89,7 @@ namespace EvoS.Framework.Assets
             }
 
             var child = (SerializedMonoChildBase) Activator.CreateInstance(_scriptTypeMap[script.ClassName]);
-            child.Deserialize(this, _stream);
+            child.DeserializeAsset(this, _stream);
 
             return child;
         }
@@ -127,7 +127,7 @@ namespace EvoS.Framework.Assets
             if (_unityTypeMap.ContainsKey(objType.TypeId))
             {
                 var obj = (ISerializedItem) Activator.CreateInstance(_unityTypeMap[objType.TypeId]);
-                obj.Deserialize(assetFile, assetFile._stream);
+                obj.DeserializeAsset(assetFile, assetFile._stream);
 
                 if (assetFile._stream.Position < endPos)
                 {

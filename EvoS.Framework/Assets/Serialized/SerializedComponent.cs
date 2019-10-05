@@ -10,7 +10,7 @@ namespace EvoS.Framework.Assets.Serialized
         private WeakReference<AssetFile> _assetFile;
         private WeakReference<ISerializedItem> _cachedValue = new WeakReference<ISerializedItem>(null);
 
-        public void Deserialize(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             _assetFile = new WeakReference<AssetFile>(assetFile);
 

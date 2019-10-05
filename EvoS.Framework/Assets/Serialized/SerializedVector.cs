@@ -5,7 +5,7 @@ namespace EvoS.Framework.Assets.Serialized
 {
     public class SerializedVector<T> : List<T>, ISerializedItem where T : ISerializedItem
     {
-        public void Deserialize(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             Clear();
 
@@ -13,7 +13,7 @@ namespace EvoS.Framework.Assets.Serialized
             for (var i = 0; i < length; i++)
             {
                 var item = (T) Activator.CreateInstance(typeof(T));
-                item.Deserialize(assetFile, stream);
+                item.DeserializeAsset(assetFile, stream);
                 Add(item);
             }
         }

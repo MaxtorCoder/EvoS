@@ -9,13 +9,13 @@ namespace EvoS.Framework.Assets.Serialized.Behaviours
         public bool ServerOnly { get; set; }
         public bool LocalPlayerAuthority { get; set; }
 
-        public override void Deserialize(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
             SceneId = new NetworkSceneId(stream.ReadUInt32());
 
             AssetId = new Hash128();
-            AssetId.Deserialize(assetFile, stream);
+            AssetId.DeserializeAsset(assetFile, stream);
             ServerOnly = stream.ReadBoolean();
             stream.AlignTo();
             LocalPlayerAuthority = stream.ReadBoolean();

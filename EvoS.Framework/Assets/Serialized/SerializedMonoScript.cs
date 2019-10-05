@@ -13,7 +13,7 @@ namespace EvoS.Framework.Assets.Serialized
         public string AssemblyName { get; set; }
         public bool IsEditorScript { get; set; }
 
-        public void Deserialize(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             Name = stream.ReadString32();
             ExecutionOrder = stream.ReadInt32();

@@ -11,14 +11,14 @@ namespace EvoS.Framework.Assets.Serialized
         public string Name { get; set; }
         public SerializedMonoChildBase Child { get; set; }
 
-        public void Deserialize(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             GameObject = new SerializedComponent();
-            GameObject.Deserialize(assetFile, stream);
+            GameObject.DeserializeAsset(assetFile, stream);
             Enabled = stream.ReadBoolean();
             stream.AlignTo();
             var script = new SerializedComponent();
-            script.Deserialize(assetFile, stream);
+            script.DeserializeAsset(assetFile, stream);
             Name = stream.ReadString32();
 
             Script = (SerializedMonoScript) assetFile.ReadObject(script);

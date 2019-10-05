@@ -6,7 +6,7 @@ namespace EvoS.Framework.Assets.Serialized
     {
         public byte[] Bytes = new byte[16];
 
-        public void Deserialize(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             for (int i = 0; i < Bytes.Length; i++)
             {

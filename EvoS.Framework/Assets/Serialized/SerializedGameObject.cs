@@ -11,10 +11,10 @@ namespace EvoS.Framework.Assets.Serialized
         public ushort Tag { get; set; }
         public bool IsActive { get; set; }
 
-        public void Deserialize(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             Components = new SerializedVector<SerializedComponent>();
-            Components.Deserialize(assetFile, stream);
+            Components.DeserializeAsset(assetFile, stream);
             Layer = stream.ReadUInt32();
             Name = stream.ReadString32();
             Tag = stream.ReadUInt16();
