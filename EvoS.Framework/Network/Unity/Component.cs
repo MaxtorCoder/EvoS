@@ -6,7 +6,7 @@ namespace EvoS.Framework.Network.Unity
     public class Component
     {
         public GameObject gameObject;
-        public Transform transform = new Transform();
+        public Transform transform;
 
         public Component GetComponent(Type type)
         {
