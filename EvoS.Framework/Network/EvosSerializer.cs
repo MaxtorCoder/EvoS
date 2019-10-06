@@ -43,6 +43,9 @@ namespace EvoS.Framework.Network
             {typeof(Dictionary<int, FactionTierAndVersion>), 582},
             {typeof(KeyValuePair<int, FactionTierAndVersion>[]), 583},
             {typeof(KeyValuePair<int, FactionTierAndVersion>), 584},
+            {typeof(Dictionary<uint, uint>), 693},
+            {typeof(KeyValuePair<uint, uint>[]), 694},
+            {typeof(KeyValuePair<uint, uint>), 695},
         };
 
         private EvosSerializer()
