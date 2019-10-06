@@ -15,7 +15,11 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
-            await LobbyServer.Program.sendChatAsync((ChatNotification)requestData, connection);
+            ChatNotification notification = (ChatNotification)requestData;
+            notification.SenderAccountId = connection.AuthInfo.AccountId;
+            notification.SenderHandle = connection.AuthInfo.Handle;
+
+            await LobbyServer.Program.sendChatAsync(notification, connection);
         }
     }
 }

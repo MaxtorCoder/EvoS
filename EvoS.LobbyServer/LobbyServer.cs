@@ -11,6 +11,7 @@ using vtortola.WebSockets.Rfc6455;
 using System.IO;
 using EvoS.Framework.Network;
 using EvoS.Framework.Network.NetworkMessages;
+using EvoS.Framework.Constants.Enums;
 
 namespace EvoS.LobbyServer
 {
@@ -70,12 +71,42 @@ namespace EvoS.LobbyServer
 
         public static async Task sendChatAsync(ChatNotification chat, ClientConnection sender)
         {
-            chat.DisplayDevTag = true;
-            chat.SenderHandle = sender.RegistrationInfo.AuthInfo.Handle;
-
-            foreach (ClientConnection con in ConnectedClients) {
-                await con.SendMessage(chat);
+            switch (chat.ConsoleMessageType)
+            {
+                case ConsoleMessageType.GlobalChat:
+                    foreach (ClientConnection con in ConnectedClients)
+                        await con.SendMessage(chat);
+                    break;
+                
+                case ConsoleMessageType.WhisperChat:
+                    await sender.SendMessage(chat);
+                    ClientConnection recipient = GetPlayerByHandle(chat.RecipientHandle);
+                    if (recipient != null)
+                        await recipient.SendMessage(chat);
+                    break;
+                
+                default:
+                    Log.Print(LogType.Warning, $"Unhandled chat type: {chat.ConsoleMessageType.ToString()}");
+                    break;
             }
+            
+        }
+
+        public static ClientConnection GetPlayerByHandle(string handle)
+        {
+            string DEV_TAG = "";
+            if (handle.StartsWith(DEV_TAG)) {
+                handle = handle.Substring(DEV_TAG.Length);
+            }
+
+            foreach (ClientConnection con in ConnectedClients)
+            {
+                if (con.RegistrationInfo.AuthInfo.Handle == handle)
+                {
+                    return con;
+                }
+            }
+            return null;
         }
     }
 }
