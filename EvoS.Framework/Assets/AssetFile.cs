@@ -17,6 +17,9 @@ namespace EvoS.Framework.Assets
         public SerializedFileMetadata Metadata { get; set; }
         private List<AssetFile> _fileMap = new List<AssetFile>();
 
+        private Dictionary<long, WeakReference<ISerializedItem>> _referenceCache =
+            new Dictionary<long, WeakReference<ISerializedItem>>();
+
         private static Dictionary<int, Type> _unityTypeMap = new Dictionary<int, Type>
         {
             {1, typeof(SerializedGameObject)},
@@ -24,6 +27,7 @@ namespace EvoS.Framework.Assets
             {114, typeof(SerializedMonoBehaviour)},
             {115, typeof(SerializedMonoScript)},
         };
+
         private static Dictionary<string, Type> _scriptTypeMap = new Dictionary<string, Type>
         {
         };
@@ -137,6 +141,17 @@ namespace EvoS.Framework.Assets
                 return _fileMap[fileId].ReadObject(pathId, 0, restorePos);
             }
 
+            // Check the reference cache first
+            _referenceCache.TryGetValue(pathId, out var cacheRef);
+            if (cacheRef != null)
+            {
+                cacheRef.TryGetTarget(out var cached);
+                if (cached != null)
+                {
+                    return cached;
+                }
+            }
+
             var savedPos = _stream.Position;
 
             var objInfo = Metadata.ObjectInfoTable[pathId];
@@ -169,7 +184,13 @@ namespace EvoS.Framework.Assets
                         $"Read past the end of {obj.GetType().Name}, {currentPos}/{endPos}");
                 }
 
-                _stream.Position = savedPos;
+                if (restorePos)
+                {
+                    _stream.Position = savedPos;
+                }
+
+                _referenceCache[pathId] = new WeakReference<ISerializedItem>(obj);
+
                 return obj;
             }
             else

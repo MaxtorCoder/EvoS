@@ -8,7 +8,6 @@ namespace EvoS.Framework.Assets.Serialized
         public int FileId { get; set; }
         public long PathId { get; set; }
         private WeakReference<AssetFile> _assetFile;
-        private WeakReference<ISerializedItem> _cachedValue = new WeakReference<ISerializedItem>(null);
 
         public SerializedComponent()
         {
@@ -29,19 +28,12 @@ namespace EvoS.Framework.Assets.Serialized
 
         public ISerializedItem LoadValue()
         {
-            if (_cachedValue.TryGetTarget(out var value))
-            {
-                return value;
-            }
-
             if (!_assetFile.TryGetTarget(out var assetFile))
             {
                 return null;
             }
 
-            value = assetFile.ReadObject(PathId, FileId);
-            _cachedValue.SetTarget(value);
-            return value;
+            return assetFile.ReadObject(PathId, FileId);
         }
 
         public override string ToString()
