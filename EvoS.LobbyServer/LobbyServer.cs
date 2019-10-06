@@ -45,10 +45,15 @@ namespace EvoS.LobbyServer
                 WebSocket socket = await server.AcceptWebSocketAsync(CancellationToken.None);
                 Log.Print(LogType.Lobby, "Client connected");
                 ClientConnection newClient = new ClientConnection(socket);
+                newClient.OnDisconnect += NewClient_OnDisconnect;
                 ConnectedClients.Add(newClient);
-
                 new Thread(newClient.HandleConnection).Start();
             }
+        }
+
+        private static void NewClient_OnDisconnect(object sender, EventArgs e)
+        {
+            ConnectedClients.Remove((ClientConnection)sender);
         }
 
         private static async void HandleClient(object arg)
@@ -71,11 +76,13 @@ namespace EvoS.LobbyServer
 
         public static async Task sendChatAsync(ChatNotification chat, ClientConnection sender)
         {
+            sender.SendMessage(new ChatNotification() { Text = "Hey jude", ConsoleMessageType = ConsoleMessageType.BroadcastMessage, SenderAccountId = 0 });
             switch (chat.ConsoleMessageType)
             {
                 case ConsoleMessageType.GlobalChat:
                     foreach (ClientConnection con in ConnectedClients)
                         await con.SendMessage(chat);
+
                     break;
                 
                 case ConsoleMessageType.WhisperChat:

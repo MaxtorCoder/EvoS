@@ -31,10 +31,10 @@ namespace EvoS.LobbyServer
 
         public void Disconnect()
         {
-            Log.Print(LogType.Server, "Client disconnected.");
+            Log.Print(LogType.Lobby, $"Client {RegistrationInfo.AuthInfo.Handle} disconnected.");
+            OnDisconnect.Invoke(this, new EventArgs());
             if (Socket.IsConnected)
                 Socket.Close();
-
             Socket.Dispose();
         }
 
@@ -49,6 +49,8 @@ namespace EvoS.LobbyServer
                 await writer.FlushAsync();
             }    
         }
+
+        public event EventHandler OnDisconnect;
 
         public async void HandleConnection()
         {
