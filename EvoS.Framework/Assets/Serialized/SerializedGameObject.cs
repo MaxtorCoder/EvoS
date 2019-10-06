@@ -21,7 +21,7 @@ namespace EvoS.Framework.Assets.Serialized
             IsActive = stream.ReadBoolean();
         }
 
-        public IEnumerable<SerializedMonoChildBase> ComponentChildren()
+        public IEnumerable<ISerializedItem> ComponentChildren()
         {
             return from component in Components
                 select (SerializedMonoBehaviour) component.LoadValue()
@@ -39,7 +39,7 @@ namespace EvoS.Framework.Assets.Serialized
                 select value.Script.ClassName).ToList();
         }
 
-        public T GetComponent<T>() where T : SerializedMonoChildBase
+        public T GetComponent<T>() where T : class, ISerializedItem
         {
             foreach (var component in ComponentChildren())
             {

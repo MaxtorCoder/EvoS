@@ -1,13 +1,11 @@
-using EvoS.Framework.Network.Unity;
-
 namespace EvoS.Framework.Assets.Serialized.Behaviours
 {
     [SerializedMonoBehaviour("ChatterComponent")]
-    public class SerializedChatterComponent : SerializedMonoChildBase
+    public class SerializedChatterComponent : ISerializedItem
     {
         public SerializedVector<SerializedComponent> Chatters { get; set; }
 
-        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
             Chatters = new SerializedVector<SerializedComponent>();

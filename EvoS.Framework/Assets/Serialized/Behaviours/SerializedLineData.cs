@@ -1,13 +1,11 @@
-using EvoS.Framework.Network.Unity;
-
 namespace EvoS.Framework.Assets.Serialized.Behaviours
 {
     [SerializedMonoBehaviour("LineData")]
-    public class SerializedLineData : SerializedMonoChildBase
+    public class SerializedLineData : ISerializedItem
     {
         public float LastAllyMovementChange { get; set; }
 
-        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
             LastAllyMovementChange = stream.ReadSingle();

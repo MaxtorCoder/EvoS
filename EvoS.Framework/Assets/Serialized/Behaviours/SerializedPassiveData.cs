@@ -1,13 +1,13 @@
 namespace EvoS.Framework.Assets.Serialized.Behaviours
 {
     [SerializedMonoBehaviour("PassiveData")]
-    public class SerializedPassiveData : SerializedMonoChildBase
+    public class SerializedPassiveData : ISerializedItem
     {
         public SerializedVector<SerializedComponent> Passives { get; set; }
         public string ToolTip { get; set; }
         public string ToolTipTitle { get; set; }
 
-        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             Passives = new SerializedVector<SerializedComponent>();
             Passives.DeserializeAsset(assetFile, stream);

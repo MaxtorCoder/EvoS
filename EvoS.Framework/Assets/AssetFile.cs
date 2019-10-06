@@ -96,15 +96,15 @@ namespace EvoS.Framework.Assets
 
             return null;
         }
-        
-        public SerializedMonoChildBase ReadMonoScriptChild(SerializedMonoScript script)
+
+        public ISerializedItem ReadMonoScriptChild(SerializedMonoScript script)
         {
             if (!_scriptTypeMap.ContainsKey(script.ClassName))
             {
                 return null;
             }
 
-            var child = (SerializedMonoChildBase) Activator.CreateInstance(_scriptTypeMap[script.ClassName]);
+            var child = (ISerializedItem) Activator.CreateInstance(_scriptTypeMap[script.ClassName]);
             child.DeserializeAsset(this, _stream);
 
             return child;

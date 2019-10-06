@@ -9,7 +9,7 @@ namespace EvoS.Framework.Assets.Serialized
         public SerializedMonoScript Script { get; set; }
         [Obsolete("This is probably not what you want, see Script.ClassName")]
         public string Name { get; set; }
-        public SerializedMonoChildBase Child { get; set; }
+        public ISerializedItem Child { get; set; }
 
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {

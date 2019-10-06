@@ -1,10 +1,9 @@
-using System;
 using EvoS.Framework.Network.Static;
 
 namespace EvoS.Framework.Assets.Serialized.Behaviours
 {
     [SerializedMonoBehaviour("ActorData")]
-    public class SerializedActorData : SerializedMonoChildBase
+    public class SerializedActorData : ISerializedItem
     {
         public int PlayerIndex { get; set; }
         public SerializedComponent PlayerData { get; set; }
@@ -38,7 +37,7 @@ namespace EvoS.Framework.Assets.Serialized.Behaviours
         public string OnDeathAudioEvent { get; set; }
         public SerializedVector<SerializedComponent> AdditionalNetworkObjectsToRegister { get; set; }
 
-        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
             PlayerIndex = stream.ReadInt32();

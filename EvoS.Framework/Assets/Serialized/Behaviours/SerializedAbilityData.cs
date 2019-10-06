@@ -1,10 +1,7 @@
-using System;
-using EvoS.Framework.Network.Unity;
-
 namespace EvoS.Framework.Assets.Serialized.Behaviours
 {
     [SerializedMonoBehaviour("AbilityData")]
-    public class SerializedAbilityData : SerializedMonoChildBase
+    public class SerializedAbilityData : ISerializedItem
     {
         public bool IgnoreForLocalization { get; set; }
         public SerializedComponent Ability0 { get; set; }
@@ -26,7 +23,7 @@ namespace EvoS.Framework.Assets.Serialized.Behaviours
         public string SequenceDirNameOverride { get; set; }
         public string AbilitySetupNotes { get; set; }
 
-        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
 

@@ -3,7 +3,7 @@ using EvoS.Framework.Constants.Enums;
 namespace EvoS.Framework.Assets.Serialized.Behaviours
 {
     [SerializedMonoBehaviour("Passive")]
-    public class SerializedPassive : SerializedMonoChildBase
+    public class SerializedPassive : ISerializedItem
     {
         public string PassiveName { get; set; }
         public SerializedComponent SequencePrefab { get; set; }
@@ -17,7 +17,7 @@ namespace EvoS.Framework.Assets.Serialized.Behaviours
 //        public SerializedVector<StandardActorEffectData> EffectsOnEveryTurn { get; set; }
         public SerializedVector<SerializedComponent> EffectsOnEveryTurn { get; set; }
 
-        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public virtual void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             PassiveName = stream.ReadString32();
             SequencePrefab = new SerializedComponent();

@@ -1,16 +1,17 @@
+using System;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Assets.Serialized.Behaviours
 {
     [SerializedMonoBehaviour("NetworkIdentity")]
-    public class SerializedNetworkIdentity : SerializedMonoChildBase
+    public class SerializedNetworkIdentity : ISerializedItem
     {
         public NetworkSceneId SceneId { get; set; }
         public Hash128 AssetId { get; set; }
         public bool ServerOnly { get; set; }
         public bool LocalPlayerAuthority { get; set; }
 
-        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
             SceneId = new NetworkSceneId(stream.ReadUInt32());
