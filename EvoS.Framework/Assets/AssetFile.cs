@@ -145,15 +145,22 @@ namespace EvoS.Framework.Assets
                 var obj = (ISerializedItem) Activator.CreateInstance(_unityTypeMap[objType.TypeId]);
                 obj.DeserializeAsset(assetFile, assetFile._stream);
 
-                if (assetFile._stream.Position < endPos)
+                var currentPos = assetFile._stream.Position;
+                if (currentPos < endPos)
                 {
-//                    Log.Print(LogType.Warning,
-//                        $"Didn't fully read {obj.GetType().Name}, {assetFile._stream.Position}/{endPos}");
+                    if (obj is SerializedMonoBehaviour smb)
+                    {
+                        Log.Print(LogType.Warning, $"Didn't fully read MB {smb.Script.ClassName}, {currentPos}/{endPos}");
+                    }
+                    else
+                    {
+                        Log.Print(LogType.Warning, $"Didn't fully read {obj.GetType().Name}, {currentPos}/{endPos}");
+                    }
                 }
-                else if (assetFile._stream.Position > endPos)
+                else if (currentPos > endPos)
                 {
                     throw new IndexOutOfRangeException(
-                        $"Read past the end of {obj.GetType().Name}, {assetFile._stream.Position}/{endPos}");
+                        $"Read past the end of {obj.GetType().Name}, {currentPos}/{endPos}");
                 }
 
                 assetFile._stream.Position = savedPos;
