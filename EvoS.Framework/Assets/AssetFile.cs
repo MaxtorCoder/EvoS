@@ -128,29 +128,35 @@ namespace EvoS.Framework.Assets
                 {
                     throw new ArgumentException($"pathId was 0, but fileId was {fileId}");
                 }
+
                 return null;
             }
-            
-            var assetFile = _fileMap[fileId];
-            var savedPos = assetFile._stream.Position;
 
-            var objInfo = assetFile.Metadata.ObjectInfoTable[pathId];
+            if (fileId != 0)
+            {
+                return _fileMap[fileId].ReadObject(pathId, 0, restorePos);
+            }
 
-            var objType = assetFile.Metadata.TypeTree.BaseClasses[objInfo.TypeId];
+            var savedPos = _stream.Position;
 
-            assetFile._stream.Position = assetFile.Header.DataOffset + objInfo.ByteStart;
-            var endPos = assetFile.Header.DataOffset + objInfo.ByteStart + objInfo.ByteSize;
+            var objInfo = Metadata.ObjectInfoTable[pathId];
+
+            var objType = Metadata.TypeTree.BaseClasses[objInfo.TypeId];
+
+            _stream.Position = Header.DataOffset + objInfo.ByteStart;
+            var endPos = Header.DataOffset + objInfo.ByteStart + objInfo.ByteSize;
             if (_unityTypeMap.ContainsKey(objType.TypeId))
             {
                 var obj = (ISerializedItem) Activator.CreateInstance(_unityTypeMap[objType.TypeId]);
-                obj.DeserializeAsset(assetFile, assetFile._stream);
+                obj.DeserializeAsset(this, _stream);
 
-                var currentPos = assetFile._stream.Position;
+                var currentPos = _stream.Position;
                 if (currentPos < endPos)
                 {
                     if (obj is SerializedMonoBehaviour smb)
                     {
-                        Log.Print(LogType.Warning, $"Didn't fully read MB {smb.Script.ClassName}, {currentPos}/{endPos}");
+                        Log.Print(LogType.Warning,
+                            $"Didn't fully read MB {smb.Script.ClassName}, {currentPos}/{endPos}");
                     }
                     else
                     {
@@ -163,7 +169,7 @@ namespace EvoS.Framework.Assets
                         $"Read past the end of {obj.GetType().Name}, {currentPos}/{endPos}");
                 }
 
-                assetFile._stream.Position = savedPos;
+                _stream.Position = savedPos;
                 return obj;
             }
             else
@@ -173,7 +179,7 @@ namespace EvoS.Framework.Assets
 
             if (restorePos)
             {
-                assetFile._stream.Position = savedPos;
+                _stream.Position = savedPos;
             }
 
             return null;
