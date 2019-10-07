@@ -67,10 +67,10 @@ namespace EvoS.Framework.Misc
         public SerializedVector<TargetData> m_targetData;
 
 //        public Ability[] m_chainAbilities;
-        public SerializedVector<SerializedComponent> m_chainAbilities;
+        public SerializedArray<Ability> m_chainAbilities;
 
 //        public List<TargeterTemplateSwapData> m_targeterTemplateSwaps;
-        public SerializedVector<SerializedComponent> m_targeterTemplateSwaps;
+        public SerializedVector<TargeterTemplateSwapData> m_targeterTemplateSwaps;
         private AbilityMod m_currentAbilityMod;
 
 //        public Sprite sprite { get; set; }
@@ -131,20 +131,18 @@ namespace EvoS.Framework.Misc
             m_freeAction = stream.ReadBoolean();
             stream.AlignTo();
             m_techPointsCost = stream.ReadInt32();
-            m_techPointInteractions =
-                new SerializedVector<TechPointInteraction>(assetFile, stream); // TechPointInteraction[]
+            m_techPointInteractions = new SerializedVector<TechPointInteraction>(assetFile, stream);
             m_actionAnimType = (ActorModelData.ActionAnimationType) stream.ReadInt32();
             m_rotationVisibilityMode = (RotationVisibilityMode) stream.ReadInt32();
             m_movementAdjustment = (MovementAdjustment) stream.ReadInt32();
             m_movementSpeed = stream.ReadSingle();
             m_movementDuration = stream.ReadSingle();
             m_cameraBoundsMinHeight = stream.ReadSingle();
-            m_targetData = new SerializedVector<TargetData>(assetFile, stream); // TargetData[]
+            m_targetData = new SerializedArray<TargetData>(assetFile, stream);
             m_tags = new SerializedVector<AbilityTags>(assetFile, stream);
             m_statusWhenRequested = new SerializedVector<StatusType>(assetFile, stream);
-            m_chainAbilities = new SerializedVector<SerializedComponent>(assetFile, stream); // Ability[]
-            m_targeterTemplateSwaps =
-                new SerializedVector<SerializedComponent>(assetFile, stream); // List<TargeterTemplateSwapData>
+            m_chainAbilities = new SerializedArray<Ability>(assetFile, stream);
+            m_targeterTemplateSwaps = new SerializedVector<TargeterTemplateSwapData>(assetFile, stream);
         }
     }
 }

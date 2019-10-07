@@ -5,12 +5,15 @@ namespace EvoS.Framework.Assets.Serialized
 {
     public class SerializedVector<T> : List<T>, ISerializedItem
     {
-        public SerializedVector()
+        public bool InlineRead { get; set; }
+
+        public SerializedVector(bool inlineRead = false)
         {
-            
+            InlineRead = inlineRead;
         }
-        
-        public SerializedVector(AssetFile assetFile, StreamReader stream)
+
+
+        public SerializedVector(AssetFile assetFile, StreamReader stream, bool inlineRead = false) : this(inlineRead)
         {
             DeserializeAsset(assetFile, stream);
         }
@@ -27,8 +30,7 @@ namespace EvoS.Framework.Assets.Serialized
                     Add((T) (object) stream.ReadString32());
                 }
             }
-            else 
-            if (typeof(T) == typeof(int))
+            else if (typeof(T) == typeof(int))
             {
                 for (var i = 0; i < length; i++)
                 {
@@ -42,7 +44,9 @@ namespace EvoS.Framework.Assets.Serialized
                     Add((T) (object) stream.ReadInt32());
                 }
             }
-            else if (typeof(SerializedComponent).IsAssignableFrom(typeof(T)) || typeof(T).IsValueType)
+            else if (typeof(T).IsValueType || 
+                     InlineRead && typeof(ISerializedItem).IsAssignableFrom(typeof(T)) ||
+                     typeof(T) == typeof(SerializedComponent))
             {
                 for (var i = 0; i < length; i++)
                 {

@@ -2,7 +2,6 @@ using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Constants.Enums;
-using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
 {
@@ -29,11 +28,11 @@ namespace EvoS.Framework.Misc
         public InvisibilityBreakMode m_invisBreakMode;
         public bool m_removeInvisibilityOnLastResolveStart;
         public bool m_removeRevealedOnLastResolveStart;
-        public SerializedVector<AbilityStatMod> m_statMods;
-        public SerializedVector<StatusType> m_statusChanges;
+        public SerializedArray<AbilityStatMod> m_statMods;
+        public SerializedArray<StatusType> m_statusChanges;
         public StatusDelayMode m_statusDelayMode;
-        public SerializedVector<EffectEndTag> m_endTriggers;
-        public SerializedVector<SerializedGameObject> m_sequencePrefabs;
+        public SerializedArray<EffectEndTag> m_endTriggers;
+        public SerializedVector<SerializedComponent> m_sequencePrefabs;
         public SerializedComponent m_tickSequencePrefab;
 
         public StandardActorEffectData()
@@ -70,11 +69,11 @@ namespace EvoS.Framework.Misc
             stream.AlignTo();
             m_removeRevealedOnLastResolveStart = stream.ReadBoolean();
             stream.AlignTo();
-            m_statMods = new SerializedVector<AbilityStatMod>(assetFile, stream);
-            m_statusChanges = new SerializedVector<StatusType>(assetFile, stream);
+            m_statMods = new SerializedArray<AbilityStatMod>(assetFile, stream);
+            m_statusChanges = new SerializedArray<StatusType>(assetFile, stream);
             m_statusDelayMode = (StatusDelayMode) stream.ReadInt32();
-            m_endTriggers = new SerializedVector<EffectEndTag>(assetFile, stream);
-            m_sequencePrefabs = new SerializedVector<SerializedGameObject >(assetFile, stream);
+            m_endTriggers = new SerializedArray<EffectEndTag>(assetFile, stream);
+            m_sequencePrefabs = new SerializedVector<SerializedComponent>(assetFile, stream);
             m_tickSequencePrefab = new SerializedComponent(assetFile, stream);
         }
 

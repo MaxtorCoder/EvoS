@@ -15,15 +15,14 @@ namespace EvoS.Framework.Misc
         public int m_healing;
         public int m_damage;
         public int m_techPoints;
-        public SerializedVector<AbilityStatMod> m_permanentStatMods;
-        public SerializedVector<StatusType> m_permanentStatusChanges;
+        public SerializedArray<AbilityStatMod> m_permanentStatMods;
+        public SerializedArray<StatusType> m_permanentStatusChanges;
         public SerializedComponent m_sequenceToPlay;
 
         public GameplayResponseForActor()
         {
-            
         }
-        
+
         public GameplayResponseForActor(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);
@@ -36,9 +35,9 @@ namespace EvoS.Framework.Misc
             m_healing = stream.ReadInt32();
             m_damage = stream.ReadInt32();
             m_techPoints = stream.ReadInt32();
-            m_permanentStatMods = new SerializedVector<AbilityStatMod>(assetFile, stream);
-            m_permanentStatusChanges = new SerializedVector<StatusType>(assetFile, stream);
-            m_sequenceToPlay = new SerializedComponent(assetFile, stream);
+            m_permanentStatMods = new SerializedArray<AbilityStatMod>(assetFile, stream);
+            m_permanentStatusChanges = new SerializedArray<StatusType>(assetFile, stream);
+            m_sequenceToPlay = new SerializedComponent(assetFile, stream); // class [UnityEngine]UnityEngine.GameObject
         }
 
         public override string ToString()
