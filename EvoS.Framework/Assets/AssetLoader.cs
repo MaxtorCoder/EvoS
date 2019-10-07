@@ -37,15 +37,44 @@ namespace EvoS.Framework.Assets
             MainAssetFile = new AssetFile(join);
 
             _gameObjectType = MainAssetFile.FindTypeById(1);
-            
+
             LoadNetworkedObjects();
         }
 
         private void LoadNetworkedObjects()
         {
-            foreach (var gameObject in MainAssetFile.GetObjectInfosByType(_gameObjectType))
+            var stack = new Stack<AssetFile>();
+            var seen = new HashSet<string>();
+            stack.Push(MainAssetFile);
+
+            while (!stack.IsNullOrEmpty())
             {
-                var obj = (SerializedGameObject) MainAssetFile.ReadObject(gameObject);
+                var assetFile = stack.Pop();
+                if (seen.Contains(assetFile.Name))
+                {
+                    continue;
+                }
+
+                InternalLoadNetworkedObjects(assetFile);
+                seen.Add(assetFile.Name);
+            }
+
+            Log.Print(LogType.Misc, $"Loaded {NetworkedObjects.Count} networked game objects");
+        }
+
+        private void InternalLoadNetworkedObjects(AssetFile assetFile)
+        {
+            Console.WriteLine($"Loading net objs from {assetFile.Name}");
+
+            var gameObjectType = assetFile.FindTypeById(1);
+            if (gameObjectType == null)
+            {
+                return;
+            }
+
+            foreach (var gameObject in assetFile.GetObjectInfosByType(gameObjectType))
+            {
+                var obj = (SerializedGameObject) assetFile.ReadObject(gameObject);
 
                 var netIdent = obj.GetComponent<SerializedNetworkIdentity>();
                 if (netIdent != null)
@@ -55,7 +84,10 @@ namespace EvoS.Framework.Assets
                 }
             }
 
-            Log.Print(LogType.Misc, $"Loaded {NetworkedObjects.Count} networked game objects");
+            foreach (var externalRef in assetFile.ExternalAssetRefs)
+            {
+                InternalLoadNetworkedObjects(externalRef);
+            }
         }
 
         public void DumpNetworkObjectComponents()

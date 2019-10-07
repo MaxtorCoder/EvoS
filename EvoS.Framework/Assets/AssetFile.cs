@@ -1,21 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Logging;
-using EvoS.Framework.Network;
 
 namespace EvoS.Framework.Assets
 {
     public class AssetFile : IDisposable
     {
+        public string Name { get; private set; }
         private StreamReader _stream;
         public SerializedFileHeader Header { get; set; }
         public SerializedFileMetadata Metadata { get; set; }
         private List<AssetFile> _fileMap = new List<AssetFile>();
+
+        public ReadOnlyCollection<AssetFile> ExternalAssetRefs => _fileMap.Skip(1).ToList().AsReadOnly();
 
         private Dictionary<long, WeakReference<ISerializedItem>> _referenceCache =
             new Dictionary<long, WeakReference<ISerializedItem>>();
@@ -47,6 +50,7 @@ namespace EvoS.Framework.Assets
 
         public AssetFile(string filePath)
         {
+            Name = Path.GetFullPath(filePath);
             _fileMap.Add(this);
 
             _stream = new StreamReader(filePath);
