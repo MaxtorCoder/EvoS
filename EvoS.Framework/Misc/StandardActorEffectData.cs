@@ -1,5 +1,6 @@
 using System;
-using System.Collections.Generic;
+using EvoS.Framework.Assets;
+using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Network.Unity;
 
@@ -8,12 +9,12 @@ namespace EvoS.Framework.Misc
     [Serializable]
     public class StandardActorEffectData
     {
-        public int m_duration = 1;
-        public HealingType m_healingType = HealingType.Effect;
         public string m_effectName;
+        public int m_duration;
         public int m_maxStackSize;
         public int m_damagePerTurn;
         public int m_healingPerTurn;
+        public HealingType m_healingType = HealingType.Effect;
         public int m_perTurnHitDelayTurns;
         public int m_absorbAmount;
         public int m_nextTurnAbsorbAmount;
@@ -25,61 +26,101 @@ namespace EvoS.Framework.Misc
         public int m_techPointChangeOnStart;
         public int m_techPointGainPerTurn;
         public int m_techPointLossPerTurn;
-        public StandardActorEffectData.InvisibilityBreakMode m_invisBreakMode;
+        public InvisibilityBreakMode m_invisBreakMode;
         public bool m_removeInvisibilityOnLastResolveStart;
         public bool m_removeRevealedOnLastResolveStart;
-        public AbilityStatMod[] m_statMods;
-        public StatusType[] m_statusChanges;
-        public StandardActorEffectData.StatusDelayMode m_statusDelayMode;
-        public EffectEndTag[] m_endTriggers;
-        public GameObject[] m_sequencePrefabs;
-        public GameObject m_tickSequencePrefab;
+        public SerializedVector<AbilityStatMod> m_statMods;
+        public SerializedVector<StatusType> m_statusChanges;
+        public StatusDelayMode m_statusDelayMode;
+        public SerializedVector<EffectEndTag> m_endTriggers;
+        public SerializedVector<SerializedGameObject> m_sequencePrefabs;
+        public SerializedComponent m_tickSequencePrefab;
 
-        public void InitWithDefaultValues()
+        public StandardActorEffectData()
         {
-            this.SetValues(string.Empty, 1, 0, 0, 0, HealingType.Effect, 0, 0, new AbilityStatMod[0], new StatusType[0],
-                StandardActorEffectData.StatusDelayMode.DefaultBehavior);
         }
 
-        public void SetValues(
-            string effectName,
-            int duration,
-            int maxStackSize,
-            int damagePerTurn,
-            int healingPerTurn,
-            HealingType healingType,
-            int perTurnHitDelayTurns,
-            int absorbAmount,
-            AbilityStatMod[] statMods,
-            StatusType[] statusChanges,
-            StandardActorEffectData.StatusDelayMode statusDelayMode)
+        public StandardActorEffectData(AssetFile assetFile, StreamReader stream)
         {
-            this.m_effectName = effectName;
-            this.m_duration = duration;
-            this.m_maxStackSize = maxStackSize;
-            this.m_damagePerTurn = damagePerTurn;
-            this.m_healingPerTurn = healingPerTurn;
-            this.m_healingType = healingType;
-            this.m_perTurnHitDelayTurns = perTurnHitDelayTurns;
-            this.m_absorbAmount = absorbAmount;
-            this.m_statMods = statMods;
-            this.m_statusChanges = statusChanges;
-            this.m_statusDelayMode = statusDelayMode;
-            this.m_endTriggers = new EffectEndTag[0];
-            this.m_sequencePrefabs = new GameObject[0];
+            DeserializeAsset(assetFile, stream);
+        }
+
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        {
+            m_effectName = stream.ReadString32();
+            m_duration = stream.ReadInt32();
+            m_maxStackSize = stream.ReadInt32();
+            m_damagePerTurn = stream.ReadInt32();
+            m_healingPerTurn = stream.ReadInt32();
+            m_healingType = (HealingType) stream.ReadInt32();
+            m_perTurnHitDelayTurns = stream.ReadInt32();
+            m_absorbAmount = stream.ReadInt32();
+            m_nextTurnAbsorbAmount = stream.ReadInt32();
+            m_dontEndEarlyOnShieldDeplete = stream.ReadBoolean();
+            stream.AlignTo();
+            m_damagePerMoveSquare = stream.ReadInt32();
+            m_healPerMoveSquare = stream.ReadInt32();
+            m_techPointLossPerMoveSquare = stream.ReadInt32();
+            m_techPointGainPerMoveSquare = stream.ReadInt32();
+            m_techPointChangeOnStart = stream.ReadInt32();
+            m_techPointGainPerTurn = stream.ReadInt32();
+            m_techPointLossPerTurn = stream.ReadInt32();
+            m_invisBreakMode = (InvisibilityBreakMode) stream.ReadInt32();
+            m_removeInvisibilityOnLastResolveStart = stream.ReadBoolean();
+            stream.AlignTo();
+            m_removeRevealedOnLastResolveStart = stream.ReadBoolean();
+            stream.AlignTo();
+            m_statMods = new SerializedVector<AbilityStatMod>(assetFile, stream);
+            m_statusChanges = new SerializedVector<StatusType>(assetFile, stream);
+            m_statusDelayMode = (StatusDelayMode) stream.ReadInt32();
+            m_endTriggers = new SerializedVector<EffectEndTag>(assetFile, stream);
+            m_sequencePrefabs = new SerializedVector<SerializedGameObject >(assetFile, stream);
+            m_tickSequencePrefab = new SerializedComponent(assetFile, stream);
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(StandardActorEffectData)}>(" +
+                   $"{nameof(m_effectName)}: {m_effectName}, " +
+                   $"{nameof(m_duration)}: {m_duration}, " +
+                   $"{nameof(m_maxStackSize)}: {m_maxStackSize}, " +
+                   $"{nameof(m_damagePerTurn)}: {m_damagePerTurn}, " +
+                   $"{nameof(m_healingPerTurn)}: {m_healingPerTurn}, " +
+                   $"{nameof(m_healingType)}: {m_healingType}, " +
+                   $"{nameof(m_perTurnHitDelayTurns)}: {m_perTurnHitDelayTurns}, " +
+                   $"{nameof(m_absorbAmount)}: {m_absorbAmount}, " +
+                   $"{nameof(m_nextTurnAbsorbAmount)}: {m_nextTurnAbsorbAmount}, " +
+                   $"{nameof(m_dontEndEarlyOnShieldDeplete)}: {m_dontEndEarlyOnShieldDeplete}, " +
+                   $"{nameof(m_damagePerMoveSquare)}: {m_damagePerMoveSquare}, " +
+                   $"{nameof(m_healPerMoveSquare)}: {m_healPerMoveSquare}, " +
+                   $"{nameof(m_techPointLossPerMoveSquare)}: {m_techPointLossPerMoveSquare}, " +
+                   $"{nameof(m_techPointGainPerMoveSquare)}: {m_techPointGainPerMoveSquare}, " +
+                   $"{nameof(m_techPointChangeOnStart)}: {m_techPointChangeOnStart}, " +
+                   $"{nameof(m_techPointGainPerTurn)}: {m_techPointGainPerTurn}, " +
+                   $"{nameof(m_techPointLossPerTurn)}: {m_techPointLossPerTurn}, " +
+                   $"{nameof(m_invisBreakMode)}: {m_invisBreakMode}, " +
+                   $"{nameof(m_removeInvisibilityOnLastResolveStart)}: {m_removeInvisibilityOnLastResolveStart}, " +
+                   $"{nameof(m_removeRevealedOnLastResolveStart)}: {m_removeRevealedOnLastResolveStart}, " +
+                   $"{nameof(m_statMods)}: {m_statMods}, " +
+                   $"{nameof(m_statusChanges)}: {m_statusChanges}, " +
+                   $"{nameof(m_statusDelayMode)}: {m_statusDelayMode}, " +
+                   $"{nameof(m_endTriggers)}: {m_endTriggers}, " +
+                   $"{nameof(m_sequencePrefabs)}: {m_sequencePrefabs}, " +
+                   $"{nameof(m_tickSequencePrefab)}: {m_tickSequencePrefab}, " +
+                   ")";
         }
 
         public enum InvisibilityBreakMode
         {
             RemoveInvisAndEndEarly,
-            SuppressOnly,
+            SuppressOnly
         }
 
         public enum StatusDelayMode
         {
             DefaultBehavior,
             AllStatusesDelayToTurnStart,
-            NoStatusesDelayToTurnStart,
+            NoStatusesDelayToTurnStart
         }
     }
 }

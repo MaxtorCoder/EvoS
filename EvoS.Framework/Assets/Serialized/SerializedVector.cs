@@ -20,6 +20,14 @@ namespace EvoS.Framework.Assets.Serialized
             Clear();
 
             var length = stream.ReadInt32();
+            if (typeof(T) == typeof(string))
+            {
+                for (var i = 0; i < length; i++)
+                {
+                    Add((T) (object) stream.ReadString32());
+                }
+            }
+            else 
             if (typeof(T) == typeof(int))
             {
                 for (var i = 0; i < length; i++)

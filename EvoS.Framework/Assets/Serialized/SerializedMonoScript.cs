@@ -1,5 +1,6 @@
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Assets.Serialized
 {
@@ -7,6 +8,7 @@ namespace EvoS.Framework.Assets.Serialized
     {
         public string Name { get; set; }
         public int ExecutionOrder { get; set; }
+        [JsonIgnore]
         public NetworkHash128 PropertiesHash { get; set; }
         public string ClassName { get; set; }
         public string Namespace { get; set; }
