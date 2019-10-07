@@ -134,61 +134,51 @@ namespace EvoS.Framework.Misc
             m_tooltip = stream.ReadString32();
             m_flavorText = stream.ReadString32();
             m_debugUnlocalizedTooltip = stream.ReadString32();
-            m_savedStatusTypesForTooltips =
-                new SerializedVector<StatusType>(assetFile,
-                    stream); // class [mscorlib]System.Collections.Generic.List`1<valuetype StatusType>
-            m_iconSprite = new SerializedComponent(assetFile, stream); // class [UnityEngine]UnityEngine.Sprite
+            m_savedStatusTypesForTooltips = new SerializedVector<StatusType>(assetFile, stream);
+            m_iconSprite = new SerializedComponent(assetFile, stream);
             m_useRunPriorityOverride = stream.ReadBoolean();
             stream.AlignTo();
             m_runPriorityOverride = (AbilityPriority) stream.ReadInt32();
-            m_techPointCostMod = new AbilityModPropertyInt(assetFile, stream); // class AbilityModPropertyInt
-            m_maxCooldownMod = new AbilityModPropertyInt(assetFile, stream); // class AbilityModPropertyInt
-            m_maxStocksMod = new AbilityModPropertyInt(assetFile, stream); // class AbilityModPropertyInt
-            m_stockRefreshDurationMod = new AbilityModPropertyInt(assetFile, stream); // class AbilityModPropertyInt
-            m_refillAllStockOnRefreshMod =
-                new AbilityModPropertyBool(assetFile, stream); // class AbilityModPropertyBool
-            m_isFreeActionMod = new AbilityModPropertyBool(assetFile, stream); // class AbilityModPropertyBool
-            m_autoQueueIfValidMod = new AbilityModPropertyBool(assetFile, stream); // class AbilityModPropertyBool
-            m_targetDataMaxRangeMod = new AbilityModPropertyFloat(assetFile, stream); // class AbilityModPropertyFloat
-            m_targetDataMinRangeMod = new AbilityModPropertyFloat(assetFile, stream); // class AbilityModPropertyFloat
-            m_targetDataCheckLosMod = new AbilityModPropertyBool(assetFile, stream); // class AbilityModPropertyBool
+            m_techPointCostMod = new AbilityModPropertyInt(assetFile, stream);
+            m_maxCooldownMod = new AbilityModPropertyInt(assetFile, stream);
+            m_maxStocksMod = new AbilityModPropertyInt(assetFile, stream);
+            m_stockRefreshDurationMod = new AbilityModPropertyInt(assetFile, stream);
+            m_refillAllStockOnRefreshMod = new AbilityModPropertyBool(assetFile, stream);
+            m_isFreeActionMod = new AbilityModPropertyBool(assetFile, stream);
+            m_autoQueueIfValidMod = new AbilityModPropertyBool(assetFile, stream);
+            m_targetDataMaxRangeMod = new AbilityModPropertyFloat(assetFile, stream);
+            m_targetDataMinRangeMod = new AbilityModPropertyFloat(assetFile, stream);
+            m_targetDataCheckLosMod = new AbilityModPropertyBool(assetFile, stream);
             m_useTargetDataOverrides = stream.ReadBoolean();
             stream.AlignTo();
-            m_targetDataOverrides = new SerializedArray<TargetData>(assetFile, stream); // class TargetData[]
-            m_techPointInteractionMods =
-                new SerializedArray<TechPointInteractionMod>(assetFile, stream); // class TechPointInteractionMod[]
+            m_targetDataOverrides = new SerializedArray<TargetData>(assetFile, stream);
+            m_techPointInteractionMods = new SerializedArray<TechPointInteractionMod>(assetFile, stream);
             m_useActionAnimTypeOverride = stream.ReadBoolean();
             stream.AlignTo();
             m_actionAnimTypeOverride = (ActorModelData.ActionAnimationType) stream.ReadInt32();
             m_useMovementAdjustmentOverride = stream.ReadBoolean();
             stream.AlignTo();
             m_movementAdjustmentOverride = (Ability.MovementAdjustment) stream.ReadInt32();
-            m_effectToSelfOnCast = new StandardEffectInfo(assetFile, stream); // class StandardEffectInfo
-            m_effectToTargetEnemyOnHit = new StandardEffectInfo(assetFile, stream); // class StandardEffectInfo
-            m_effectToTargetAllyOnHit = new StandardEffectInfo(assetFile, stream); // class StandardEffectInfo
+            m_effectToSelfOnCast = new StandardEffectInfo(assetFile, stream);
+            m_effectToTargetEnemyOnHit = new StandardEffectInfo(assetFile, stream);
+            m_effectToTargetAllyOnHit = new StandardEffectInfo(assetFile, stream);
             m_useAllyEffectForTargetedCaster = stream.ReadBoolean();
             stream.AlignTo();
             m_effectTriggerChance = stream.ReadSingle();
             m_effectTriggerChanceMultipliedPerHit = stream.ReadBoolean();
             stream.AlignTo();
-            m_cooldownReductionsOnSelf =
-                new AbilityModCooldownReduction(assetFile, stream); // class AbilityModCooldownReduction
-            m_selfHitTimingSequencePrefab =
-                new SerializedComponent(assetFile, stream); // class [UnityEngine]UnityEngine.GameObject
-            m_chainAbilityModInfo = new SerializedVector<ChainAbilityAdditionalModInfo>(assetFile, stream); // class [mscorlib]System.Collections.Generic.List`1<class ChainAbilityAdditionalModInfo>
+            m_cooldownReductionsOnSelf = new AbilityModCooldownReduction(assetFile, stream);
+            m_selfHitTimingSequencePrefab = new SerializedComponent(assetFile, stream);
+            m_chainAbilityModInfo = new SerializedVector<ChainAbilityAdditionalModInfo>(assetFile, stream);
             m_useChainAbilityOverrides = stream.ReadBoolean();
             stream.AlignTo();
             m_chainAbilityOverrides = new SerializedVector<SerializedMonoBehaviour>(assetFile, stream);
             m_tagsModType = (TagOverrideType) stream.ReadInt32();
-            m_abilityTagsInMod =
-                new SerializedVector<AbilityTags>(assetFile,
-                    stream); // class [mscorlib]System.Collections.Generic.List`1<valuetype AbilityTags>
-            m_statModsWhileEquipped = new SerializedArray<AbilityStatMod>(assetFile, stream); // class AbilityStatMod[]
+            m_abilityTagsInMod = new SerializedVector<AbilityTags>(assetFile, stream);
+            m_statModsWhileEquipped = new SerializedArray<AbilityStatMod>(assetFile, stream);
             m_useStatusWhenRequestedOverride = stream.ReadBoolean();
             stream.AlignTo();
-            m_statusWhenRequestedOverride =
-                new SerializedVector<StatusType>(assetFile,
-                    stream); // class [mscorlib]System.Collections.Generic.List`1<valuetype StatusType>
+            m_statusWhenRequestedOverride = new SerializedVector<StatusType>(assetFile, stream);
             beginningOfModSpecificData = stream.ReadBoolean();
             stream.AlignTo();
         }
