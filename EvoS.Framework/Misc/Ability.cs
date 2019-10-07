@@ -67,7 +67,7 @@ namespace EvoS.Framework.Misc
         public SerializedVector<TargetData> m_targetData;
 
 //        public Ability[] m_chainAbilities;
-        public SerializedArray<Ability> m_chainAbilities;
+        public SerializedVector<SerializedMonoBehaviour> m_chainAbilities;
 
 //        public List<TargeterTemplateSwapData> m_targeterTemplateSwaps;
         public SerializedVector<TargeterTemplateSwapData> m_targeterTemplateSwaps;
@@ -141,7 +141,7 @@ namespace EvoS.Framework.Misc
             m_targetData = new SerializedArray<TargetData>(assetFile, stream);
             m_tags = new SerializedVector<AbilityTags>(assetFile, stream);
             m_statusWhenRequested = new SerializedVector<StatusType>(assetFile, stream);
-            m_chainAbilities = new SerializedArray<Ability>(assetFile, stream);
+            m_chainAbilities = new SerializedVector<SerializedMonoBehaviour>(assetFile, stream);
             m_targeterTemplateSwaps = new SerializedVector<TargeterTemplateSwapData>(assetFile, stream);
         }
     }

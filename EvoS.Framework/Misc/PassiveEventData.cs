@@ -10,7 +10,7 @@ namespace EvoS.Framework.Misc
     {
         public PassiveEventType EventType;
 
-        public SerializedVector<Ability> CausalAbilities;
+        public SerializedVector<SerializedMonoBehaviour> CausalAbilities;
 
 //        public PassiveEventResponse ResponseOnSelf;
 //        public PassiveEventResponse ResponseOnOther;
@@ -20,7 +20,7 @@ namespace EvoS.Framework.Misc
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             EventType = (PassiveEventType) (object) stream.ReadInt32();
-            CausalAbilities = new SerializedVector<Ability>();
+            CausalAbilities = new SerializedVector<SerializedMonoBehaviour>();
 //            CausalAbilities.DeserializeAsset(assetFile, stream);
             ResponseOnSelf = new SerializedComponent(assetFile, stream);
             ResponseOnOther = new SerializedComponent(assetFile, stream);

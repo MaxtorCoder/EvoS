@@ -98,7 +98,7 @@ namespace EvoS.Framework.Misc
 //        [Header("    Chain Ability override")]
         public bool m_useChainAbilityOverrides;
 
-        public SerializedVector<Ability> m_chainAbilityOverrides;
+        public SerializedVector<SerializedMonoBehaviour> m_chainAbilityOverrides;
 
 //        [Header("-- Ability Tag Override")]
         public AbilityMod.TagOverrideType m_tagsModType;
@@ -178,7 +178,7 @@ namespace EvoS.Framework.Misc
             m_chainAbilityModInfo = new SerializedVector<ChainAbilityAdditionalModInfo>(assetFile, stream); // class [mscorlib]System.Collections.Generic.List`1<class ChainAbilityAdditionalModInfo>
             m_useChainAbilityOverrides = stream.ReadBoolean();
             stream.AlignTo();
-            m_chainAbilityOverrides = new SerializedArray<Ability>(assetFile, stream); // class Ability[]
+            m_chainAbilityOverrides = new SerializedVector<SerializedMonoBehaviour>(assetFile, stream);
             m_tagsModType = (TagOverrideType) stream.ReadInt32();
             m_abilityTagsInMod =
                 new SerializedVector<AbilityTags>(assetFile,

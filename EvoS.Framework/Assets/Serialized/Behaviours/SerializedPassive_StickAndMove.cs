@@ -8,14 +8,14 @@ namespace EvoS.Framework.Assets.Serialized.Behaviours
     {
         public int DamageToAdvanceCooldown;
 //        public List<Ability> AbilitiesToAdvanceCooldown;
-        public List<SerializedComponent> AbilitiesToAdvanceCooldown;
+        public List<SerializedMonoBehaviour> AbilitiesToAdvanceCooldown;
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             base.DeserializeAsset(assetFile, stream);
 
             DamageToAdvanceCooldown = stream.ReadInt32();
-            AbilitiesToAdvanceCooldown = new SerializedVector<SerializedComponent>(assetFile, stream);
+            AbilitiesToAdvanceCooldown = new SerializedVector<SerializedMonoBehaviour>(assetFile, stream);
         }
 
         public override string ToString()
