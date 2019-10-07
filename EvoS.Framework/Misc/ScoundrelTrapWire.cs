@@ -14,6 +14,15 @@ namespace EvoS.Framework.Misc
         public float m_barrierSizeScale;
         public StandardBarrierData m_barrierData;
 
+        public ScoundrelTrapWire()
+        {
+        }
+
+        public ScoundrelTrapWire(AssetFile assetFile, StreamReader stream)
+        {
+            DeserializeAsset(assetFile, stream);
+        }
+
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             base.DeserializeAsset(assetFile, stream);

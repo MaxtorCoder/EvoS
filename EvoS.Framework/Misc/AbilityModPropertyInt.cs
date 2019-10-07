@@ -1,4 +1,5 @@
 using System;
+using EvoS.Framework.Assets;
 
 namespace EvoS.Framework.Misc
 {
@@ -7,6 +8,29 @@ namespace EvoS.Framework.Misc
     {
         public float value;
         public ModOp operation;
+
+        public AbilityModPropertyInt()
+        {
+        }
+
+        public AbilityModPropertyInt(AssetFile assetFile, StreamReader stream)
+        {
+            DeserializeAsset(assetFile, stream);
+        }
+
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        {
+            value = stream.ReadSingle();
+            operation = (ModOp) stream.ReadInt32();
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(AbilityModPropertyInt)}>(" +
+                   $"{nameof(value)}: {value}, " +
+                   $"{nameof(operation)}: {operation}, " +
+                   ")";
+        }
 
         public int GetModifiedValue(int input)
         {
