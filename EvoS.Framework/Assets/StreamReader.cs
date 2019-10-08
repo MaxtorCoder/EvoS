@@ -49,6 +49,8 @@ namespace EvoS.Framework.Assets
 
         public void AlignTo(int offset = 4)
         {
+            if (Position % offset == 0) return;
+
             Position += (offset - Position % offset) % offset;
         }
 
