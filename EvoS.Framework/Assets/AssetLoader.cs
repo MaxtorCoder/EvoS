@@ -41,7 +41,7 @@ namespace EvoS.Framework.Assets
             LoadNetworkedObjects();
         }
 
-        private void LoadNetworkedObjects()
+        private IEnumerable<AssetFile> AllAssetFiles()
         {
             var stack = new Stack<AssetFile>();
             var seen = new HashSet<string>();
@@ -55,7 +55,7 @@ namespace EvoS.Framework.Assets
                     continue;
                 }
 
-                InternalLoadNetworkedObjects(assetFile);
+                yield return assetFile;
                 seen.Add(assetFile.Name);
 
                 foreach (var extRef in assetFile.ExternalAssetRefs)
@@ -63,9 +63,19 @@ namespace EvoS.Framework.Assets
                     stack.Push(extRef);
                 }
             }
+        }
+
+        private void LoadNetworkedObjects()
+        {
+            var count = 0;
+            foreach (var assetFile in AllAssetFiles())
+            {
+                InternalLoadNetworkedObjects(assetFile);
+                count++;
+            }
 
             Log.Print(LogType.Misc,
-                $"Loaded {NetworkedObjects.Count} networked game objects from {seen.Count} asset files.");
+                $"Loaded {NetworkedObjects.Count} networked game objects from {count} asset files.");
         }
 
         private void InternalLoadNetworkedObjects(AssetFile assetFile)
