@@ -64,8 +64,8 @@ namespace EvoS.Framework.Assets
                    $"{nameof(TypeId)}: {TypeId}, " +
                    $"{nameof(Unknown1)}: {Unknown1}, " +
                    $"{nameof(Unknown2)}: {Unknown2}, " +
-//                   $"{nameof(Foo2)}: {Foo2}, " +
-//                   $"{nameof(Foo1)}: {BitConverter.ToString(Foo1)}" +
+                   $"{nameof(Foo2)}: {(Foo2 != null ? BitConverter.ToString(Foo2).Replace("-","") : null)}, " +
+                   $"{nameof(Foo1)}: {BitConverter.ToString(Foo1).Replace("-","")}" +
                    ")";
         }
     }

@@ -11,12 +11,17 @@ namespace EvoS.Framework.Assets
     public class AssetLoader
     {
         public AssetFile MainAssetFile;
+
+        private Dictionary<byte[], List<SerializedMonoScript>> _scriptsByHash =
+            new Dictionary<byte[], List<SerializedMonoScript>>(new ByteArrayComparer());
+
+        private Dictionary<string, SerializedMonoScript> _scriptsByName =
+            new Dictionary<string, SerializedMonoScript>();
+
         public Dictionary<string, SerializedGameObject> NetObjsByName = new Dictionary<string, SerializedGameObject>();
 
         public Dictionary<NetworkHash128, SerializedGameObject> NetObjsByAssetId =
             new Dictionary<NetworkHash128, SerializedGameObject>();
-
-        private TypeEntry _gameObjectType;
 
         public Dictionary<string, SerializedGameObject>.ValueCollection NetworkedObjects => NetObjsByName.Values;
 
@@ -37,8 +42,19 @@ namespace EvoS.Framework.Assets
             MainAssetFile = new AssetFile(join);
 
             _gameObjectType = MainAssetFile.FindTypeById(1);
+            ConstructMonoScriptMap();
 
             LoadNetworkedObjects();
+
+        public IEnumerable<SerializedGameObject> GetObjectsByComponent(SerializedMonoScript script)
+        {
+            foreach (var assetFile in AllAssetFiles())
+            {
+                foreach (var gameObject in assetFile.GetObjectsByComponent(script))
+                {
+                    yield return gameObject;
+                }
+            }
         }
 
         private IEnumerable<AssetFile> AllAssetFiles()
@@ -63,6 +79,49 @@ namespace EvoS.Framework.Assets
                     stack.Push(extRef);
                 }
             }
+        }
+
+        private void ConstructMonoScriptMap()
+        {
+            foreach (var assetFile in AllAssetFiles())
+            {
+                var monoScriptType = assetFile.FindTypeById(CommonTypeIds.MonoScript);
+                if (monoScriptType == null)
+                {
+                    continue;
+                }
+
+                foreach (var gameObject in assetFile.GetObjectInfosByType(monoScriptType))
+                {
+                    var obj = (SerializedMonoScript) assetFile.ReadObject(gameObject);
+                    if (obj.PropertiesHash.IsZero())
+                    {
+                        continue;
+                    }
+
+                    // multiple scripts can share the same properties hash
+                    if (!_scriptsByHash.TryGetValue(obj.PropertiesHash.ToByteArray(), out var scriptList))
+                    {
+                        scriptList = new List<SerializedMonoScript>();
+                        _scriptsByHash.Add(obj.PropertiesHash.ToByteArray(), scriptList);
+                    }
+
+                    scriptList.Add(obj);
+                    if (!_scriptsByName.TryAdd(obj.QualifiedName, obj))
+                    {
+                        var existing = _scriptsByName[obj.QualifiedName];
+                        if (existing.QualifiedName == obj.QualifiedName && existing.AssemblyName == obj.AssemblyName)
+                        {
+                            continue;
+                        }
+
+                        Log.Print(LogType.Warning, $"    trying:  {obj}");
+                        Log.Print(LogType.Warning, $"    already: {_scriptsByName[obj.QualifiedName]}");
+                    }
+                }
+            }
+
+            Log.Print(LogType.Misc, $"Loaded {_scriptsByName.Count} MonoScript type mappings");
         }
 
         private void LoadNetworkedObjects()

@@ -14,6 +14,7 @@ namespace EvoS.Framework.Assets.Serialized
         public string Namespace { get; set; }
         public string AssemblyName { get; set; }
         public bool IsEditorScript { get; set; }
+        public string QualifiedName => $"{Namespace}.{ClassName}";
 
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
@@ -30,12 +31,12 @@ namespace EvoS.Framework.Assets.Serialized
         {
             return $"{nameof(SerializedMonoScript)}(" +
                    (!Name.Equals(ClassName) ? $"{nameof(Name)}: {Name}, " : "") +
-//                   $"{nameof(ExecutionOrder)}: {ExecutionOrder}, " +
-//                   $"{nameof(PropertiesHash)}: {PropertiesHash}, " +
+                   $"{nameof(ExecutionOrder)}: {ExecutionOrder}, " +
+                   $"{nameof(PropertiesHash)}: {PropertiesHash}, " +
                    $"{nameof(AssemblyName)}: {AssemblyName}, " +
                    (!Namespace.IsNullOrEmpty() ? $"{nameof(Namespace)}: {Namespace}, " : "") +
                    $"{nameof(ClassName)}: {ClassName}, " +
-//                   $"{nameof(IsEditorScript)}: {IsEditorScript}" +
+                   $"{nameof(IsEditorScript)}: {IsEditorScript}" +
                    ")";
         }
     }

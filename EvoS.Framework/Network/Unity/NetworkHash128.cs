@@ -123,10 +123,17 @@ namespace EvoS.Framework.Network.Unity
             return networkHash128;
         }
 
+        public bool IsZero()
+        {
+            return i0 == 0 && i1 == 0 && i2 == 0 && i3 == 0 && i4 == 0 && i5 == 0 && i6 == 0 && i7 == 0 && i8 == 0 && i9 == 0 && i10 == 0 && i11 == 0 && i12 == 0 && i13 == 0 && i14 == 0 && i15 == 0;;
+        }
+
         public override string ToString()
         {
             return
                 $"{(object) i0:x2}{(object) i1:x2}{(object) i2:x2}{(object) i3:x2}{(object) i4:x2}{(object) i5:x2}{(object) i6:x2}{(object) i7:x2}{(object) i8:x2}{(object) i9:x2}{(object) i10:x2}{(object) i11:x2}{(object) i12:x2}{(object) i13:x2}{(object) i14:x2}{(object) i15:x2}";
         }
+
+        public byte[] ToByteArray() => new[] {i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15};
     }
 }

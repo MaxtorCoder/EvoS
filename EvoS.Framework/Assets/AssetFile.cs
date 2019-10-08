@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -17,6 +18,9 @@ namespace EvoS.Framework.Assets
         public SerializedFileHeader Header { get; set; }
         public SerializedFileMetadata Metadata { get; set; }
         private List<AssetFile> _fileMap = new List<AssetFile>();
+
+        public Dictionary<byte[], List<TypeEntry>> TypesByPropHash =
+            new Dictionary<byte[], List<TypeEntry>>(new ByteArrayComparer());
 
         public ReadOnlyCollection<AssetFile> ExternalAssetRefs => _fileMap.Skip(1).ToList().AsReadOnly();
 
@@ -57,7 +61,36 @@ namespace EvoS.Framework.Assets
             Header = new SerializedFileHeader(_stream);
             Metadata = new SerializedFileMetadata(_stream);
 
+            ProcessTypeTree();
+
             LoadExternalReferences(filePath);
+        }
+
+        private void ProcessTypeTree()
+        {
+            foreach (var baseClass in Metadata.TypeTree.BaseClasses)
+            {
+                if (baseClass.Foo1 == null) continue;
+
+                if (!TypesByPropHash.TryGetValue(baseClass.Foo1, out var typeList))
+                {
+                    typeList = new List<TypeEntry>();
+                    TypesByPropHash.Add(baseClass.Foo1, typeList);
+                }
+
+                typeList.Add(baseClass);
+            }
+        }
+
+        public IEnumerable<T> GetObjectsByType<T>(TypeEntry type)
+        {
+            foreach (var objInfo in Metadata.ObjectInfoTable.Values)
+            {
+                if (objInfo.TypeId == type.Index)
+                {
+                    yield return (T) ReadObject(objInfo);
+                }
+            }
         }
 
         public IEnumerable<ObjectInfoEntry> GetObjectInfosByType(TypeEntry typeEntry)
@@ -92,6 +125,8 @@ namespace EvoS.Framework.Assets
             _stream?.Dispose();
         }
 
+        public TypeEntry FindTypeById(CommonTypeIds typeId) => FindTypeById((int) typeId);
+
         public TypeEntry FindTypeById(int typeId)
         {
             foreach (var typeEntry in Metadata.TypeTree.BaseClasses)
@@ -103,6 +138,26 @@ namespace EvoS.Framework.Assets
             }
 
             return null;
+        }
+
+        public IEnumerable<SerializedGameObject> GetObjectsByComponent(SerializedMonoScript script)
+        {
+            if (!TypesByPropHash.TryGetValue(script.PropertiesHash.ToByteArray(), out var types))
+            {
+                yield break;
+            }
+
+            if (types.Count == 1)
+            {
+                foreach (var obj in GetObjectsByType<SerializedMonoBehaviour>(types[0]))
+                {
+                    yield return (SerializedGameObject) obj.GameObject.LoadValue();
+                }
+            }
+            else if (types.Count > 1)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public ISerializedItem ReadMonoScriptChild(SerializedMonoScript script)
