@@ -19,7 +19,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         {
             JoinMatchmakingQueueRequest request = (JoinMatchmakingQueueRequest)requestData;
 
-            LobbyQueueManager.AddToQueue(request.GameType, connection);
+            QueueManager.AddPlayerToQueue(request.GameType, connection);
 
             JoinMatchmakingQueueResponse response = new JoinMatchmakingQueueResponse();
             response.ResponseId = request.RequestId;
