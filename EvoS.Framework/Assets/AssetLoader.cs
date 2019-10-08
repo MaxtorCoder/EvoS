@@ -57,6 +57,11 @@ namespace EvoS.Framework.Assets
 
                 InternalLoadNetworkedObjects(assetFile);
                 seen.Add(assetFile.Name);
+
+                foreach (var extRef in assetFile.ExternalAssetRefs)
+                {
+                    stack.Push(extRef);
+                }
             }
 
             Log.Print(LogType.Misc, $"Loaded {NetworkedObjects.Count} networked game objects");
@@ -82,11 +87,6 @@ namespace EvoS.Framework.Assets
                     NetObjsByName.Add(obj.Name, obj);
                     NetObjsByAssetId.Add(new NetworkHash128(netIdent.AssetId.Bytes), obj);
                 }
-            }
-
-            foreach (var externalRef in assetFile.ExternalAssetRefs)
-            {
-                InternalLoadNetworkedObjects(externalRef);
             }
         }
 
