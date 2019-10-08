@@ -209,5 +209,14 @@ namespace EvoS.Framework.Assets
 
             return null;
         }
+
+        public override string ToString()
+        {
+            return $"{nameof(AssetFile)}(" +
+                   $"{nameof(Name)}: {Name}, " +
+                   $"{Metadata.ObjectInfoTable.Count} objects, " +
+                   $"{ExternalAssetRefs.Count} external refs" +
+                   ")";
+        }
     }
 }
