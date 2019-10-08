@@ -139,16 +139,9 @@ namespace EvoS.Framework.Assets
 
         private void InternalLoadNetworkedObjects(AssetFile assetFile)
         {
-            var gameObjectType = assetFile.FindTypeById(1);
-            if (gameObjectType == null)
+            var netIdentScript = _scriptsByName[CommonTypes.NetworkIdentity];
+            foreach (var obj in assetFile.GetObjectsByComponent(netIdentScript))
             {
-                return;
-            }
-
-            foreach (var gameObject in assetFile.GetObjectInfosByType(gameObjectType))
-            {
-                var obj = (SerializedGameObject) assetFile.ReadObject(gameObject);
-
                 var netIdent = obj.GetComponent<SerializedNetworkIdentity>();
                 if (netIdent != null)
                 {
