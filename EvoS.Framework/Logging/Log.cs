@@ -11,6 +11,7 @@ namespace EvoS.Framework.Logging
         public static readonly Dictionary<LogType, (ConsoleColor Color, string Name)> TypeColor = new Dictionary<LogType, (ConsoleColor Color, string Name)>()
         {
             { LogType.Debug,   (ConsoleColor.DarkMagenta,  "  Debug  ") },
+            { LogType.Misc  ,  (ConsoleColor.DarkGreen,    "  Misc   ") },
             { LogType.Server,  (ConsoleColor.Green,        "  Server ") },
             { LogType.Lobby,   (ConsoleColor.Green,        "  Lobby  ") },
             { LogType.Game,    (ConsoleColor.Green,        "  Game   ") },

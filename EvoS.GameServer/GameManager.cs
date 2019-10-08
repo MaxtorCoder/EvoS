@@ -102,7 +102,7 @@ namespace EvoS.GameServer.Network
                 return;
             if (!GameInfo.GameServerProcessCode.IsNullOrEmpty() && GameInfo.GameConfig != null)
             {
-                Log.Print(LogType.GameServer,
+                Log.Print(LogType.Game,
                     gameResult == GameResult.NoResult
                         ? $"Game {GameInfo.Name} is {gameStatus.ToString().ToLower()}"
                         : $"Game {GameInfo.Name} is {gameStatus.ToString().ToLower()} with result {gameResult.ToString()}");

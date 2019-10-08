@@ -56,7 +56,7 @@ namespace EvoS.GameServer.Network
                 }
             }
 
-            Log.Print(LogType.GameServer,
+            Log.Print(LogType.Game,
                 $"Loaded {ClientIdsByType.Count} client {(ClientIdsByType.Count == 1 ? "type" : "types")} and {ServerIdsByType.Count} server {(ServerIdsByType.Count == 1 ? "type" : "types")}");
         }
 
@@ -80,7 +80,7 @@ namespace EvoS.GameServer.Network
                 {
                     if (_handlers.ContainsKey(deserialized.msgType))
                     {
-                        Log.Print(LogType.GameServer,
+                        Log.Print(LogType.Game,
                             $"{deserialized.GetType().Name} - {JsonConvert.SerializeObject(deserialized)}");
                         _handlers[deserialized.msgType].Invoke(deserialized);
                     }

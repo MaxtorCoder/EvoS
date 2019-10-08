@@ -181,7 +181,7 @@ namespace EvoS.Framework.Network
             this._serializer.AddTypes(_idsByType);
 
 //            this.DumpTypeMap();
-            Log.Print(LogType.LobbyServer, $"Loaded {_idsByType.Count} {(_idsByType.Count == 1 ? "ID" : "IDs")}");
+            Log.Print(LogType.Lobby, $"Loaded {_idsByType.Count} {(_idsByType.Count == 1 ? "ID" : "IDs")}");
             return this._serializer;
         }
 
