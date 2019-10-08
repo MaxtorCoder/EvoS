@@ -64,13 +64,12 @@ namespace EvoS.Framework.Assets
                 }
             }
 
-            Log.Print(LogType.Misc, $"Loaded {NetworkedObjects.Count} networked game objects");
+            Log.Print(LogType.Misc,
+                $"Loaded {NetworkedObjects.Count} networked game objects from {seen.Count} asset files.");
         }
 
         private void InternalLoadNetworkedObjects(AssetFile assetFile)
         {
-            Console.WriteLine($"Loading net objs from {assetFile.Name}");
-
             var gameObjectType = assetFile.FindTypeById(1);
             if (gameObjectType == null)
             {
