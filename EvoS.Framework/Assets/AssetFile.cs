@@ -234,6 +234,7 @@ namespace EvoS.Framework.Assets
             if (_unityTypeMap.ContainsKey(objType.TypeId))
             {
                 var obj = (ISerializedItem) Activator.CreateInstance(_unityTypeMap[objType.TypeId]);
+                _referenceCache[pathId] = new WeakReference<ISerializedItem>(obj);
                 obj.DeserializeAsset(this, _stream);
 
                 var currentPos = _stream.Position;
@@ -259,8 +260,6 @@ namespace EvoS.Framework.Assets
                 {
                     _stream.Position = savedPos;
                 }
-
-                _referenceCache[pathId] = new WeakReference<ISerializedItem>(obj);
 
                 return obj;
             }
