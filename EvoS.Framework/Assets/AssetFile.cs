@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using EvoS.Framework.Assets.Serialized;
@@ -14,6 +12,7 @@ namespace EvoS.Framework.Assets
     public class AssetFile : IDisposable
     {
         public string Name { get; private set; }
+        private AssetLoader _loader;
         private StreamReader _stream;
         public SerializedFileHeader Header { get; set; }
         public SerializedFileMetadata Metadata { get; set; }
@@ -52,30 +51,39 @@ namespace EvoS.Framework.Assets
             }
         }
 
-        public AssetFile(string filePath)
+        public AssetFile(AssetLoader loader, string name, StreamReader stream)
         {
-            Name = Path.GetFullPath(filePath);
-            _fileMap.Add(this);
+            Name = name;
+            _loader = loader;
+            _stream = stream;
 
-            _stream = new StreamReader(filePath);
-            Header = new SerializedFileHeader(_stream);
-            Metadata = new SerializedFileMetadata(_stream);
-
-            ProcessTypeTree();
-
-            LoadExternalReferences(filePath);
+            Initialize();
+            
+            LoadExternalReferences();
         }
 
+        private void Initialize()
+        {
+            _fileMap.Add(this);
+            Header = new SerializedFileHeader(_stream);
+            Metadata = new SerializedFileMetadata(_stream);
+            ProcessTypeTree();
+        }
+
+        /// <summary>
+        /// Construct a lookup table of MonoScript property hashes to their
+        /// BaseClass definitions in this AssetFile.
+        /// </summary>
         private void ProcessTypeTree()
         {
             foreach (var baseClass in Metadata.TypeTree.BaseClasses)
             {
-                if (baseClass.Foo1 == null) continue;
+                if (baseClass.PropertiesHash == null) continue;
 
-                if (!TypesByPropHash.TryGetValue(baseClass.Foo1, out var typeList))
+                if (!TypesByPropHash.TryGetValue(baseClass.PropertiesHash, out var typeList))
                 {
                     typeList = new List<TypeEntry>();
-                    TypesByPropHash.Add(baseClass.Foo1, typeList);
+                    TypesByPropHash.Add(baseClass.PropertiesHash, typeList);
                 }
 
                 typeList.Add(baseClass);
@@ -104,7 +112,7 @@ namespace EvoS.Framework.Assets
             }
         }
 
-        private void LoadExternalReferences(string filePath)
+        private void LoadExternalReferences()
         {
             foreach (var externalReference in Metadata.ExternalReferencesTable)
             {
@@ -114,15 +122,15 @@ namespace EvoS.Framework.Assets
                     fileName = "resources/" + fileName.Substring(8);
                 }
 
-                var path = Path.Join(Path.GetDirectoryName(filePath), fileName);
-
-                _fileMap.Add(new AssetFile(path));
+                _fileMap.Add(_loader.LoadAsset(fileName));
             }
         }
 
         public void Dispose()
         {
             _stream?.Dispose();
+            _loader?.Dispose(this);
+            _loader = null;
         }
 
         public TypeEntry FindTypeById(CommonTypeIds typeId) => FindTypeById((int) typeId);

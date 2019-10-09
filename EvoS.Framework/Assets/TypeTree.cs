@@ -8,21 +8,30 @@ namespace EvoS.Framework.Assets
         public int Attributes { get; set; }
         public byte Embeded { get; set; }
         public List<TypeEntry> BaseClasses { get; set; } = new List<TypeEntry>();
+        public Dictionary<int, TypeTreeInfo> TypeInfos { get; set; } = new Dictionary<int, TypeTreeInfo>();
+        public Dictionary<int, TypeTreeInfo> ScriptTypeInfos { get; set; } = new Dictionary<int, TypeTreeInfo>();
 
         public TypeTree(StreamReader stream)
         {
             Attributes = stream.ReadInt32();
             Embeded = stream.ReadByte();
-            if (Embeded != 0)
-            {
-                throw new NotImplementedException();
-            }
 
             var baseClassCount = stream.ReadInt32();
             for (var i = 0; i < baseClassCount; i++)
             {
                 var entry = new TypeEntry(stream) {Index = i};
                 BaseClasses.Add(entry);
+
+                if (Embeded == 0) continue;
+
+                if (entry.TypeId == (int) CommonTypeIds.MonoBehaviour)
+                {
+                    ScriptTypeInfos.Add(entry.Unknown2, new TypeTreeInfo(stream));
+                }
+                else
+                {
+                    TypeInfos.Add(entry.TypeId, new TypeTreeInfo(stream));
+                }
             }
         }
 
@@ -36,6 +45,18 @@ namespace EvoS.Framework.Assets
         }
     }
 
+    public class TypeTreeInfo
+    {
+        public TypeTreeInfo(StreamReader stream)
+        {
+            var nodeCount = stream.ReadInt32();
+            var stringBufSize = stream.ReadInt32();
+
+            // TODO
+            stream.Position += nodeCount * 24 + stringBufSize;
+        }
+    }
+
     public class TypeEntry
     {
         public int Index { get; set; }
@@ -43,7 +64,7 @@ namespace EvoS.Framework.Assets
         public byte Unknown1 { get; set; }
         public short Unknown2 { get; set; }
         public byte[]? Foo2 { get; set; }
-        public byte[] Foo1 { get; set; }
+        public byte[] PropertiesHash { get; set; }
 
         public TypeEntry(StreamReader stream)
         {
@@ -55,7 +76,7 @@ namespace EvoS.Framework.Assets
                 Foo2 = stream.ReadBytes(16);
             }
 
-            Foo1 = stream.ReadBytes(16);
+            PropertiesHash = stream.ReadBytes(16);
         }
 
         public override string ToString()
@@ -64,8 +85,8 @@ namespace EvoS.Framework.Assets
                    $"{nameof(TypeId)}: {TypeId}, " +
                    $"{nameof(Unknown1)}: {Unknown1}, " +
                    $"{nameof(Unknown2)}: {Unknown2}, " +
-                   $"{nameof(Foo2)}: {(Foo2 != null ? BitConverter.ToString(Foo2).Replace("-","") : null)}, " +
-                   $"{nameof(Foo1)}: {BitConverter.ToString(Foo1).Replace("-","")}" +
+                   $"{nameof(Foo2)}: {(Foo2 != null ? BitConverter.ToString(Foo2).Replace("-", "") : null)}, " +
+                   $"{nameof(PropertiesHash)}: {BitConverter.ToString(PropertiesHash).Replace("-", "")}" +
                    ")";
         }
     }

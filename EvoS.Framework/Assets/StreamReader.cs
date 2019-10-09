@@ -26,6 +26,7 @@ namespace EvoS.Framework.Assets
         {
             _stream = stream;
             DataOffset = dataOffset;
+            _stream.Position = dataOffset;
             Initialize();
         }
 
@@ -47,8 +48,8 @@ namespace EvoS.Framework.Assets
 
         public long Position
         {
-            get => _stream.Position;
             set => _stream.Position = DataOffset + value;
+            get => _stream.Position - DataOffset;
         }
 
         public long Length => _stream.Length;

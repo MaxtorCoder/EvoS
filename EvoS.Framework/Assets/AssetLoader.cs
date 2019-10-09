@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using EvoS.Framework.Assets.Bundles;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Logging;
@@ -11,6 +14,15 @@ namespace EvoS.Framework.Assets
     public class AssetLoader
     {
         public AssetFile MainAssetFile;
+        private string _basePath;
+
+        private Dictionary<string, WeakReference<AssetFile>> _assetFiles =
+            new Dictionary<string, WeakReference<AssetFile>>();
+
+        private Dictionary<string, UnityFs> _assetBundles =
+            new Dictionary<string, UnityFs>();
+
+        private List<AssetFile> _strongRefs = new List<AssetFile>();
 
         private Dictionary<byte[], List<SerializedMonoScript>> _scriptsByHash =
             new Dictionary<byte[], List<SerializedMonoScript>>(new ByteArrayComparer());
@@ -25,6 +37,11 @@ namespace EvoS.Framework.Assets
 
         public Dictionary<string, SerializedGameObject>.ValueCollection NetworkedObjects => NetObjsByName.Values;
 
+        public AssetLoader(string basePath)
+        {
+            _basePath = basePath;
+        }
+
         public SerializedGameObject GetNetObj(string assetId)
         {
             return GetNetObj(new NetworkHash128(Utils.ToByteArray(assetId)));
@@ -35,16 +52,92 @@ namespace EvoS.Framework.Assets
             return NetObjsByAssetId[assetId];
         }
 
-        public void Load(string join)
+        public AssetFile LoadAsset(string name, bool strongRef = false)
         {
-            NetObjsByName.Clear();
-            NetObjsByAssetId.Clear();
-            MainAssetFile = new AssetFile(join);
+            AssetFile assetFile = null;
 
-            _gameObjectType = MainAssetFile.FindTypeById(1);
+            if (_assetFiles.TryGetValue(name, out var existingRef) && existingRef.TryGetTarget(out assetFile))
+            {
+                return assetFile;
+            }
+
+            var assetIsMain = MainAssetFile == null;
+
+            // check if the asset is part of a bundle
+            if (name.StartsWith("archive:/"))
+            {
+                var nameInfo = name.Split("/");
+                var bundleName = nameInfo[1];
+                var assetName = nameInfo[2];
+
+                // check if the bundled asset is already loaded
+                if (_assetFiles.TryGetValue(assetName, out existingRef) && existingRef.TryGetTarget(out assetFile))
+                {
+                    return assetFile;
+                }
+
+                // ensure the bundle is loaded
+                if (!_assetBundles.TryGetValue(bundleName, out var unityFs))
+                {
+                    throw new ArgumentException($"Asset bundle containing asset file {name} not loaded!");
+                }
+
+                foreach (var node in unityFs.Nodes)
+                {
+                    if (node.Name.ToLower() != assetName) continue;
+
+                    assetFile = unityFs.OpenAssetFile(node);
+                    break;
+                }
+
+                if (assetFile == null)
+                {
+                    throw new ArgumentException($"Asset {assetName} not found in bundle {bundleName}!");
+                }
+            }
+            else
+            {
+                assetFile = new AssetFile(this, name, new StreamReader(Path.Join(_basePath, name)));
+            }
+
+            _assetFiles[assetFile.Name] = new WeakReference<AssetFile>(assetFile);
+            _assetFiles[name] = new WeakReference<AssetFile>(assetFile);
+
+            // First loaded becomes "main" -- TODO this is arbitrary
+            if (assetIsMain) MainAssetFile = assetFile;
+
+            if (strongRef) _strongRefs.Add(assetFile);
+
+            return assetFile;
+        }
+
+        public List<AssetFile> LoadAssetBundle(string fileName, bool loadNodes = false, bool strongRefs = false)
+        {
+            var unityFs = new UnityFs(this, Path.Join(_basePath, fileName));
+
+            _assetBundles.Add(unityFs.Name, unityFs);
+
+            if (!loadNodes)
+            {
+                return null;
+            }
+
+            var assets = new List<AssetFile>();
+            foreach (var node in unityFs.Nodes)
+            {
+                assets.Add(LoadAsset($"archive:/{unityFs.Name}/{node.Name.ToLower()}", strongRefs));
+            }
+
+            return assets;
+        }
+
+        public void ConstructCaches()
+        {
             ConstructMonoScriptMap();
 
             LoadNetworkedObjects();
+//            DumpNetworkObjectComponents();
+        }
 
         public IEnumerable<SerializedGameObject> GetObjectsByComponent(SerializedMonoScript script)
         {
@@ -62,6 +155,13 @@ namespace EvoS.Framework.Assets
             var stack = new Stack<AssetFile>();
             var seen = new HashSet<string>();
             stack.Push(MainAssetFile);
+            foreach (var file in _assetFiles.Values)
+            {
+                if (file.TryGetTarget(out var asset))
+                {
+                    stack.Push(asset);
+                }
+            }
 
             while (!stack.IsNullOrEmpty())
             {
@@ -139,14 +239,22 @@ namespace EvoS.Framework.Assets
 
         private void InternalLoadNetworkedObjects(AssetFile assetFile)
         {
-            var netIdentScript = _scriptsByName[CommonTypes.NetworkIdentity];
+            if (!_scriptsByName.TryGetValue(CommonTypes.NetworkIdentity, out var netIdentScript))
+            {
+                return;
+            }
+
             foreach (var obj in assetFile.GetObjectsByComponent(netIdentScript))
             {
                 var netIdent = obj.GetComponent<SerializedNetworkIdentity>();
                 if (netIdent != null)
                 {
-                    NetObjsByName.Add(obj.Name, obj);
-                    NetObjsByAssetId.Add(new NetworkHash128(netIdent.AssetId.Bytes), obj);
+                    var netHash = new NetworkHash128(netIdent.AssetId.Bytes);
+                    if (!netHash.IsZero())
+                    {
+                        NetObjsByName.Add(obj.Name, obj);
+                        NetObjsByAssetId.Add(netHash, obj);
+                    }
                 }
             }
         }
@@ -162,6 +270,10 @@ namespace EvoS.Framework.Assets
             }
         }
 
-        public static AssetLoader Instance { get; } = new AssetLoader();
+        public void Dispose(AssetFile assetFile)
+        {
+            _strongRefs.Remove(assetFile);
+            _assetFiles.Remove(assetFile.Name);
+        }
     }
 }
