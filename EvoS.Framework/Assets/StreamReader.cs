@@ -20,14 +20,16 @@ namespace EvoS.Framework.Assets
         private static byte[] _stringReaderBuffer;
         private static Encoding _encoding;
         public ByteOrder ByteOrder = ByteOrder.LittleEndian;
+        public long DataOffset { get; private set; }
 
-        public StreamReader(FileStream stream)
+        public StreamReader(Stream stream, long dataOffset = 0)
         {
             _stream = stream;
+            DataOffset = dataOffset;
             Initialize();
         }
 
-        public StreamReader(string filePath) : this(File.OpenRead(filePath))
+        public StreamReader(string filePath, long dataOffset = 0) : this(File.OpenRead(filePath), dataOffset)
         {
         }
 
@@ -42,7 +44,7 @@ namespace EvoS.Framework.Assets
         public long Position
         {
             get => _stream.Position;
-            set => _stream.Position = value;
+            set => _stream.Position = DataOffset + value;
         }
 
         public long Length => _stream.Length;
