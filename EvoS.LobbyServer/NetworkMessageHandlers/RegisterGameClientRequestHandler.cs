@@ -88,7 +88,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 ClientAccessLevel = ClientAccessLevel.Full,
                 ConnectionQueueInfo = null,
                 ErrorReportRate = TimeSpan.FromMinutes(3),
-                GameplayOverrides = LobbyStatusNotification.GetRegisterGamePlayOverrides(),
+                GameplayOverrides = null,
                 HasPurchasedGame = true,
                 HighestPurchasedGamePack = 0,
                 LocalizedFailure = null,
