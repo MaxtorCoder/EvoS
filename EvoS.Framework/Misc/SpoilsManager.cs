@@ -1,14 +1,39 @@
-using System.Collections.Generic;
-using EvoS.Framework.Network.Unity;
+using System;
+using EvoS.Framework.Assets;
+using EvoS.Framework.Assets.Serialized;
+using EvoS.Framework.Assets.Serialized.Behaviours;
 
 namespace EvoS.Framework.Misc
 {
-    public class SpoilsManager : MonoBehaviour
+    [Serializable]
+    [SerializedMonoBehaviour("SpoilsManager")]
+    public class SpoilsManager : ISerializedItem
     {
-        public PowerUp[] m_heroSpoils;
-        public PowerUp[] m_minionSpoils;
-        private List<PowerUp> m_activePowerUps;
-        private static SpoilsManager s_instance;
+        public SerializedArray<SerializedComponent> m_heroSpoils;
+        public SerializedArray<SerializedComponent> m_minionSpoils;
+
+        public SpoilsManager()
+        {
+        }
+
+        public SpoilsManager(AssetFile assetFile, StreamReader stream)
+        {
+            DeserializeAsset(assetFile, stream);
+        }
+
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        {
+            m_heroSpoils = new SerializedArray<SerializedComponent>(assetFile, stream);
+            m_minionSpoils = new SerializedArray<SerializedComponent>(assetFile, stream);
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(SpoilsManager)}>(" +
+                   $"{nameof(m_heroSpoils)}: {m_heroSpoils}, " +
+                   $"{nameof(m_minionSpoils)}: {m_minionSpoils}, " +
+                   ")";
+        }
 
         public enum SpoilsType
         {

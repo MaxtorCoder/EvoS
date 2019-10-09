@@ -6,6 +6,7 @@ namespace EvoS.Framework.Assets
         Component = 2,
         Transform = 4,
         Behaviour = 8,
+        BoxCollider = 65,
         MonoBehaviour = 114,
         MonoScript = 115,
     }
@@ -13,5 +14,6 @@ namespace EvoS.Framework.Assets
     public class CommonTypes
     {
         public const string NetworkIdentity = "UnityEngine.Networking.NetworkIdentity";
+        public const string BoardSquare = ".BoardSquare";
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace EvoS.Framework.Assets.Serialized
 {
@@ -35,6 +36,13 @@ namespace EvoS.Framework.Assets.Serialized
                 for (var i = 0; i < length; i++)
                 {
                     Add((T) (object) stream.ReadInt32());
+                }
+            }
+            else if (typeof(T) == typeof(Vector3))
+            {
+                for (var i = 0; i < length; i++)
+                {
+                    Add((T) (object) stream.ReadVector3());
                 }
             }
             else if (typeof(T).IsEnum)

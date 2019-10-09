@@ -6,6 +6,8 @@ using System.Reflection;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Misc;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Assets
 {
@@ -28,10 +30,12 @@ namespace EvoS.Framework.Assets
 
         private static Dictionary<int, Type> _unityTypeMap = new Dictionary<int, Type>
         {
-            {1, typeof(SerializedGameObject)},
-            {2, typeof(SerializedComponent)},
-            {114, typeof(SerializedMonoBehaviour)},
-            {115, typeof(SerializedMonoScript)},
+            {(int) CommonTypeIds.GameObject, typeof(SerializedGameObject)},
+            {(int) CommonTypeIds.Component, typeof(SerializedComponent)},
+            {(int) CommonTypeIds.Transform, typeof(Transform)},
+            {(int) CommonTypeIds.BoxCollider, typeof(BoxCollider)},
+            {(int) CommonTypeIds.MonoBehaviour, typeof(SerializedMonoBehaviour)},
+            {(int) CommonTypeIds.MonoScript, typeof(SerializedMonoScript)},
         };
 
         private static Dictionary<string, Type> _scriptTypeMap = new Dictionary<string, Type>
