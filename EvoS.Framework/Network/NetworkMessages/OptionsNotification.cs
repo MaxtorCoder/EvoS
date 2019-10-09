@@ -8,6 +8,9 @@ namespace EvoS.Framework.Network.NetworkMessages
     [EvosMessage(91)]
     public class OptionsNotification : WebSocketMessage
     {
+        [NonSerialized]
+        public new static bool LogData = false;
+
         public bool UserDialog;
         public string DeviceIdentifier;
         public byte GraphicsQuality;
