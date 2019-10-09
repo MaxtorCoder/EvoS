@@ -10,7 +10,7 @@ namespace EvoS.Framework.Network.Static
         public CurrencyData()
         {
             m_Type = CurrencyType.ISO;
-            m_Amount = 0;
+            m_Amount = 10000;
             m_TotalSpent = 0;
         }
 
