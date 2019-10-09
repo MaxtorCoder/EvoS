@@ -152,6 +152,30 @@ namespace EvoS.Framework.Assets
             return null;
         }
 
+        public SerializedGameObject GetObjectByName(string name)
+        {
+            foreach (var gameObject in GetObjectsByType<SerializedGameObject>(FindTypeById(CommonTypeIds.GameObject)))
+            {
+                if (gameObject.Name == name)
+                {
+                    return gameObject;
+                }
+            }
+
+            return null;
+        }
+
+        public IEnumerable<SerializedGameObject> GetObjectsByName(string name)
+        {
+            foreach (var gameObject in GetObjectsByType<SerializedGameObject>(FindTypeById(CommonTypeIds.GameObject)))
+            {
+                if (gameObject.Name == name)
+                {
+                    yield return gameObject;
+                }
+            }
+        }
+
         public IEnumerable<SerializedGameObject> GetObjectsByComponent(SerializedMonoScript script)
         {
             if (!TypesByPropHash.TryGetValue(script.PropertiesHash.ToByteArray(), out var types))
