@@ -27,7 +27,7 @@ namespace EvoS.Framework.Assets
         private Dictionary<byte[], List<SerializedMonoScript>> _scriptsByHash =
             new Dictionary<byte[], List<SerializedMonoScript>>(new ByteArrayComparer());
 
-        private Dictionary<string, SerializedMonoScript> _scriptsByName =
+        public readonly Dictionary<string, SerializedMonoScript> ScriptsByName =
             new Dictionary<string, SerializedMonoScript>();
 
         public Dictionary<string, SerializedGameObject> NetObjsByName = new Dictionary<string, SerializedGameObject>();
@@ -207,21 +207,21 @@ namespace EvoS.Framework.Assets
                     }
 
                     scriptList.Add(obj);
-                    if (!_scriptsByName.TryAdd(obj.QualifiedName, obj))
+                    if (!ScriptsByName.TryAdd(obj.QualifiedName, obj))
                     {
-                        var existing = _scriptsByName[obj.QualifiedName];
+                        var existing = ScriptsByName[obj.QualifiedName];
                         if (existing.QualifiedName == obj.QualifiedName && existing.AssemblyName == obj.AssemblyName)
                         {
                             continue;
                         }
 
                         Log.Print(LogType.Warning, $"    trying:  {obj}");
-                        Log.Print(LogType.Warning, $"    already: {_scriptsByName[obj.QualifiedName]}");
+                        Log.Print(LogType.Warning, $"    already: {ScriptsByName[obj.QualifiedName]}");
                     }
                 }
             }
 
-            Log.Print(LogType.Misc, $"Loaded {_scriptsByName.Count} MonoScript type mappings");
+            Log.Print(LogType.Misc, $"Loaded {ScriptsByName.Count} MonoScript type mappings");
         }
 
         private void LoadNetworkedObjects()
@@ -239,7 +239,7 @@ namespace EvoS.Framework.Assets
 
         private void InternalLoadNetworkedObjects(AssetFile assetFile)
         {
-            if (!_scriptsByName.TryGetValue(CommonTypes.NetworkIdentity, out var netIdentScript))
+            if (!ScriptsByName.TryGetValue(CommonTypes.NetworkIdentity, out var netIdentScript))
             {
                 return;
             }
