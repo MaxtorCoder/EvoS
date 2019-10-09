@@ -1,4 +1,4 @@
-﻿using EvoS.Framework;
+using EvoS.Framework;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Logging;
 using System;
@@ -76,13 +76,10 @@ namespace EvoS.LobbyServer
 
         public static async Task sendChatAsync(ChatNotification chat, ClientConnection sender)
         {
-            sender.SendMessage(new ChatNotification() { Text = "Hey jude", ConsoleMessageType = ConsoleMessageType.BroadcastMessage, SenderAccountId = 0 });
             switch (chat.ConsoleMessageType)
             {
                 case ConsoleMessageType.GlobalChat:
-                    foreach (ClientConnection con in ConnectedClients)
-                        await con.SendMessage(chat);
-
+                    sendChatToAll(chat);
                     break;
                 
                 case ConsoleMessageType.WhisperChat:
@@ -97,6 +94,12 @@ namespace EvoS.LobbyServer
                     break;
             }
             
+        }
+
+        public static async Task sendChatToAll(ChatNotification chat)
+        {
+            foreach (ClientConnection con in ConnectedClients)
+                await con.SendMessage(chat);
         }
 
         public static ClientConnection GetPlayerByHandle(string handle)

@@ -1,4 +1,4 @@
-using EvoS.Framework.Network;
+﻿using EvoS.Framework.Network;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +24,13 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             await connection.SendMessage(response);
             var lobbyServerReady = LobbyServerReady(connection);
             await connection.SendMessage(lobbyServerReady);
+            ChatNotification connectedMessage = new ChatNotification() {
+                ConsoleMessageType = ConsoleMessageType.SystemMessage,
+                Text = $"{connection.RegistrationInfo.AuthInfo.Handle} has connected",
+                RequestId = 0,
+                ResponseId = 0
+            };
+            await Program.sendChatToAll(connectedMessage);
         }
 
         private LobbyServerReadyNotification LobbyServerReady(ClientConnection connection)
@@ -71,6 +78,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
             response.SessionInfo = request.SessionInfo;
             response.SessionInfo.ConnectionAddress = "127.0.0.1";
+            response.SessionInfo.LanguageCode = "EN";
             response.AuthInfo = request.AuthInfo;
             response.DevServerConnectionUrl = "127.0.0.1"; // What is this?
             response.AuthInfo.AccountStatus = null;
@@ -80,7 +88,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 ClientAccessLevel = ClientAccessLevel.Full,
                 ConnectionQueueInfo = null,
                 ErrorReportRate = TimeSpan.FromMinutes(3),
-                GameplayOverrides = null,
+                GameplayOverrides = LobbyStatusNotification.GetRegisterGamePlayOverrides(),
                 HasPurchasedGame = true,
                 HighestPurchasedGamePack = 0,
                 LocalizedFailure = null,
