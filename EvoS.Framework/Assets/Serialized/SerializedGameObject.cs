@@ -23,20 +23,37 @@ namespace EvoS.Framework.Assets.Serialized
 
         public IEnumerable<ISerializedItem> ComponentChildren()
         {
-            return from component in Components
-                select (SerializedMonoBehaviour) component.LoadValue()
-                into compValue
-                where compValue?.Child != null
-                select compValue.Child;
+            foreach (var component in Components)
+            {
+                var compValue = component.LoadValue();
+                if (compValue is SerializedMonoBehaviour smb)
+                {
+                    yield return smb.Child;
+                }
+                else
+                {
+                    yield return compValue;
+                }
+            }
         }
 
         public List<string> ComponentNames()
         {
-            return (from component in Components
-                select (SerializedMonoBehaviour) component.LoadValue()
-                into value
-                where value?.Script != null
-                select value.Script.ClassName).ToList();
+            var list = new List<string>();
+            foreach (var component in Components)
+            {
+                var compValue = component.LoadValue();
+                if (compValue is SerializedMonoBehaviour smb)
+                {
+                    list.Add(smb.Script.ClassName);
+                }
+                else
+                {
+                    list.Add(compValue != null ? compValue.GetType().FullName : "null");
+                }
+            }
+
+            return list;
         }
 
         public T GetComponent<T>() where T : class, ISerializedItem
