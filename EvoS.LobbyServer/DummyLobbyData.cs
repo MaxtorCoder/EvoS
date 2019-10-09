@@ -16,7 +16,38 @@ namespace EvoS.LobbyServer
             {
                 var characterData = new PersistedCharacterData(characterType)
                 {
-                    CharacterComponent = {Unlocked = true}
+                    CharacterComponent = {
+                        Unlocked = true,
+                        Skins = new List<PlayerSkinData>()
+                        {
+                            new PlayerSkinData() {
+                                Unlocked = true,
+                                Patterns = new List<PlayerPatternData>()
+                                {
+                                    new PlayerPatternData()
+                                    {
+                                        Colors = new List<PlayerColorData>()
+                                        {
+                                            new PlayerColorData() { Unlocked = true},
+                                            new PlayerColorData() { Unlocked = true},
+                                            new PlayerColorData() { Unlocked = true},
+                                            new PlayerColorData() { Unlocked = true}
+                                        },
+                                        Unlocked = true,
+                                    },
+                                    new PlayerPatternData()
+                                    {
+                                        Colors = new List<PlayerColorData>()
+                                        {
+                                            new PlayerColorData() { Unlocked = true},
+                                            new PlayerColorData() { Unlocked = true}
+                                        },
+                                        Unlocked = true,
+                                    }
+                                }
+                            }
+                        }
+                    }
                 };
                 data.Add(characterData);
             }
@@ -37,10 +68,11 @@ namespace EvoS.LobbyServer
                             QueueableGroupSizes = new Dictionary<int, RequirementCollection> {{1, null}},
                             IsActive = true,
                             TeamAPlayers = 1,
+                            TeamBBots = 2,
                             SubTypes = CreatePracticeGameSubTypes()
                         }
                     },
-                    {
+                    /*{
                         GameType.Coop, new GameTypeAvailability
                         {
                             IsActive = false
@@ -51,7 +83,7 @@ namespace EvoS.LobbyServer
                         {
                             IsActive = false
                         }
-                    },
+                    },*/
                     {
                         GameType.PvP, new GameTypeAvailability
                         {
@@ -62,7 +94,7 @@ namespace EvoS.LobbyServer
                                 {3, null},
                                 {4, null},
                             },
-                            IsActive = false,
+                            IsActive = true,
                             TeamAPlayers = 4,
                             TeamBPlayers = 4,
                             BlockedExperienceAlternativeGameType = GameType.NewPlayerPvP,
@@ -97,7 +129,13 @@ namespace EvoS.LobbyServer
                                 }
                             }
                         }
-                    }
+                    },
+                    /*{
+                        GameType.Custom, new GameTypeAvailability
+                        {
+                            IsActive = false
+                        }
+                    }*/
                 },
                 TierInstanceNames = new List<LocalizationPayload>(),
                 AllowBadges = true,
@@ -128,7 +166,7 @@ namespace EvoS.LobbyServer
                     RewardBucket = GameBalanceVars.GameRewardBucketType.NoRewards,
                     PersistedStatBucket = PersistedStatBucket.DoNotPersist,
                     TeamABots = -1,
-                    TeamBBots = -1,
+                    TeamBBots = 2,
                     TeamAPlayers = -1,
                     TeamBPlayers = -1,
                     TeamComposition = new TeamCompositionRules
@@ -216,13 +254,16 @@ namespace EvoS.LobbyServer
         {
             return new PersistedAccountData
             {
-                QuestComponent = new QuestComponent {ActiveSeason = 9},
+                QuestComponent = new QuestComponent { ActiveSeason = 9 },
                 AccountId = connection.AuthInfo.AccountId,
                 UserName = connection.AuthInfo.UserName,
                 Handle = connection.AuthInfo.Handle,
                 SchemaVersion = new SchemaVersion<AccountSchemaChange>(0x1FFFF),
                 CreateDate = DateTime.Now.AddHours(-1),
                 UpdateDate = DateTime.Now,
+                AccountComponent = new AccountComponent(),
+                BankComponent = new BankComponent(new List<CurrencyData>() { new CurrencyData() })
+
             };
         }
 
@@ -247,7 +288,7 @@ namespace EvoS.LobbyServer
                 EnableHiddenCharacters = true,
                 EnableAllMods = true,
                 EnableQuests = false,
-                EnableSeasons = false
+                EnableSeasons = false,
             };
         }
 
@@ -318,6 +359,69 @@ namespace EvoS.LobbyServer
             response.GameInfo.GameServerHost = "Practice Game Host";
 
             return response;
+        }
+
+        private static List<GameSubType> CreatePvPGameSubTypes()
+        {
+            return new List<GameSubType>
+            {
+                new GameSubType
+                {
+                    LocalizedName = "GenericPvP@SubTypes",
+                    GameMapConfigs = new List<GameMapConfig>
+                    {
+                        new GameMapConfig
+                        {
+                            IsActive = true,
+                            Map = "VR_Practice"
+                        }
+                    },
+                    Mods = new List<GameSubType.SubTypeMods>
+                    {
+                        GameSubType.SubTypeMods.AllowPlayingLockedCharacters,
+                        GameSubType.SubTypeMods.HumansHaveFirstSlots
+                    },
+                    RewardBucket = GameBalanceVars.GameRewardBucketType.NoRewards,
+                    PersistedStatBucket = PersistedStatBucket.DoNotPersist,
+                    TeamABots = -1,
+                    TeamBBots = 2,
+                    TeamAPlayers = -1,
+                    TeamBPlayers = -1,
+                    TeamComposition = new TeamCompositionRules
+                    {
+                        Rules = new Dictionary<TeamCompositionRules.SlotTypes, FreelancerSet>
+                        {
+                            {
+                                TeamCompositionRules.SlotTypes.A1, new FreelancerSet
+                                {
+                                    Roles = new List<CharacterRole>
+                                    {
+                                        CharacterRole.Tank,
+                                        CharacterRole.Assassin,
+                                        CharacterRole.Support
+                                    }
+                                }
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A2, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A4, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.A3, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            },
+                            {
+                                TeamCompositionRules.SlotTypes.TeamB, new FreelancerSet
+                                    {Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            }
+                        }
+                    }
+                }
+            };
         }
     }
 }
