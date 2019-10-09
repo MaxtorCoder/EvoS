@@ -14,7 +14,7 @@ namespace EvoS.Framework.Assets
 
     public class StreamReader : IDisposable
     {
-        private FileStream _stream;
+        private Stream _stream;
         private const int MaxStringLength = 32768;
         private const int InitialStringBufferSize = 1024;
         private static byte[] _stringReaderBuffer;
@@ -27,6 +27,10 @@ namespace EvoS.Framework.Assets
             _stream = stream;
             DataOffset = dataOffset;
             Initialize();
+        }
+
+        public StreamReader(byte[] data, long dataOffset = 0) : this(new MemoryStream(data), dataOffset)
+        {
         }
 
         public StreamReader(string filePath, long dataOffset = 0) : this(File.OpenRead(filePath), dataOffset)
