@@ -229,12 +229,17 @@ namespace EvoS.Framework.Assets
             return new string(_encoding.GetChars(_stringReaderBuffer, 0, num));
         }
 
-        public string ReadNullString()
+        public string ReadNullString(int maxLength = -1)
         {
             var size = 0;
             // we'll lazily reuse the string buffer, null terminated strings shouldn't be too long
             while (size < _stringReaderBuffer.Length)
             {
+                if (size == maxLength)
+                {
+                    break;
+                }
+                
                 var data = ReadByte();
                 if (data == 0)
                 {
