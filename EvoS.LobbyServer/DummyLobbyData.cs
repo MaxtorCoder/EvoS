@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
+using EvoS.LobbyServer.Utils;
 
 namespace EvoS.LobbyServer
 {
@@ -262,7 +263,7 @@ namespace EvoS.LobbyServer
                 CreateDate = DateTime.Now.AddHours(-1),
                 UpdateDate = DateTime.Now,
                 AccountComponent = new AccountComponent(),
-                BankComponent = new BankComponent(new List<CurrencyData>() { new CurrencyData() })
+                BankComponent = PlayerUtils.GetBankData(connection.AuthInfo.AccountId)
 
             };
         }
