@@ -11,7 +11,7 @@ namespace EvoS.Framework.Network.NetworkMessages
     */
     [Serializable]
     [EvosMessage(350)]
-    public class StoreOpened : WebSocketMessage
+    public class StoreOpenedMessage : WebSocketMessage
     {
         
     }
