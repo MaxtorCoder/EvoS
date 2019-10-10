@@ -20,7 +20,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public virtual void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_quads = new SerializedArray<BoardQuad>(assetFile, stream);
         }
