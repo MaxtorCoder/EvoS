@@ -8,11 +8,6 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class CrashReportArchiveNameRequestHandler : IEvosNetworkMessageHandler
     {
-        public bool DoLogPacket()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             CrashReportArchiveNameResponse response = new CrashReportArchiveNameResponse()

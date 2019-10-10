@@ -10,6 +10,5 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
     interface IEvosNetworkMessageHandler
     {
         Task OnMessage(ClientConnection connection, object requestData);
-        bool DoLogPacket();
     }
 }

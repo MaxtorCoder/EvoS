@@ -8,11 +8,6 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class PlayerInfoUpdateRequestHandler : IEvosNetworkMessageHandler
     {
-        public bool DoLogPacket()
-        {
-            return true;
-        }
-
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             PlayerInfoUpdateRequest request = (PlayerInfoUpdateRequest) requestData;

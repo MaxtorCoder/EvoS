@@ -8,11 +8,6 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class ChatNotificationHandler : IEvosNetworkMessageHandler
     {
-        public bool DoLogPacket()
-        {
-            return false;
-        }
-
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             ChatNotification notification = (ChatNotification)requestData;

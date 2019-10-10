@@ -9,11 +9,6 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class ClientFeedbackReportHandler : IEvosNetworkMessageHandler
     {
-        public bool DoLogPacket()
-        {
-            throw new NotImplementedException();
-        }
-
         public Task OnMessage(ClientConnection connection, object requestData)
         {
             ClientFeedbackReport feedback = (ClientFeedbackReport)requestData;

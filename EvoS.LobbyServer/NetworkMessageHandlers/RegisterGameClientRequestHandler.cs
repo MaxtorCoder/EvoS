@@ -13,8 +13,6 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class RegisterGameClientRequestHandler : IEvosNetworkMessageHandler
     {
-        public bool DoLogPacket() { return true; }
-
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             RegisterGameClientRequest request = (RegisterGameClientRequest) requestData;

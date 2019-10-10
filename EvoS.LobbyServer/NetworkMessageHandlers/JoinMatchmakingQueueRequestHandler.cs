@@ -10,11 +10,6 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class JoinMatchmakingQueueRequestHandler : IEvosNetworkMessageHandler
     {
-        public bool DoLogPacket()
-        {
-            return true;
-        }
-
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             JoinMatchmakingQueueRequest request = (JoinMatchmakingQueueRequest)requestData;

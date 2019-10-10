@@ -7,11 +7,6 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class CustomKeyBindNotificationHandler : IEvosNetworkMessageHandler
     {
-        public bool DoLogPacket()
-        {
-            return false;
-        }
-
         public Task OnMessage(ClientConnection connection, object requestData)
         {
             return Task.CompletedTask;
