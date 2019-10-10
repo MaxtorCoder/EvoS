@@ -8,7 +8,7 @@ namespace EvoS.Framework.Network.NetworkMessages
 {
     [Serializable]
     [EvosMessage(362)]
-    class FriendUpdateResponse : WebSocketResponseMessage
+    public class FriendUpdateResponse : WebSocketResponseMessage
     {
         public long FriendAccountId;
         public string FriendHandle;

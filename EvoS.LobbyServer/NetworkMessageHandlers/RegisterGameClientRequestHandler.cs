@@ -8,6 +8,7 @@ using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
+using EvoS.LobbyServer.Utils;
 
 namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
@@ -41,7 +42,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 CommerceURL = "http://127.0.0.1/AtlasCommerce",
                 EnvironmentType = EnvironmentType.External,
                 FactionCompetitionStatus = new FactionCompetitionNotification(),
-                FriendStatus = new FriendStatusNotification {FriendList = new FriendList()},
+                FriendStatus = new FriendStatusNotification {FriendList = FriendListUtils.GetFriendList(connection.AuthInfo.AccountId)},
                 GroupInfo = new LobbyPlayerGroupInfo
                 {
                     SelectedQueueType = GameType.Practice,
