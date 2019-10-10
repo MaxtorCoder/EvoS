@@ -1,6 +1,6 @@
 using EvoS.Framework.Network.Unity;
 
-namespace EvoS.Framework.Network.Game.GameManager
+namespace EvoS.Framework.Network.Game.Messages
 {
     [UNetMessage(clientMsgIds: new short[] {65, 55})]
     public class PlayerObjectStartedOnClientNotification : MessageBase

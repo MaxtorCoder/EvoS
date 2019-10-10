@@ -1,23 +1,23 @@
 using EvoS.Framework.Network.Unity;
 
-namespace EvoS.Framework.Network.Game.GameManager
+namespace EvoS.Framework.Network.Game.Messages
 {
-    [UNetMessage(serverMsgIds: new short[] {54})]
-    public class SpawningObjectsNotification : MessageBase
+    [UNetMessage(clientMsgIds: new short[]{53})]
+    public class AssetsLoadedNotification : MessageBase
     {
+        public long AccountId;
         public int PlayerId;
-        public int SpawnableObjectCount;
 
         public override void Serialize(NetworkWriter writer)
         {
+            writer.WritePackedUInt64((ulong) AccountId);
             writer.WritePackedUInt32((uint) PlayerId);
-            writer.WritePackedUInt32((uint) SpawnableObjectCount);
         }
 
         public override void Deserialize(NetworkReader reader)
         {
+            AccountId = (long) reader.ReadPackedUInt64();
             PlayerId = (int) reader.ReadPackedUInt32();
-            SpawnableObjectCount = (int) reader.ReadPackedUInt32();
         }
     }
 }

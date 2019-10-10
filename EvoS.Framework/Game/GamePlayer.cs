@@ -1,5 +1,6 @@
 using EvoS.Framework.Network;
-using EvoS.Framework.Network.Game.GameManager;
+using EvoS.Framework.Network.Game;
+using EvoS.Framework.Network.Game.Messages;
 using EvoS.Framework.Network.Unity.Messages;
 
 namespace EvoS.Framework.Game

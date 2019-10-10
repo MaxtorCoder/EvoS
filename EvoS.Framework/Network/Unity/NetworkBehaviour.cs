@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Network.Game;
 
 namespace EvoS.Framework.Network.Unity
 {

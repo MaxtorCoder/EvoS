@@ -1,6 +1,6 @@
 using EvoS.Framework.Network.Unity;
 
-namespace EvoS.Framework.Network.Game.GameManager
+namespace EvoS.Framework.Network.Game.Messages
 {
     [UNetMessage(new short[]{62}, new short[]{61})]
     public class AssetsLoadingProgress : MessageBase

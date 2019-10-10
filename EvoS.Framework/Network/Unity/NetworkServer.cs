@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Network.Game;
 using EvoS.Framework.Network.Unity.Messages;
 
 namespace EvoS.Framework.Network.Unity

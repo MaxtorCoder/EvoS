@@ -5,12 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
-using EvoS.Framework.Network.Game.GameManager;
+using EvoS.Framework.Network.Game.Messages;
 using EvoS.Framework.Network.Unity;
 using EvoS.Framework.Network.Unity.Messages;
 using vtortola.WebSockets;
 
-namespace EvoS.Framework.Network
+namespace EvoS.Framework.Network.Game
 {
     public delegate void UNetGameMessageDelegate<T>(GamePlayer player, T msg) where T : MessageBase;
 

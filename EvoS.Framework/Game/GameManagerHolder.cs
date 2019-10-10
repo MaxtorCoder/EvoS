@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using EvoS.Framework.Network.Game.GameManager;
+using EvoS.Framework.Network.Game.Messages;
 
 namespace EvoS.Framework.Game
 {

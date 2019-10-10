@@ -1,6 +1,6 @@
 using EvoS.Framework.Network.Unity;
 
-namespace EvoS.Framework.Network.Game.GameManager
+namespace EvoS.Framework.Network.Game.Messages
 {
     [UNetMessage(clientMsgIds: new short[]{51})]
     public class LoginRequest : MessageBase

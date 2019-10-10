@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using vtortola.WebSockets;
 using EvoS.Framework.Network;
+using EvoS.Framework.Network.Game;
 
 namespace EvoS.GameServer
 {
