@@ -246,7 +246,7 @@ namespace EvoS.Framework.Assets
 
             foreach (var obj in assetFile.GetObjectsByComponent(netIdentScript))
             {
-                var netIdent = obj.GetComponent<SerializedNetworkIdentity>();
+                var netIdent = obj.GetComponent<NetworkIdentity>();
                 if (netIdent != null)
                 {
                     var netHash = new NetworkHash128(netIdent.AssetId.Bytes);
@@ -263,7 +263,7 @@ namespace EvoS.Framework.Assets
         {
             foreach (var obj in NetworkedObjects)
             {
-                var netIdent = obj.GetComponent<SerializedNetworkIdentity>();
+                var netIdent = obj.GetComponent<NetworkIdentity>();
 
                 Log.Print(LogType.Misc, $"{netIdent.AssetId.ToHex()} {obj.Name}");
                 Log.Print(LogType.Misc, $"  {string.Join(", ", obj.ComponentNames())}");

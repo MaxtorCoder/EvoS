@@ -1,12 +1,13 @@
 using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Network.NetworkBehaviours;
 
 namespace EvoS.Framework.Misc
 {
     [Serializable]
     [SerializedMonoBehaviour("Passive_Scoundrel")]
-    public class Passive_Scoundrel : SerializedPassive
+    public class Passive_Scoundrel : Passive
     {
         public int m_trapwireLastCastTurn;
         public bool m_trapwireDidDamage;

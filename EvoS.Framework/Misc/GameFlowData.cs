@@ -2,7 +2,7 @@ using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
-using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Network.NetworkBehaviours;
 
 namespace EvoS.Framework.Misc
 {
@@ -10,7 +10,7 @@ namespace EvoS.Framework.Misc
     [SerializedMonoBehaviour("GameFlowData")]
     public class GameFlowData : ISerializedItem
     {
-        public SerializedVector<SerializedActorData> m_ownedActorDatas;
+        public SerializedVector<ActorData> m_ownedActorDatas;
         public bool m_oneClassOnTeam;
         public SerializedArray<SerializedComponent> m_availableCharacterResourceLinkPrefabs;
         public float m_startTime;
@@ -30,7 +30,7 @@ namespace EvoS.Framework.Misc
 
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
-            m_ownedActorDatas = new SerializedVector<SerializedActorData>(assetFile, stream);
+            m_ownedActorDatas = new SerializedVector<ActorData>(assetFile, stream);
             m_oneClassOnTeam = stream.ReadBoolean();
             stream.AlignTo();
             m_availableCharacterResourceLinkPrefabs = new SerializedArray<SerializedComponent>(assetFile, stream);

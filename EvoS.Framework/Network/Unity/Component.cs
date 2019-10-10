@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using EvoS.Framework.Assets;
+using EvoS.Framework.Assets.Serialized;
 
 namespace EvoS.Framework.Network.Unity
 {
-    public class Component
+    public class Component : ISerializedItem
     {
         public GameObject gameObject;
         public Transform transform;
@@ -18,9 +20,14 @@ namespace EvoS.Framework.Network.Unity
             return gameObject.GetComponent<T>();
         }
         
-        protected IEnumerable<T> GetComponents<T>() where T : Component
+        public IEnumerable<T> GetComponents<T>() where T : Component
         {
             return gameObject.GetComponents<T>();
+        }
+
+        public virtual void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        {
+            throw new NotImplementedException();
         }
     }
 }

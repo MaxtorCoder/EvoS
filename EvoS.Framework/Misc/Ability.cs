@@ -104,7 +104,7 @@ namespace EvoS.Framework.Misc
             NoMovement
         }
 
-        public virtual void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_toolTip = stream.ReadString32();
             m_debugUnlocalizedTooltip = stream.ReadString32();

@@ -6,7 +6,7 @@ using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
 {
-    public class AbilityMod : MonoBehaviour, ISerializedItem
+    public class AbilityMod : MonoBehaviour
     {
         public string m_name = string.Empty;
         public bool m_availableInGame = true;
@@ -121,7 +121,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public virtual void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_abilityScopeId = stream.ReadInt32();
             m_name = stream.ReadString32();

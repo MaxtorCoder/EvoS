@@ -1,40 +1,22 @@
-﻿using EvoS.Framework.Network.Static;
-using EvoS.Framework.Logging;
-using System;
+﻿using EvoS.Framework.Logging;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using vtortola.WebSockets;
-using vtortola.WebSockets.Rfc6455;
-using System.IO;
 using EvoS.Framework.Network;
-using EvoS.GameServer.Network;
-using EvoS.GameServer.Network.Messages.GameManager;
 
 namespace EvoS.GameServer
 {
     public class GameServer
     {
         private static List<ClientConnection> ConnectedClients = new List<ClientConnection>();
-        private static Dictionary<string, GameManager> _gameManagers = new Dictionary<string, GameManager>();
 
         public static void Main()
         {
             Task server = Task.Run(StartServer);
             server.Wait();
             Log.Print(LogType.Game, "Server Stopped");
-        }
-
-        public static GameManager? FindGameManager(LoginRequest loginRequest)
-        {
-            // TODO this is only suitable for solo
-            if (!_gameManagers.ContainsKey(loginRequest.SessionToken))
-            {
-                _gameManagers.Add(loginRequest.SessionToken, new GameManager());
-            }
-
-            return _gameManagers[loginRequest.SessionToken];
         }
 
         private static async Task StartServer()

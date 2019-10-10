@@ -20,7 +20,7 @@ namespace EvoS.Framework.Network.Unity
         {
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
             serializedGameObject = new SerializedComponent(assetFile, stream);
