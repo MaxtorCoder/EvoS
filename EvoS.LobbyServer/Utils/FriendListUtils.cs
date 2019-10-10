@@ -29,5 +29,30 @@ namespace EvoS.LobbyServer.Utils
 
         }
 
+        public static void BlockFriend(ClientConnection connection, FriendUpdateRequest request)
+        {
+
+        }
+
+        public static void NoteFriend(ClientConnection connection, FriendUpdateRequest request)
+        {
+
+        }
+
+        public static void RejectFriend(ClientConnection connection, FriendUpdateRequest request)
+        {
+
+        }
+
+        public static void RemoveFriend(ClientConnection connection, FriendUpdateRequest request)
+        {
+
+        }
+
+        public static void UnblockFriend(ClientConnection connection, FriendUpdateRequest request)
+        {
+
+        }
+
     }
 }

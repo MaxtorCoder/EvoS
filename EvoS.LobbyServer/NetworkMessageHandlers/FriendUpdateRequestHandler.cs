@@ -17,19 +17,25 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             switch (request.FriendOperation)
             {
                 case FriendOperation.Accept:
+                    FriendListUtils.AcceptFriend(connection, request);
                     break;
                 case FriendOperation.Add:
                     FriendListUtils.AddFriend(connection, request);
                     break;
                 case FriendOperation.Block:
+                    FriendListUtils.BlockFriend(connection, request);
                     break;
                 case FriendOperation.Note:
+                    FriendListUtils.NoteFriend(connection, request);
                     break;
                 case FriendOperation.Reject:
+                    FriendListUtils.RejectFriend(connection, request);
                     break;
                 case FriendOperation.Remove:
+                    FriendListUtils.RemoveFriend(connection, request);
                     break;
                 case FriendOperation.Unblock:
+                    FriendListUtils.UnblockFriend(connection, request);
                     break;
                 case FriendOperation.Unknown:
                     break;
