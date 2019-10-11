@@ -270,6 +270,14 @@ namespace EvoS.Framework.Assets
             }
         }
 
+        public void ClearCache()
+        {
+            foreach (var assetFile in AllAssetFiles())
+            {
+                assetFile.ClearCache();
+            }
+        }
+
         public void Dispose(AssetFile assetFile)
         {
             _strongRefs.Remove(assetFile);

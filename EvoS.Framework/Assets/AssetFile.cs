@@ -25,8 +25,8 @@ namespace EvoS.Framework.Assets
 
         public ReadOnlyCollection<AssetFile> ExternalAssetRefs => _fileMap.Skip(1).ToList().AsReadOnly();
 
-        private Dictionary<long, WeakReference<ISerializedItem>> _referenceCache =
-            new Dictionary<long, WeakReference<ISerializedItem>>();
+        private Dictionary<long, ISerializedItem> _referenceCache =
+            new Dictionary<long, ISerializedItem>();
 
         private static Dictionary<int, Type> _unityTypeMap = new Dictionary<int, Type>
         {
@@ -62,7 +62,7 @@ namespace EvoS.Framework.Assets
             _stream = stream;
 
             Initialize();
-            
+
             LoadExternalReferences();
         }
 
@@ -237,14 +237,11 @@ namespace EvoS.Framework.Assets
             }
 
             // Check the reference cache first
-            _referenceCache.TryGetValue(pathId, out var cacheRef);
-            if (cacheRef != null)
+
+            _referenceCache.TryGetValue(pathId, out var cached);
+            if (cached != null)
             {
-                cacheRef.TryGetTarget(out var cached);
-                if (cached != null)
-                {
-                    return cached;
-                }
+                return cached;
             }
 
             var savedPos = _stream.Position;
@@ -258,7 +255,7 @@ namespace EvoS.Framework.Assets
             if (_unityTypeMap.ContainsKey(objType.TypeId))
             {
                 var obj = (ISerializedItem) Activator.CreateInstance(_unityTypeMap[objType.TypeId]);
-                _referenceCache[pathId] = new WeakReference<ISerializedItem>(obj);
+                _referenceCache[pathId] = obj;
                 obj.DeserializeAsset(this, _stream);
 
                 var currentPos = _stream.Position;
@@ -298,6 +295,11 @@ namespace EvoS.Framework.Assets
             }
 
             return null;
+        }
+
+        public void ClearCache()
+        {
+            _referenceCache.Clear();
         }
 
         public override string ToString()
