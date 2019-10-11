@@ -23,6 +23,16 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
+        public void Register(GameManager manager)
+        {
+            if (GameManager != null)
+            {
+                throw new ApplicationException($"GameObject {this} already registered!");
+            }
+
+            GameManager = manager;
+        }
+
         public IEnumerable<T> GetComponents<T>() where T : Component
         {
             foreach (var component in _components)

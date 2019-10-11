@@ -15,7 +15,8 @@ namespace EvoS.Framework.Game
 {
     public class GameManager
     {
-        public NetworkServer NetworkServer = new NetworkServer();
+        public readonly NetworkServer NetworkServer = new NetworkServer();
+        public readonly Board Board = new Board(); // TODO
         private bool s_quitting;
         private GameStatus m_gameStatus;
         private LobbyGameplayOverrides m_gameplayOverrides;
@@ -269,18 +270,19 @@ namespace EvoS.Framework.Game
                 netId = new NetworkInstanceId(6),
                 sceneId = new NetworkSceneId(2),
                 position = new Vector3(18.7f, 2.0f, 19.4f),
-                payload = Convert.FromBase64String("CwD7//////v/////+//////7//////v/////+//////7//////v/////+//////7//////v/////")
+                payload = Convert.FromBase64String(
+                    "CwD7//////v/////+//////7//////v/////+//////7//////v/////+//////7//////v/////")
             });
             player.Connection.Send(10, new ObjectSpawnSceneMessage
             {
                 netId = new NetworkInstanceId(7),
                 sceneId = new NetworkSceneId(3),
                 position = Vector3.Zero,
-                payload = Convert.FromBase64String("AAAAAAAAAAAAAIA/AADgQAAAoEEAANBBAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=")
+                payload = Convert.FromBase64String(
+                    "AAAAAAAAAAAAAIA/AADgQAAAoEEAANBBAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=")
             });
             player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = false});
             player.Connection.Send(12, new ObjectSpawnFinishedMessage {state = 1});
-
         }
 
 //        public class ObserverMessage : MessageBase

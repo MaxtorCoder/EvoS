@@ -296,7 +296,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal void OnUpdateVars(NetworkReader reader, bool initialState)
+        public void OnUpdateVars(NetworkReader reader, bool initialState)
         {
             if (initialState && m_NetworkBehaviours == null)
             {
@@ -305,6 +305,7 @@ namespace EvoS.Framework.Network.Unity
 
             foreach (var networkBehaviour in m_NetworkBehaviours)
             {
+                Log.Print(LogType.Debug, $"Will deserialize {GetType().Name}.{networkBehaviour.GetType().Name}");
                 networkBehaviour.OnDeserialize(reader, initialState);
             }
         }

@@ -1,5 +1,6 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Assets.Serialized
 {
@@ -79,6 +80,28 @@ namespace EvoS.Framework.Assets.Serialized
 //                   $"{nameof(Tag)}: {Tag}, " +
 //                   $"{nameof(IsActive)}: {IsActive}" +
                    ")";
+        }
+
+        public GameObject Instantiate()
+        {
+            var gameObj = new GameObject();
+            var names = ComponentNames();
+            var index = 0;
+            foreach (var component in ComponentChildren())
+            {
+                var name = names[index++];
+                if (component is MonoBehaviour behaviour)
+                {
+                    gameObj.AddComponent(behaviour);
+                    behaviour.Awake();
+                }
+                else
+                {
+                    Console.WriteLine($"  Unhandled component child {name} - {component}");
+                }
+            }
+
+            return gameObj;
         }
     }
 }
