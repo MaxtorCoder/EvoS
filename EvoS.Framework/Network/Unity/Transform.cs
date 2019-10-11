@@ -5,9 +5,8 @@ using EvoS.Framework.Assets.Serialized;
 
 namespace EvoS.Framework.Network.Unity
 {
-    public class Transform : Component, ISerializedItem
+    public class Transform : Component
     {
-        public SerializedComponent serializedGameObject;
         [JsonIgnore] public Vector3 position = Vector3.Zero;
         public Vector3 localPosition = Vector3.Zero;
         [JsonIgnore] public Quaternion rotation = Quaternion.Identity;
@@ -23,7 +22,9 @@ namespace EvoS.Framework.Network.Unity
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
-            serializedGameObject = new SerializedComponent(assetFile, stream);
+            var serializedGameObject = (SerializedGameObject) new SerializedComponent(assetFile, stream).LoadValue();
+            
+            gameObject = serializedGameObject.Instantiate();
             localRotation = stream.ReadQuaternion();
             localPosition = stream.ReadVector3();
             localScale = stream.ReadVector3();
@@ -38,7 +39,7 @@ namespace EvoS.Framework.Network.Unity
                    $"{nameof(localPosition)}: {localPosition}, " +
                    $"{nameof(localRotation)}: {localRotation}, " +
                    $"{nameof(localScale)}: {localScale}, " +
-                   $"{nameof(children)}: {children.Count} entries, " +
+                   $"{nameof(children)}: {children?.Count} entries, " +
                    $"{nameof(father)}: {(father != null ? "Exists" : "null")}" +
                    ")";
         }

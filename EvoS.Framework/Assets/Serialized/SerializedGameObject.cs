@@ -47,7 +47,7 @@ namespace EvoS.Framework.Assets.Serialized
                 var compValue = component.LoadValue();
                 if (compValue is SerializedMonoBehaviour smb)
                 {
-                    list.Add(smb.Script.ClassName);
+                    list.Add(smb.Script?.ClassName);
                 }
                 else
                 {
@@ -94,20 +94,28 @@ namespace EvoS.Framework.Assets.Serialized
             _cachedChild.SetTarget(gameObj);
             var names = ComponentNames();
             var index = 0;
+
+            Transform transform = null;
             foreach (var component in ComponentChildren())
             {
                 var name = names[index++];
-                if (component is MonoBehaviour behaviour)
+                switch (component)
                 {
-                    gameObj.AddComponent(behaviour);
-                    behaviour.Awake();
-                }
-                else
-                {
-                    Console.WriteLine($"  Unhandled component child {name} - {component}");
+                    case Transform trans:
+                        transform = trans;
+                        break;
+                    case Component comp:
+                        comp.transform = transform;
+                        gameObj.AddComponent(comp);
+                        break;
+                    case null:
+                        // ignore
+                        break;
+                    default:
+                        Console.WriteLine($"  Unhandled component child {name} - {component}");
+                        break;
                 }
             }
-
             return gameObj;
         }
     }

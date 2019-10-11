@@ -33,6 +33,11 @@ namespace EvoS.Framework.Network.Unity
             }
 
             GameManager = manager;
+
+            foreach (var component in GetComponents<MonoBehaviour>())
+            {
+                component.Awake();
+            }
         }
 
         public IEnumerable<T> GetComponents<T>() where T : Component
@@ -59,7 +64,7 @@ namespace EvoS.Framework.Network.Unity
             _components.Add(component);
         }
 
-        public void AddComponent(MonoBehaviour component)
+        public void AddComponent(Component component)
         {
             component.gameObject = this;
 
