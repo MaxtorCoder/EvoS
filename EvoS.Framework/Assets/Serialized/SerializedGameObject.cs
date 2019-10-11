@@ -11,6 +11,7 @@ namespace EvoS.Framework.Assets.Serialized
         public string Name { get; set; }
         public ushort Tag { get; set; }
         public bool IsActive { get; set; }
+        private readonly WeakReference<GameObject> _cachedChild = new WeakReference<GameObject>(null);
 
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
@@ -82,9 +83,15 @@ namespace EvoS.Framework.Assets.Serialized
                    ")";
         }
 
-        public GameObject Instantiate()
+        public GameObject Instantiate(bool ignoreCache =  false)
         {
+            if (!ignoreCache && _cachedChild.TryGetTarget(out var child))
+            {
+                return child;
+            }
+            
             var gameObj = new GameObject();
+            _cachedChild.SetTarget(gameObj);
             var names = ComponentNames();
             var index = 0;
             foreach (var component in ComponentChildren())
