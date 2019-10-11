@@ -2,12 +2,13 @@ using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
 {
     [Serializable]
     [SerializedMonoBehaviour("SpawnPointManager")]
-    public class SpawnPointManager : ISerializedItem
+    public class SpawnPointManager : MonoBehaviour
     {
         public bool m_playersSelectRespawn;
         public bool m_spawnInDuringMovement;
@@ -40,7 +41,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_playersSelectRespawn = stream.ReadBoolean();
             stream.AlignTo();

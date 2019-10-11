@@ -4,12 +4,13 @@ using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Network.Unity;
 
-namespace EvoS.Framework.Misc
+namespace EvoS.Framework.Network.NetworkBehaviours
 {
     [Serializable]
     [SerializedMonoBehaviour("PowerUp")]
-    public class PowerUp : ISerializedItem
+    public class PowerUp : NetworkBehaviour
     {
         public SerializedComponent m_ability;
         public string m_powerUpName;
@@ -70,7 +71,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_ability = new SerializedComponent(assetFile, stream);
             m_powerUpName = stream.ReadString32();

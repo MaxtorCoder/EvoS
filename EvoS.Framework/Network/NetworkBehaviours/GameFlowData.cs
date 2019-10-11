@@ -2,13 +2,13 @@ using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
-using EvoS.Framework.Network.NetworkBehaviours;
+using EvoS.Framework.Network.Unity;
 
-namespace EvoS.Framework.Misc
+namespace EvoS.Framework.Network.NetworkBehaviours
 {
     [Serializable]
     [SerializedMonoBehaviour("GameFlowData")]
-    public class GameFlowData : ISerializedItem
+    public class GameFlowData : NetworkBehaviour
     {
         public SerializedVector<ActorData> m_ownedActorDatas;
         public bool m_oneClassOnTeam;
@@ -28,7 +28,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_ownedActorDatas = new SerializedVector<ActorData>(assetFile, stream);
             m_oneClassOnTeam = stream.ReadBoolean();

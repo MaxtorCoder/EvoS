@@ -2,13 +2,14 @@ using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
-using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Misc;
+using EvoS.Framework.Network.Unity;
 
-namespace EvoS.Framework.Misc
+namespace EvoS.Framework.Network.NetworkBehaviours
 {
     [Serializable]
     [SerializedMonoBehaviour("ObjectivePoints")]
-    public class ObjectivePoints : ISerializedItem
+    public class ObjectivePoints : NetworkBehaviour
     {
         public bool m_skipEndOfGameCheck;
         public int m_startingPointsTeamA;
@@ -33,7 +34,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_skipEndOfGameCheck = stream.ReadBoolean();
             stream.AlignTo();

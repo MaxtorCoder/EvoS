@@ -8,7 +8,7 @@ namespace EvoS.Framework.Misc
 {
     [Serializable]
     [SerializedMonoBehaviour("MatchObjectiveKill")]
-    public class MatchObjectiveKill : ISerializedItem
+    public class MatchObjectiveKill : MatchObjective
     {
         public KillObjectiveType killType;
         public string m_tag;
@@ -25,7 +25,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             killType = (KillObjectiveType) stream.ReadInt32();
             m_tag = stream.ReadString32();

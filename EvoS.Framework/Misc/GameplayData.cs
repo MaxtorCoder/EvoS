@@ -3,12 +3,13 @@ using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
 {
     [Serializable]
     [SerializedMonoBehaviour("GameplayData")]
-    public class GameplayData : ISerializedItem
+    public class GameplayData : MonoBehaviour
     {
         public GameplayData.DiagonalMovement m_diagonalMovement;
         public GameplayData.MovementMaximumType m_movementMaximumType;
@@ -66,7 +67,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_diagonalMovement = (GameplayData.DiagonalMovement) stream.ReadInt32();
             m_movementMaximumType = (GameplayData.MovementMaximumType) stream.ReadInt32();

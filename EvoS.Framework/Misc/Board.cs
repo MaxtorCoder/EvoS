@@ -9,7 +9,7 @@ namespace EvoS.Framework.Misc
 {
     [Serializable]
     [SerializedMonoBehaviour("Board")]
-    public class Board : ISerializedItem
+    public class Board : MonoBehaviour
     {
         public SerializedComponent m_LOSHighlightsParent;
         public bool m_showLOS;
@@ -79,7 +79,7 @@ namespace EvoS.Framework.Misc
 //            }
 //        }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_LOSHighlightsParent = new SerializedComponent(assetFile, stream);
             m_showLOS = stream.ReadBoolean();

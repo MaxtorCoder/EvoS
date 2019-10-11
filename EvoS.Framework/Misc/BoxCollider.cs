@@ -1,10 +1,11 @@
 using System.Numerics;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
 {
-    public class BoxCollider : ISerializedItem
+    public class BoxCollider : Component
     {
         public SerializedComponent SerializedGameObject;
         public SerializedComponent Material;
@@ -17,7 +18,7 @@ namespace EvoS.Framework.Misc
         {
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
             SerializedGameObject = new SerializedComponent(assetFile, stream);
