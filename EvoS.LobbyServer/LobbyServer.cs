@@ -111,7 +111,7 @@ namespace EvoS.LobbyServer
 
             foreach (ClientConnection con in ConnectedClients)
             {
-                if (con.RegistrationInfo.AuthInfo.Handle == handle)
+                if (con.UserName == handle)
                 {
                     return con;
                 }

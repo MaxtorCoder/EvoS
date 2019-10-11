@@ -19,6 +19,10 @@ namespace EvoS.LobbyServer
                 {
                     CharacterComponent = {
                         Unlocked = true,
+                        LastSelectedLoadout = 0,
+                        CharacterLoadouts = new List<CharacterLoadout>(){
+                            PlayerUtils.GetLoadout(0, characterType)
+                        },
                         Skins = new List<PlayerSkinData>()
                         {
                             new PlayerSkinData() {
@@ -251,23 +255,6 @@ namespace EvoS.LobbyServer
             return data;
         }
 
-        public static PersistedAccountData CreateAccountData(ClientConnection connection)
-        {
-            return new PersistedAccountData
-            {
-                QuestComponent = new QuestComponent { ActiveSeason = 9 },
-                AccountId = connection.AuthInfo.AccountId,
-                UserName = connection.AuthInfo.UserName,
-                Handle = connection.AuthInfo.Handle,
-                SchemaVersion = new SchemaVersion<AccountSchemaChange>(0x1FFFF),
-                CreateDate = DateTime.Now.AddHours(-1),
-                UpdateDate = DateTime.Now,
-                AccountComponent = new AccountComponent(),
-                BankComponent = PlayerUtils.GetBankData(connection.AuthInfo.AccountId)
-
-            };
-        }
-
         public static GameAssignmentNotification CreatePracticeGameNotification(ClientConnection connection)
         {
             return new GameAssignmentNotification
@@ -334,8 +321,8 @@ namespace EvoS.LobbyServer
             {
                 PlayerId = 0, // TODO
                 CharacterInfo = CreateLobbyCharacterInfo(CharacterType.Scoundrel),
-                Handle = connection.AuthInfo.Handle,
-                AccountId = connection.AuthInfo.AccountId,
+                Handle = connection.UserName,
+                AccountId = connection.AccountId,
                 IsGameOwner = true,
                 EffectiveClientAccessLevel = ClientAccessLevel.Admin
             };

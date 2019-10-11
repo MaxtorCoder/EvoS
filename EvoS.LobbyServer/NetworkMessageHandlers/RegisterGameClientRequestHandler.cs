@@ -1,4 +1,4 @@
-﻿using EvoS.Framework.Network;
+using EvoS.Framework.Network;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,36 +17,53 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             RegisterGameClientRequest request = (RegisterGameClientRequest) requestData;
-            connection.RegistrationInfo = request;
-            
+            connection.AccountId = request.AuthInfo.AccountId;
+            connection.UserName = request.AuthInfo.Handle;
+
+            // Send RegisterGameClientResponse
+            await Send_RegisterGameClientResponse(connection, request);
+            // Sent LobbyServerReadyNotification
+            await Send_LobbyServerReadyNotification(connection);
+
+            // Send "{username} has connected" to global chat
+            await Send_ChatConnectedNotification(connection);
+        }
+
+
+        private async Task Send_RegisterGameClientResponse(ClientConnection connection, RegisterGameClientRequest request)
+        {
             var response = RegisterGameClient(request);
             await connection.SendMessage(response);
+        }
+
+        private async Task Send_LobbyServerReadyNotification(ClientConnection connection)
+        {
             var lobbyServerReady = LobbyServerReady(connection);
             await connection.SendMessage(lobbyServerReady);
-            ChatNotification connectedMessage = new ChatNotification() {
-                ConsoleMessageType = ConsoleMessageType.SystemMessage,
-                Text = $"{connection.RegistrationInfo.AuthInfo.Handle} has connected",
-                RequestId = 0,
-                ResponseId = 0
-            };
+        }
+
+        private async Task Send_ChatConnectedNotification(ClientConnection connection)
+        {
+            ChatNotification connectedMessage = new ChatNotification() { Text = $"{connection.UserName} has connected", ConsoleMessageType = ConsoleMessageType.SystemMessage };
             await Program.sendChatToAll(connectedMessage);
         }
+
 
         private LobbyServerReadyNotification LobbyServerReady(ClientConnection connection)
         {
             return new LobbyServerReadyNotification
             {
-                AccountData = DummyLobbyData.CreateAccountData(connection),
+                AccountData = PlayerUtils.GetAccountData(connection),
                 AlertMissionData = new LobbyAlertMissionDataNotification(),
                 CharacterDataList = DummyLobbyData.CreateCharacterDataList(),
                 CommerceURL = "http://127.0.0.1/AtlasCommerce",
                 EnvironmentType = EnvironmentType.External,
                 FactionCompetitionStatus = new FactionCompetitionNotification(),
-                FriendStatus = new FriendStatusNotification {FriendList = FriendListUtils.GetFriendList(connection.AuthInfo.AccountId)},
+                FriendStatus = new FriendStatusNotification {FriendList = FriendListUtils.GetFriendList(connection.AccountId)},
                 GroupInfo = new LobbyPlayerGroupInfo
                 {
                     SelectedQueueType = GameType.Practice,
-                    MemberDisplayName = connection.SessionInfo.Handle,
+                    MemberDisplayName = connection.UserName,
                     // ChararacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(CharacterType.Archer),
                     Members = new List<UpdateGroupMemberData>()
                 },

@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.NetworkMessages;
+using EvoS.LobbyServer.Utils;
 using Newtonsoft.Json;
 
 namespace EvoS.LobbyServer.NetworkMessageHandlers
@@ -27,6 +28,8 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 }
             }
 
+            request.PlayerInfoUpdate.LastSelectedLoadout = 0;
+
             if (request.PlayerInfoUpdate.CharacterType == null)
             {
                 Log.Print(LogType.Warning, "CharacterType is null in PlayerInfoUpdateRequest");
@@ -35,7 +38,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
             var accountDataUpdate = new PlayerAccountDataUpdateNotification
             {
-                AccountData = DummyLobbyData.CreateAccountData(connection)
+                AccountData = PlayerUtils.GetAccountData(connection)
             };
             accountDataUpdate.AccountData.AccountComponent.LastCharacter = request.PlayerInfoUpdate.CharacterType.Value;
             Log.Print(LogType.Network, $"Responding {JsonConvert.SerializeObject(accountDataUpdate)}");

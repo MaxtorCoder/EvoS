@@ -20,18 +20,23 @@ namespace EvoS.LobbyServer
     public class ClientConnection
     {
         private WebSocket Socket;
-        public RegisterGameClientRequest RegistrationInfo;
-        public AuthInfo AuthInfo => RegistrationInfo.AuthInfo;
-        public LobbySessionInfo SessionInfo => RegistrationInfo.SessionInfo;
+        public long AccountId;
+        public string UserName;
+        public CharacterType SelectedCharacter;
+        public int SelectedTitleID;
+        public int SelectedForegroundBannerID;
+        public int SelectedBackgroundBannerID;
+        public int SelectedRibbonID = -1;
 
         public ClientConnection(WebSocket socket)
         {
             Socket = socket;
+            SelectedCharacter = CharacterType.Scoundrel;
         }
 
         public void Disconnect()
         {
-            Log.Print(LogType.Lobby, $"Client {RegistrationInfo.AuthInfo.Handle} disconnected.");
+            Log.Print(LogType.Lobby, $"Client {UserName} disconnected.");
             OnDisconnect.Invoke(this, new EventArgs());
             if (Socket.IsConnected)
                 Socket.Close();
