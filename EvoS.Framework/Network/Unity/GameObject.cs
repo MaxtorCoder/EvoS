@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using EvoS.Framework.Assets.Serialized;
+using EvoS.Framework.Game;
 
 namespace EvoS.Framework.Network.Unity
 {
@@ -8,7 +10,7 @@ namespace EvoS.Framework.Network.Unity
     {
         public string Name { get; private set; }
         private readonly List<Component> _components = new List<Component>();
-        private readonly Dictionary<Type, Component> _componentsByType = new Dictionary<Type, Component>();
+        public GameManager GameManager { get; private set; }
 
         public GameObject() : this(null)
         {
@@ -55,17 +57,31 @@ namespace EvoS.Framework.Network.Unity
             component.gameObject = this;
 
             _components.Add(component);
-            _componentsByType.Add(type, component);
+        }
+
+        public void AddComponent(MonoBehaviour component)
+        {
+            component.gameObject = this;
+
+            _components.Add(component);
         }
 
         public Component GetComponent(Type type)
         {
-            return _componentsByType[type];
+            foreach (var component in _components)
+            {
+                if (component.GetType().IsAssignableFrom(type))
+                {
+                    return component;
+                }
+            }
+
+            return null;
         }
 
         public T GetComponent<T>() where T : Component
         {
-            return (T) _componentsByType[typeof(T)];
+            return (T) GetComponent(typeof(T));
         }
     }
 }
