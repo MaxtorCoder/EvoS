@@ -19,5 +19,11 @@ namespace EvoS.Framework.Network.NetworkMessages
         public LocalizationPayload LocalizedText;
         public List<int> EmojisAllowed;
         public bool DisplayDevTag;
+
+        public ChatNotification()
+        {
+            RequestId = 0;
+            ResponseId = 0;
+        }
     }
 }
