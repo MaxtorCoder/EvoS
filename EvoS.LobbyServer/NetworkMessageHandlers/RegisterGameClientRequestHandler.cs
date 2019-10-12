@@ -22,6 +22,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
             // Send RegisterGameClientResponse
             await Send_RegisterGameClientResponse(connection, request);
+
             // Sent LobbyServerReadyNotification
             await Send_LobbyServerReadyNotification(connection);
 

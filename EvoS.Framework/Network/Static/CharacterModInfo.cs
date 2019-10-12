@@ -6,6 +6,13 @@ namespace EvoS.Framework.Network.Static
     [EvosMessage(540)]
     public struct CharacterModInfo
     {
+        public int ModForAbility0;
+        public int ModForAbility1;
+        public int ModForAbility2;
+        public int ModForAbility3;
+        public int ModForAbility4;
+        public static int AbilityCount = 5;
+
         public CharacterModInfo Reset()
         {
             ModForAbility0 = -1;
@@ -84,11 +91,6 @@ namespace EvoS.Framework.Network.Static
                    ModForAbility3.GetHashCode() ^ ModForAbility4.GetHashCode();
         }
 
-        public int ModForAbility0;
-        public int ModForAbility1;
-        public int ModForAbility2;
-        public int ModForAbility3;
-        public int ModForAbility4;
-        public static int AbilityCount = 5;
+        
     }
 }

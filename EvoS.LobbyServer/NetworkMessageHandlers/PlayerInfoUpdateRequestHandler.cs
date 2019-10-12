@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
@@ -11,7 +12,17 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
     {
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
+            /*
+             * The clients sends this request everytime something important to loadout configuration changes
+             * apparently it only sends in PlayerInfoUpdate the thing that was modified and everything else is is null
+             * 
+             * ie: if the client changes freelancer, it only sends the new value of CharacterType and all other values are null
+             */
             PlayerInfoUpdateRequest request = (PlayerInfoUpdateRequest) requestData;
+            if (request.GameType != null)
+                connection.SelectedGameType = request.GameType.Value;
+
+
 
             if (request.PlayerInfoUpdate.ContextualReadyState != null)
             {
@@ -20,7 +31,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                     var practice = DummyLobbyData.CreatePracticeGameNotification(connection);
                     Log.Print(LogType.Network, $"Responding {JsonConvert.SerializeObject(practice)}");
                     await connection.SendMessage(practice);
-                    
+
                     var practiceGameInfo = DummyLobbyData.CreatePracticeGameInfoNotification(connection);
                     Log.Print(LogType.Network, $"Responding {JsonConvert.SerializeObject(practiceGameInfo)}");
                     await connection.SendMessage(practiceGameInfo);
@@ -28,13 +39,54 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 }
             }
 
-            request.PlayerInfoUpdate.LastSelectedLoadout = 0;
+            else if (request.PlayerInfoUpdate.CharacterType != null)
+            {
+                connection.SelectedCharacter = request.PlayerInfoUpdate.CharacterType.Value;
+                var accountDataUpdate = new PlayerAccountDataUpdateNotification
+                {
+                    AccountData = PlayerUtils.GetAccountData(connection)
+                };
+                Log.Print(LogType.Debug, $"Responding {JsonConvert.SerializeObject(accountDataUpdate)}");
+                await connection.SendMessage(accountDataUpdate);
+                var response = new PlayerInfoUpdateResponse
+                {
+                    CharacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(connection.SelectedCharacter),
+                    OriginalPlayerInfoUpdate = request.PlayerInfoUpdate,
+                    ResponseId = request.RequestId
+                };
+                await connection.SendMessage(response);
+                return;
+            }
 
-            if (request.PlayerInfoUpdate.CharacterType == null)
+            else if (request.PlayerInfoUpdate.CharacterSkin != null)
+            {
+                connection.Loadout.Skin = request.PlayerInfoUpdate.CharacterSkin.Value;
+            }
+            else if (request.PlayerInfoUpdate.CharacterCards != null)
+            {
+                connection.Loadout.Cards = request.PlayerInfoUpdate.CharacterCards.Value;
+            }
+
+            else if (request.PlayerInfoUpdate.CharacterMods != null)
+            {
+                connection.Loadout.Mods = request.PlayerInfoUpdate.CharacterMods.Value;
+            }
+
+            else if (request.PlayerInfoUpdate.CharacterAbilityVfxSwaps != null)
+            {
+                connection.Loadout.AbilityVfxSwaps = request.PlayerInfoUpdate.CharacterAbilityVfxSwaps.Value;
+            }
+
+            else if (request.PlayerInfoUpdate.CharacterLoadoutChanges != null)
+            {
+                //
+            }
+
+            /*if (request.PlayerInfoUpdate.CharacterType == null)
             {
                 Log.Print(LogType.Warning, "CharacterType is null in PlayerInfoUpdateRequest");
                 return;
-            }
+            }/
 
             var accountDataUpdate = new PlayerAccountDataUpdateNotification
             {
@@ -62,6 +114,22 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             // response.PlayerInfo.CharacterInfo = response.CharacterInfo;
             Log.Print(LogType.Network, $"Responding {JsonConvert.SerializeObject(response)}");
             await connection.SendMessage(response);
+            */
+            /*try
+            {
+                var response = new PlayerInfoUpdateResponse
+                {
+                    //PlayerInfo = null,
+                    CharacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(connection.SelectedCharacter),
+                    OriginalPlayerInfoUpdate = request.PlayerInfoUpdate,
+                    ResponseId = request.RequestId
+                };
+                await connection.SendMessage(response);
+            }
+            catch(Exception e) {
+                Log.Print(LogType.Debug, e.Message);
+            }
+            */
         }
     }
 }

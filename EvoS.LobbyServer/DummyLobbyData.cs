@@ -216,7 +216,7 @@ namespace EvoS.LobbyServer
             return new LobbyCharacterInfo
             {
                 CharacterType = characterType,
-                CharacterSkin = new CharacterVisualInfo(),
+                CharacterSkin = new CharacterVisualInfo(0,0,0),
                 CharacterCards = new CharacterCardInfo().Reset(),
                 CharacterMods = new CharacterModInfo().Reset(),
                 CharacterAbilityVfxSwaps = new CharacterAbilityVfxSwapInfo(),
