@@ -4,6 +4,7 @@ using EvoS.Framework.Network.Static;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EvoS.LobbyServer.Utils
 {
@@ -24,9 +25,58 @@ namespace EvoS.LobbyServer.Utils
         {
 
         }
-        public static void AddFriend(ClientConnection connection, FriendUpdateRequest request)
+        public async static Task AddFriend(ClientConnection connection, FriendUpdateRequest request)
         {
+            ClientConnection friend = LobbyServer.Program.GetPlayerByHandle(request.FriendHandle);
+            var friendRequest = new FriendUpdateRequest()
+            {
+                FriendHandle = connection.UserName,
+                FriendAccountId = connection.AccountId,
+                FriendOperation = FriendOperation.Add,
+                RequestId = 0,
+                ResponseId = 0
+            };
+            await friend.SendMessage(friendRequest);
 
+            // Send a "RequestSent" status to the person that wants to add a new friend
+            await connection.SendMessage(new FriendStatusNotification()
+            {
+                FriendList = new Framework.Network.Static.FriendList()
+                {
+                    Friends = new Dictionary<long, Framework.Network.Static.FriendInfo>(){
+                {
+                    0,
+                    new Framework.Network.Static.FriendInfo()
+                    {
+                        FriendHandle = request.FriendHandle,
+                        FriendAccountId = request.FriendAccountId,
+                        FriendStatus = Framework.Constants.Enums.FriendStatus.RequestSent,
+                    }
+                }},
+                    IsDelta = true// set that this request doesnt have to overwrite friendlist
+                }
+            });
+
+            // Send a "RequestReceived" status to the person
+            await connection.SendMessage(new FriendStatusNotification()
+            {
+                FriendList = new Framework.Network.Static.FriendList()
+                {
+                    Friends = new Dictionary<long, Framework.Network.Static.FriendInfo>(){
+                {
+                    0,
+                    new Framework.Network.Static.FriendInfo()
+                    {
+                        FriendHandle = connection.UserName,
+                        FriendAccountId = connection.AccountId,
+                        FriendStatus = Framework.Constants.Enums.FriendStatus.RequestReceived,
+                    }
+                }},
+                    IsDelta = true // set that this request doesnt have to overwrite friendlist
+                }
+            });
+
+            // TODO: SEND FRIENDSTATUSNOTIFICATION WITH STATUS REQUESTSENT
         }
 
         public static void BlockFriend(ClientConnection connection, FriendUpdateRequest request)

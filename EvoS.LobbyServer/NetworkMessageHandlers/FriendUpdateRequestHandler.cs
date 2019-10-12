@@ -20,7 +20,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                     FriendListUtils.AcceptFriend(connection, request);
                     break;
                 case FriendOperation.Add:
-                    FriendListUtils.AddFriend(connection, request);
+                    await FriendListUtils.AddFriend(connection, request);
                     break;
                 case FriendOperation.Block:
                     FriendListUtils.BlockFriend(connection, request);
