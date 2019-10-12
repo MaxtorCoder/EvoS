@@ -11,3 +11,4 @@ CREATE TABLE IF NOT EXISTS Users(
     RibbonId SMALLINT
 );
 
+CREATE TABLE IF NOT EXISTS FriendList(AccountID_1 INT, AccountID_2 INT, FriendStatus TINYINT, PRIMARY KEY (AccountID_1, AccountID_2))

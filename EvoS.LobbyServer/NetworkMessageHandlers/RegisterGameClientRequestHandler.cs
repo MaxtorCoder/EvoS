@@ -67,7 +67,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 CommerceURL = "http://127.0.0.1/AtlasCommerce",
                 EnvironmentType = EnvironmentType.External,
                 FactionCompetitionStatus = new FactionCompetitionNotification(),
-                FriendStatus = new FriendStatusNotification {FriendList = FriendListUtils.GetFriendList(connection.AccountId)},
+                FriendStatus = new FriendStatusNotification {FriendList = FriendData.GetFriendList(connection.AccountId)},
                 GroupInfo = new LobbyPlayerGroupInfo
                 {
                     SelectedQueueType = GameType.Practice,
