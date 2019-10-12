@@ -14,6 +14,7 @@ using EvoS.LobbyServer.NetworkMessageHandlers;
 using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using EvoS.Framework.Misc;
 
 namespace EvoS.LobbyServer
 {
@@ -22,16 +23,21 @@ namespace EvoS.LobbyServer
         private WebSocket Socket;
         public long AccountId;
         public string UserName;
+        public string StatusString;
         public CharacterType SelectedCharacter;
+        public GameType SelectedGameType;
+        public PlayerLoadout Loadout;
         public int SelectedTitleID;
         public int SelectedForegroundBannerID;
         public int SelectedBackgroundBannerID;
         public int SelectedRibbonID = -1;
+        
 
         public ClientConnection(WebSocket socket)
         {
             Socket = socket;
             SelectedCharacter = CharacterType.Scoundrel;
+            Loadout = new PlayerLoadout();
         }
 
         public void Disconnect()
