@@ -1,10 +1,12 @@
 using System;
+using EvoS.Framework.Assets;
+using EvoS.Framework.Assets.Serialized;
 
 namespace EvoS.Framework.Network.Static
 {
     [Serializable]
     [EvosMessage(543)]
-    public struct CharacterAbilityVfxSwapInfo
+    public struct CharacterAbilityVfxSwapInfo : ISerializedItem
     {
         public void Reset()
         {
@@ -82,6 +84,15 @@ namespace EvoS.Framework.Network.Static
             return VfxSwapForAbility0.GetHashCode() ^ VfxSwapForAbility1.GetHashCode() ^
                    VfxSwapForAbility2.GetHashCode() ^ VfxSwapForAbility3.GetHashCode() ^
                    VfxSwapForAbility4.GetHashCode();
+        }
+
+        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        {
+            VfxSwapForAbility0 = stream.ReadInt32();
+            VfxSwapForAbility1 = stream.ReadInt32();
+            VfxSwapForAbility2 = stream.ReadInt32();
+            VfxSwapForAbility3 = stream.ReadInt32();
+            VfxSwapForAbility4 = stream.ReadInt32();
         }
 
         public int VfxSwapForAbility0;

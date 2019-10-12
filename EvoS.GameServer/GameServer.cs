@@ -1,14 +1,11 @@
-﻿using EvoS.Framework.Network.Static;
-using EvoS.Framework.Logging;
-using System;
+﻿using EvoS.Framework.Logging;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using vtortola.WebSockets;
-using vtortola.WebSockets.Rfc6455;
-using System.IO;
 using EvoS.Framework.Network;
+using EvoS.Framework.Network.Game;
 
 namespace EvoS.GameServer
 {
