@@ -11,6 +11,7 @@ using System.IO;
 using System.Net;
 using Newtonsoft.Json;
 using EvoS.Framework.Logging;
+using EvoS.Framework.DataAccess;
 
 namespace EvoS.DirectoryServer
 {
@@ -57,16 +58,34 @@ namespace EvoS.DirectoryServer
                 response.Success = true;
                 response.ErrorMessage = "";
 
-                response.SessionInfo = request.SessionInfo;
-                response.SessionInfo.ConnectionAddress = "127.0.0.1";
+                PlayerData.Player p = PlayerData.GetPlayer(request.AuthInfo.Handle);
+                if (p == null)
+                {
+                    Log.Print(LogType.Warning, $"Player {request.AuthInfo.Handle} doesnt exists");
+                    PlayerData.CreatePlayer(request.AuthInfo.Handle);
+                    p = PlayerData.GetPlayer(request.AuthInfo.Handle);
+                    if (p != null)
+                    {
+                        Log.Print(LogType.Debug, $"Succesfully Registered {p.UserName}");
+                    }
+                    else
+                    {
+                        Log.Print(LogType.Error, $"Error creating a new account for player '{request.AuthInfo.UserName}'");
+                    }
+                }
 
-                response.SessionInfo.ProcessCode = "This is the process code";
-                response.LobbyServerAddress = "127.0.0.1";
+                response.SessionInfo = request.SessionInfo;
+                response.SessionInfo.AccountId = p.AccountId;
+                response.SessionInfo.Handle = p.UserName;
+                response.SessionInfo.ConnectionAddress = "127.0.0.1";
+                response.SessionInfo.ProcessCode = "";
                 response.SessionInfo.FakeEntitlements = "";
                 response.SessionInfo.LanguageCode = "EN"; // Needs to be uppercase
 
+                response.LobbyServerAddress = "127.0.0.1";
+
                 LobbyGameClientProxyInfo proxyInfo = new LobbyGameClientProxyInfo();
-                proxyInfo.AccountId = request.SessionInfo.AccountId;
+                proxyInfo.AccountId = response.SessionInfo.AccountId;
                 proxyInfo.SessionToken = request.SessionInfo.SessionToken;
                 proxyInfo.AssignmentTime = 1565574095;
                 proxyInfo.Handle = request.SessionInfo.Handle;

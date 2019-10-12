@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.DataAccess;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.LobbyServer.Utils;
@@ -39,9 +40,12 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 }
             }
 
+            // Change Selected Freelancer
             else if (request.PlayerInfoUpdate.CharacterType != null)
             {
                 connection.SelectedCharacter = request.PlayerInfoUpdate.CharacterType.Value;
+                PlayerData.SaveSelectedCharacter(connection.AccountId, (int)connection.SelectedCharacter);
+
                 var accountDataUpdate = new PlayerAccountDataUpdateNotification
                 {
                     AccountData = PlayerUtils.GetAccountData(connection)

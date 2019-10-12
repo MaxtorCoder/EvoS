@@ -12,6 +12,7 @@ using System.IO;
 using EvoS.Framework.Network;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.DataAccess;
 
 namespace EvoS.LobbyServer
 {
@@ -38,6 +39,7 @@ namespace EvoS.LobbyServer
 #pragma warning restore CS4014
 
             Log.Print(LogType.Lobby, "Started LobbyServer on '0.0.0.0:6060'");
+            SQLiteDB.Init();
             QueueManager.GetInstance();
             while (true)
             {

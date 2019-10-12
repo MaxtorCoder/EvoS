@@ -53,7 +53,7 @@ namespace EvoS.LobbyServer.Utils
                         FriendStatus = Framework.Constants.Enums.FriendStatus.RequestSent,
                     }
                 }},
-                    IsDelta = true// set that this request doesnt have to overwrite friendlist
+                    IsDelta = true// set this to true to the request to tell the client to not overwrite current friend list
                 }
             });
 

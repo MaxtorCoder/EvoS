@@ -9,6 +9,7 @@ using EvoS.Framework.Logging;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
 using EvoS.LobbyServer.Utils;
+using EvoS.Framework.DataAccess;
 
 namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
@@ -17,8 +18,14 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             RegisterGameClientRequest request = (RegisterGameClientRequest) requestData;
-            connection.AccountId = request.AuthInfo.AccountId;
-            connection.UserName = request.AuthInfo.Handle;
+            PlayerData.Player p = PlayerData.GetPlayer(request.SessionInfo.Handle);
+            connection.AccountId = p.AccountId;
+            connection.UserName = p.UserName;
+            connection.SelectedTitleID = p.SelectedTitleID;
+            connection.SelectedBackgroundBannerID = p.SelectedBackgroundBannerID;
+            connection.SelectedForegroundBannerID = p.SelectedForegroundBannerID;
+            connection.SelectedRibbonID = p.SelectedTitleID;
+            connection.SelectedCharacter = p.LastSelectedCharacter;
 
             // Send RegisterGameClientResponse
             await Send_RegisterGameClientResponse(connection, request);
@@ -97,6 +104,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             response.SessionInfo.ConnectionAddress = "127.0.0.1";
             response.SessionInfo.LanguageCode = "EN";
             response.AuthInfo = request.AuthInfo;
+            response.AuthInfo.AccountId = request.SessionInfo.AccountId; // Override AuthInfo.AccountId with SessionInfo.AccountID, The account id from SessionInfo is set in the DirectoryServer and has the accountid value from database for the client username
             response.DevServerConnectionUrl = "127.0.0.1"; // What is this?
             response.AuthInfo.AccountStatus = null;
             response.Status = new LobbyStatusNotification
