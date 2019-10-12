@@ -1,0 +1,13 @@
+CREATE DATABASE IF NOT EXISTS Evos;
+USE Evos;
+
+CREATE TABLE IF NOT EXISTS Users(
+    AccountId INT PRIMARY KEY AUTO_INCREMENT,
+    UserName VARCHAR(32) UNIQUE,
+    LastSelectedCharacter TINYINT,
+    SelectedTitleId SMALLINT,
+    BannerForegroundId SMALLINT,
+    BannerBackgroundId SMALLINT,
+    RibbonId SMALLINT
+);
+

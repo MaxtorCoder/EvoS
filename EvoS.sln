@@ -9,9 +9,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvoS.DirectoryServer", "Evo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvoS.LobbyServer", "EvoS.LobbyServer\EvoS.LobbyServer.csproj", "{9C408431-2BDE-43F3-94F4-3414286EB074}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoS.GameServer", "EvoS.GameServer\EvoS.GameServer.csproj", "{BE0A5732-5E24-4B4C-B27A-46C440EBDB8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvoS.GameServer", "EvoS.GameServer\EvoS.GameServer.csproj", "{BE0A5732-5E24-4B4C-B27A-46C440EBDB8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoS.Sandbox", "EvoS.Sandbox\EvoS.Sandbox.csproj", "{92FC5EAF-05A5-4E64-8207-DEDEF85DCA15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvoS.Sandbox", "EvoS.Sandbox\EvoS.Sandbox.csproj", "{92FC5EAF-05A5-4E64-8207-DEDEF85DCA15}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4B44FF39-795B-46FB-8668-E8D71FC814AF}"
+	ProjectSection(SolutionItems) = preProject
+		mysql_schema.txt = mysql_schema.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

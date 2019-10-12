@@ -39,7 +39,6 @@ namespace EvoS.LobbyServer
 #pragma warning restore CS4014
 
             Log.Print(LogType.Lobby, "Started LobbyServer on '0.0.0.0:6060'");
-            SQLiteDB.Init();
             QueueManager.GetInstance();
             while (true)
             {
