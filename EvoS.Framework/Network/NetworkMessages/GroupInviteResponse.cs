@@ -7,7 +7,7 @@ namespace EvoS.Framework.Network.NetworkMessages
 {
     [Serializable]
     [EvosMessage(380)]
-    class GroupInviteResponse : WebSocketResponseMessage
+    public class GroupInviteResponse : WebSocketResponseMessage
     {
         public string FriendHandle;
         public LocalizationPayload LocalizedFailure;
