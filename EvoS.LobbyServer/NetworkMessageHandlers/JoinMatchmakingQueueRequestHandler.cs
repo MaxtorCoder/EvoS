@@ -12,14 +12,8 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
     {
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
-            JoinMatchmakingQueueRequest request = (JoinMatchmakingQueueRequest)requestData;
-
-            QueueManager.AddPlayerToQueue(request.GameType, connection);
-
-            JoinMatchmakingQueueResponse response = new JoinMatchmakingQueueResponse();
-            response.ResponseId = request.RequestId;
-            //response.RequestId = request.ResponseId;
-            await connection.SendMessage(response);
+            var request = (JoinMatchmakingQueueRequest)requestData;
+            await connection.SendMessage(new JoinMatchmakingQueueResponse() { ResponseId = request.RequestId });
 
             MatchmakingQueueAssignmentNotification assignmentNotification = new MatchmakingQueueAssignmentNotification()
             {
@@ -36,6 +30,8 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 }
             };
             await connection.SendMessage(assignmentNotification);
+
+            QueueManager.AddPlayerToQueue(connection);
         }
 
         

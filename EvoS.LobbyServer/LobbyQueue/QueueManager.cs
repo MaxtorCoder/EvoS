@@ -1,60 +1,72 @@
-﻿using EvoS.LobbyServer.LobbyQueue;
+﻿using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Network.NetworkMessages;
+using EvoS.Framework.Network.Static;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EvoS.LobbyServer
 {
     class QueueManager
     {
         private static QueueManager Instance = null;
-        private Dictionary<GameType, List<QueueParticipant>> Queue;
+        private List<ClientConnection> Queue;
+        private static Dictionary<GameType, int>QueuedPlayers;
 
         private QueueManager() {
-            Queue = new Dictionary<GameType, List<QueueParticipant>>();
+            Queue = new List<ClientConnection>();
+            QueuedPlayers = new Dictionary<GameType, int>(){{GameType.PvE, 0},{GameType.PvP, 0}};
         }
         
 
-        private static QueueManager GetInstance() {
+        public static QueueManager GetInstance() {
             if (Instance == null) {
                 Instance = new QueueManager();
             }
             return Instance;
         }
 
-        public static void AddPlayerToQueue(GameType gameType, ClientConnection client)
+        public static void AddPlayerToQueue(ClientConnection client)
         {
-            GetInstance();
-            if (!Instance.Queue.ContainsKey(gameType))
-            {
-                Instance.Queue.Add(gameType, new List<QueueParticipant>());
-            }
-            QueueParticipant player = new QueuePlayer(client);
-            Instance.Queue[gameType].Add(player);
+            QueuedPlayers[client.SelectedGameType] += 1;
+            Instance.Queue.Add(client);
+
+            ProcessMatchmaking();
         }
 
-        public static void RemovePlayerFromQueues(ClientConnection client)
+        public static void RemovePlayerFromQueue(ClientConnection client)
         {
-            foreach (var queueType in Instance.Queue.Keys)
+            QueuedPlayers[client.SelectedGameType] -= 1;
+            Instance.Queue.Remove(client);
+            ProcessMatchmaking();
+        }
+
+        public async static void ProcessMatchmaking()
+        {
+            await SendNotification();
+        }
+
+        private async static Task SendNotification()
+        {
+            foreach (var client in Instance.Queue)
             {
-                foreach (var participant in Instance.Queue[queueType])
+                MatchmakingQueueAssignmentNotification notification = new MatchmakingQueueAssignmentNotification()
                 {
-                    if (participant.IsGroup())
+                    Reason = "",
+                    MatchmakingQueueInfo = new LobbyMatchmakingQueueInfo()
                     {
-
+                        ShowQueueSize = true,
+                        QueuedPlayers = QueuedPlayers[client.SelectedGameType],
+                        AverageWaitTime = TimeSpan.FromSeconds(100),
+                        PlayersPerMinute = 0,
+                        GameConfig = new LobbyGameConfig(),
+                        QueueStatus = QueueStatus.QueueDoesntHaveEnoughHumans
                     }
-                }
+                };
+
+                await client.SendMessage(notification);
             }
-        }
-
-        public static void ProcessMatchmaking(GameType gameType)
-        {
-            // TODO
-        }
-
-        public static void RemovePlayerFromQueue()
-        {
-            // TODO
         }
     }
 }

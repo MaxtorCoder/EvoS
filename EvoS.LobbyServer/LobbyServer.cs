@@ -38,7 +38,7 @@ namespace EvoS.LobbyServer
 #pragma warning restore CS4014
 
             Log.Print(LogType.Server, "Started LobbyServer on '0.0.0.0:6060'");
-
+            QueueManager.GetInstance();
             while (true)
             {
                 Log.Print(LogType.Lobby, "Waiting for clients to connect...");

@@ -10,5 +10,11 @@ namespace EvoS.Framework.Network.NetworkMessages
     {
         public LobbyMatchmakingQueueInfo MatchmakingQueueInfo;
         public string Reason;
+
+        public MatchmakingQueueAssignmentNotification()
+        {
+            RequestId = 0;
+            ResponseId = 0;
+        }
     }
 }
