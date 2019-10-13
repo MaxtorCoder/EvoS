@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
@@ -21,9 +22,9 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public Team Team { get; private set; }
         public int LastVisibleTurnToClient { get; private set; }
         public BoardSquare ServerLastKnownPosSquare { get; private set; }
-        public float RemainingHorizontalMovement { get;private  set; }
-        public float RemainingMovementWithQueuedAbility { get;private  set; }
-        public bool QueuedMovementAllowsAbility { get;private  set; }
+        public float RemainingHorizontalMovement { get; private set; }
+        public float RemainingMovementWithQueuedAbility { get; private set; }
+        public bool QueuedMovementAllowsAbility { get; private set; }
         public bool QueuedMovementRequest { get; private set; }
         public bool QueuedChaseRequest { get; private set; }
         public ActorData QueuedChaseTarget { get; private set; }
@@ -48,10 +49,27 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public bool VisibleTillEndOfPhase { get; private set; }
         public bool IgnoreFromAbilityHits { get; private set; }
         public bool AlwaysHideNameplate { get; private set; }
+        public PlayerData PlayerData { get; set; }
+//        private ActorMovement _actorMovement;
+        private ActorTurnSM _actorTurnSM;
+        private ActorCover _actorCover;
+        private ActorVFX _actorVFX;
+        private TimeBank _timeBank;
+        private ActorAdditionalVisionProviders _additionalVisionProvider;
+        private ActorBehavior _actorBehavior;
+        private AbilityData _abilityData;
+        private ItemData _itemData;
+        private ActorStats _actorStats;
+        private ActorStatus _actorStatus;
+        private ActorTargeting _actorTargeting;
+        private PassiveData _passiveData;
+//        private CombatText _combatText;
+//        private ActorTag _actorTags;
+        private FreelancerStats _freelancerStats;
 
         /* Asset fields */
         public int PlayerIndex { get; set; }
-        public SerializedComponent PlayerData { get; set; }
+        public SerializedComponent SerializedPlayerData { get; set; }
         public int CharacterType { get; set; }
         public SerializedComponent TauntCamSetData { get; set; }
         public string AliveHudIconResourceString { get; set; }
@@ -85,8 +103,54 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public float KnockbackSpeed { get; set; }
         public string OnDeathAudioEvent { get; set; }
 
-        public SerializedVector<SerializedComponent> AdditionalNetworkObjectsToRegister { get; set; }
+    public SerializedVector<SerializedComponent> AdditionalNetworkObjectsToRegister { get; set; }
         /* Asset fields end */
+
+        public override void Awake()
+        {
+            PlayerData = GetComponent<PlayerData>();
+            if (PlayerData == null)
+                throw new Exception($"Character {(object) gameObject.Name} needs a PlayerData component");
+//            _actorMovement = gameObject.GetComponent<ActorMovement>();
+//            if (_actorMovement == null)
+//                _actorMovement = gameObject.AddComponent<ActorMovement>();
+            _actorTurnSM = gameObject.GetComponent<ActorTurnSM>();
+            if (_actorTurnSM == null)
+                _actorTurnSM = gameObject.AddComponent<ActorTurnSM>();
+            _actorCover = gameObject.GetComponent<ActorCover>();
+            if (_actorCover == null)
+                _actorCover = gameObject.AddComponent<ActorCover>();
+            _actorVFX = gameObject.GetComponent<ActorVFX>();
+            if (_actorVFX == null)
+                _actorVFX = gameObject.AddComponent<ActorVFX>();
+            _timeBank = gameObject.GetComponent<TimeBank>();
+            if (_timeBank == null)
+                _timeBank = gameObject.AddComponent<TimeBank>();
+            _additionalVisionProvider = gameObject.GetComponent<ActorAdditionalVisionProviders>();
+            if (_additionalVisionProvider == null)
+                _additionalVisionProvider = gameObject.AddComponent<ActorAdditionalVisionProviders>();
+            _actorBehavior = GetComponent<ActorBehavior>();
+            _abilityData = GetComponent<AbilityData>();
+            _itemData = GetComponent<ItemData>();
+            _actorStats = GetComponent<ActorStats>();
+            _actorStatus = GetComponent<ActorStatus>();
+            _actorTargeting = GetComponent<ActorTargeting>();
+            _passiveData = GetComponent<PassiveData>();
+//            this._combatText = this.GetComponent<CombatText>();
+//            this._actorTags = this.GetComponent<ActorTag>();
+            _freelancerStats = GetComponent<FreelancerStats>();
+//            if (NetworkServer.active)
+//                ActorIndex = (int) checked(++ActorData.s_nextActorIndex);
+//            ActorData.Layer = LayerMask.NameToLayer("Actor");
+//            ActorData.Layer_Mask = 1 << ActorData.Layer;
+//            this._lastSpawnTurn = !(bool) (GameFlowData.Get())
+//                ? 1
+//                : Mathf.Max(1, GameFlowData.Get().CurrentTurn);
+            LastDeathTurn = -2;
+            NextRespawnTurn = -1;
+            HasBotController = false;
+            SpawnerId = -1;
+        }
 
         public override bool OnSerialize(NetworkWriter writer, bool initialState)
         {
@@ -328,9 +392,9 @@ namespace EvoS.Framework.Network.NetworkBehaviours
                 stream.Serialize(ref num25);
                 if (num23 > LastVisibleTurnToClient)
                     LastVisibleTurnToClient = num23;
-                ServerLastKnownPosSquare = num24 !=  -1 || num25 !=  -1
-                    ? Board.GetBoardSquare((int) num24, (int) num25)
-                    : (BoardSquare) null;
+                ServerLastKnownPosSquare = num24 != -1 || num25 != -1
+                    ? Board.GetBoardSquare(num24, num25)
+                    : null;
                 IgnoreFromAbilityHits = out3_1;
                 AlwaysHideNameplate = out4_1;
 //                this.\u000E().MarkForRecalculateVisibility();
@@ -466,8 +530,8 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         {
             stream.AlignTo();
             PlayerIndex = stream.ReadInt32();
-            PlayerData = new SerializedComponent();
-            PlayerData.DeserializeAsset(assetFile, stream);
+            SerializedPlayerData = new SerializedComponent();
+            SerializedPlayerData.DeserializeAsset(assetFile, stream);
             CharacterType = stream.ReadInt32();
             TauntCamSetData = new SerializedComponent();
             TauntCamSetData.DeserializeAsset(assetFile, stream);

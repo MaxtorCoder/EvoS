@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Game;
+using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
 
@@ -19,6 +21,17 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         private float[] m_modifiedStatsPrevious;
         private ActorData m_actorData;
 
+        public SyncListFloat ModifiedStats => m_modifiedStats;
+        public bool ShouldUpdateFull => m_shouldUpdateFull;
+        public Dictionary<StatType, List<StatMod>> StatMods => m_statMods;
+        public float[] ModifiedStatsPrevious => m_modifiedStatsPrevious;
+
+        static ActorStats()
+        {
+            NetworkBehaviour.RegisterSyncListDelegate(typeof(ActorStats), ActorStats.kListm_modifiedStats,
+                new NetworkBehaviour.CmdDelegate(ActorStats.InvokeSyncListm_modifiedStats));
+        }
+
         public ActorStats()
         {
         }
@@ -26,6 +39,30 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public ActorStats(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);
+        }
+
+        public override void Awake()
+        {
+            m_statMods =
+                new Dictionary<StatType, List<StatMod>>(
+                    new FuncEqualityComparer<StatType>((a, b) => a == b, a => (int) a));
+            for (var index = 0; index < 24; ++index)
+            {
+                var statModList = new List<StatMod>();
+                m_statMods.Add((StatType) index, statModList);
+            }
+
+            m_modifiedStats.InitializeBehaviour(this, kListm_modifiedStats);
+            m_modifiedStatsPrevious = new float[24];
+            m_actorData = GetComponent<ActorData>();
+        }
+
+        protected static void InvokeSyncListm_modifiedStats(NetworkBehaviour obj, NetworkReader reader)
+        {
+            if (!EvoSGameConfig.NetworkIsClient)
+                Log.Print(LogType.Error, "SyncList _modifiedStats called on server.");
+            else
+                ((ActorStats) obj).m_modifiedStats.HandleMsg(reader);
         }
 
         public override bool OnSerialize(NetworkWriter writer, bool forceAll)

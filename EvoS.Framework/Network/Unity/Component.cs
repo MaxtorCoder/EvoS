@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Network.Unity
 {
     public class Component : ISerializedItem
     {
+        [JsonIgnore]
         public GameObject gameObject;
         public Transform transform;
 

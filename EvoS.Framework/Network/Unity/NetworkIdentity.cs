@@ -18,7 +18,7 @@ namespace EvoS.Framework.Network.Unity
         public Hash128 AssetId { get; set; }
         public bool ServerOnly { get; set; }
         public bool LocalPlayerAuthority { get; set; }
-        
+
         public NetworkInstanceId netId => m_NetId;
         public NetworkSceneId sceneId => m_SceneId;
         public NetworkServer Server { set; private get; }
@@ -31,7 +31,7 @@ namespace EvoS.Framework.Network.Unity
 
         public NetworkHash128 assetId => m_AssetId;
 
-        internal void SetDynamicAssetId(NetworkHash128 newAssetId)
+        public void SetDynamicAssetId(NetworkHash128 newAssetId)
         {
             if (!m_AssetId.IsValid() || m_AssetId.Equals(newAssetId))
             {
@@ -59,7 +59,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal static NetworkInstanceId GetNextNetworkId()
+        public static NetworkInstanceId GetNextNetworkId()
         {
             uint value = s_NextNetworkId;
             s_NextNetworkId += 1u;
@@ -74,7 +74,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal static void AddNetworkId(uint id)
+        public static void AddNetworkId(uint id)
         {
             if (id >= s_NextNetworkId)
             {
@@ -82,7 +82,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal void SetNetworkInstanceId(NetworkInstanceId newNetId)
+        public void SetNetworkInstanceId(NetworkInstanceId newNetId)
         {
             m_NetId = newNetId;
             if (newNetId.Value == 0u)
@@ -105,7 +105,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal bool OnCheckObserver(ClientConnection conn)
+        public bool OnCheckObserver(ClientConnection conn)
         {
             for (int i = 0; i < m_NetworkBehaviours.Length; i++)
             {
@@ -126,13 +126,17 @@ namespace EvoS.Framework.Network.Unity
             return true;
         }
 
-        internal void UNetSerializeAllVars(NetworkWriter writer)
+        public void UNetSerializeAllVars(NetworkWriter writer)
         {
             for (int i = 0; i < m_NetworkBehaviours.Length; i++)
             {
                 NetworkBehaviour networkBehaviour = m_NetworkBehaviours[i];
+                Log.Print(LogType.Debug,
+                    $"Will serialize {GetType().Name}.{networkBehaviour.GetType().Name} at {writer.Position}");
                 networkBehaviour.OnSerialize(writer, true);
             }
+
+            Log.Print(LogType.Debug, $"Finished UNetSerializeAllVars at {writer.Position}");
         }
 
         private bool GetInvokeComponent(int cmdHash, Type invokeClass, out NetworkBehaviour invokeComponent)
@@ -168,7 +172,7 @@ namespace EvoS.Framework.Network.Unity
             return result;
         }
 
-        internal void HandleSyncEvent(int cmdHash, NetworkReader reader)
+        public void HandleSyncEvent(int cmdHash, NetworkReader reader)
         {
             Type invokeClass;
             NetworkBehaviour.CmdDelegate cmdDelegate;
@@ -200,7 +204,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal void HandleSyncList(int cmdHash, NetworkReader reader)
+        public void HandleSyncList(int cmdHash, NetworkReader reader)
         {
             Type invokeClass;
             NetworkBehaviour.CmdDelegate cmdDelegate;
@@ -232,7 +236,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal void HandleCommand(int cmdHash, NetworkReader reader)
+        public void HandleCommand(int cmdHash, NetworkReader reader)
         {
             Type invokeClass;
             NetworkBehaviour.CmdDelegate cmdDelegate;
@@ -264,7 +268,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal void HandleRPC(int cmdHash, NetworkReader reader)
+        public void HandleRPC(int cmdHash, NetworkReader reader)
         {
             Type invokeClass;
             NetworkBehaviour.CmdDelegate cmdDelegate;
@@ -305,23 +309,32 @@ namespace EvoS.Framework.Network.Unity
 
             foreach (var networkBehaviour in m_NetworkBehaviours)
             {
-                Log.Print(LogType.Debug, $"Will deserialize {GetType().Name}.{networkBehaviour.GetType().Name}");
+                Log.Print(LogType.Debug,
+                    $"Will deserialize {GetType().Name}.{networkBehaviour.GetType().Name} at {reader.Position}/{reader.Length}");
                 networkBehaviour.OnDeserialize(reader, initialState);
+            }
+
+            Log.Print(LogType.Debug, $"Finished OnUpdateVars at {reader.Position}/{reader.Length}");
+            if (reader.Position != reader.Length)
+            {
+                var remain = reader.ReadBytes((int) (reader.Length - reader.Position));
+
+                Log.Print(LogType.Debug, $"    remain={BitConverter.ToString(remain).Replace("-", "")}");
             }
         }
 
-        internal void SetConnectionToServer(ClientConnection conn)
+        public void SetConnectionToServer(ClientConnection conn)
         {
             m_ConnectionToServer = conn;
         }
 
-        internal void SetConnectionToClient(ClientConnection conn, short newPlayerControllerId)
+        public void SetConnectionToClient(ClientConnection conn, short newPlayerControllerId)
         {
             m_PlayerId = newPlayerControllerId;
             m_ConnectionToClient = conn;
         }
 
-        internal void OnNetworkDestroy()
+        public void OnNetworkDestroy()
         {
             var num = 0;
             while (m_NetworkBehaviours != null && num < m_NetworkBehaviours.Length)
@@ -332,7 +345,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal void ClearObservers()
+        public void ClearObservers()
         {
             if (m_Observers == null)
             {
@@ -350,7 +363,7 @@ namespace EvoS.Framework.Network.Unity
             m_ObserverConnections.Clear();
         }
 
-        internal void AddObserver(ClientConnection conn)
+        public void AddObserver(ClientConnection conn)
         {
             if (m_Observers == null)
             {
@@ -370,7 +383,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal void RemoveObserver(ClientConnection conn)
+        public void RemoveObserver(ClientConnection conn)
         {
             if (m_Observers != null)
             {
@@ -462,12 +475,12 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        internal void MarkForReset()
+        public void MarkForReset()
         {
             m_Reset = true;
         }
 
-        internal void Reset()
+        public void Reset()
         {
             if (m_Reset)
             {
@@ -497,9 +510,9 @@ namespace EvoS.Framework.Network.Unity
 
         private NetworkBehaviour[] m_NetworkBehaviours;
 
-        private HashSet<int> m_ObserverConnections;
+        private HashSet<int> m_ObserverConnections = new HashSet<int>();
 
-        private List<ClientConnection> m_Observers;
+        private List<ClientConnection> m_Observers = new List<ClientConnection>();
 
         private bool m_Reset;
 

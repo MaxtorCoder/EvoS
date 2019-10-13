@@ -3,7 +3,7 @@ using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 
-namespace EvoS.Framework.Network.NetworkBehaviours
+namespace EvoS.Framework.Misc
 {
     [SerializedMonoBehaviour("Passive_StickAndMove")]
     public class PassiveStickAndMove : Passive

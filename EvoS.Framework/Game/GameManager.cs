@@ -10,6 +10,7 @@ using EvoS.Framework.Network.Game.Messages;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Network.Unity;
 using EvoS.Framework.Network.Unity.Messages;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Game
 {
@@ -44,6 +45,7 @@ namespace EvoS.Framework.Game
 
         public LobbyTeamInfo TeamInfo { get; private set; }
 
+        [JsonIgnore]
         public LobbyGameConfig GameConfig => GameInfo.GameConfig;
 
         public LobbyGameplayOverrides GameplayOverrides

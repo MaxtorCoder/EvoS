@@ -58,5 +58,21 @@ namespace EvoS.Framework.Misc
                    $"{nameof(m_vertices)}: [{string.Join(", ", m_vertices)}], " +
                    ")";
         }
+
+        public enum CornerType : byte
+        {
+            LowerLeft,
+            LowerRight,
+            UpperRight,
+            UpperLeft,
+        }
+
+        public enum VisibilityFlags : byte
+        {
+            Self = 1,
+            Team = 2,
+            Objective = 4,
+            Revealed = 8,
+        }
     }
 }

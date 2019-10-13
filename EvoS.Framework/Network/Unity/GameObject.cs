@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using EvoS.Framework.Assets.Serialized;
+using System.Linq;
 using EvoS.Framework.Game;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Network.Unity
 {
@@ -10,6 +11,7 @@ namespace EvoS.Framework.Network.Unity
     {
         public string Name { get; private set; }
         private readonly List<Component> _components = new List<Component>();
+        [JsonIgnore]
         public GameManager GameManager { get; private set; }
 
         public GameObject() : this(null)
@@ -34,7 +36,7 @@ namespace EvoS.Framework.Network.Unity
 
             GameManager = manager;
 
-            foreach (var component in GetComponents<MonoBehaviour>())
+            foreach (var component in GetComponents<MonoBehaviour>().ToList())
             {
                 component.Awake();
             }
@@ -56,19 +58,28 @@ namespace EvoS.Framework.Network.Unity
             return _components.AsReadOnly();
         }
 
-        private void AddComponent(Type type)
+        private Component AddComponent(Type type)
         {
-            var component = (Component) Activator.CreateInstance(type);
-            component.gameObject = this;
-
-            _components.Add(component);
+            return AddComponent((Component) Activator.CreateInstance(type));
         }
 
-        public void AddComponent(Component component)
+        public T AddComponent<T>() where T : Component
+        {
+            return (T) AddComponent(typeof(T));
+        }
+
+        public Component AddComponent(Component component)
         {
             component.gameObject = this;
 
             _components.Add(component);
+
+            if (GameManager != null && component is MonoBehaviour behaviour)
+            {
+                behaviour.Awake();
+            }
+
+            return component;
         }
 
         public Component GetComponent(Type type)
