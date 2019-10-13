@@ -128,6 +128,8 @@ namespace EvoS.Framework.Network.Unity
 
         public void UNetSerializeAllVars(NetworkWriter writer)
         {
+            CacheBehaviours();
+            
             for (int i = 0; i < m_NetworkBehaviours.Length; i++)
             {
                 NetworkBehaviour networkBehaviour = m_NetworkBehaviours[i];
