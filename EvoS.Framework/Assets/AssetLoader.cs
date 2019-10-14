@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using EvoS.Framework.Assets.Bundles;
 using EvoS.Framework.Assets.Serialized;
-using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
@@ -278,6 +278,46 @@ namespace EvoS.Framework.Assets
         {
             _strongRefs.Remove(assetFile);
             _assetFiles.Remove(assetFile.Name);
+        }
+
+        public void DumpAssetFileDepTree()
+        {
+            var removed = new List<AssetFile>();
+            var roots = AllAssetFiles().ToList();
+
+            foreach (var file in AllAssetFiles())
+            {
+                if (removed.Contains(file)) continue;
+
+                var toRemove = new Stack<AssetFile>(file.ExternalAssetRefs);
+                while (toRemove.Count != 0)
+                {
+                    var item = toRemove.Pop();
+                    if (removed.Contains(item)) continue;
+                    
+                    removed.Add(item);
+                    roots.Remove(item);
+
+                    foreach (var child in item.ExternalAssetRefs)
+                    {
+                        toRemove.Push(child);
+                    }
+                }
+            }
+
+            void DumpTree(AssetFile child, int depth = 0)
+            {
+                Console.WriteLine($"{new string(' ', 2 * depth)}{child.Name}");
+                foreach (var assetRef in child.ExternalAssetRefs)
+                {
+                    DumpTree(assetRef, depth + 1);
+                }
+            }
+
+            foreach (var assetFile in roots)
+            {
+                DumpTree(assetFile);
+            }
         }
     }
 }
