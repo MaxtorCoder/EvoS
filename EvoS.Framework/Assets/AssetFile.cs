@@ -28,6 +28,9 @@ namespace EvoS.Framework.Assets
         private Dictionary<long, ISerializedItem> _referenceCache =
             new Dictionary<long, ISerializedItem>();
 
+        public Dictionary<SerializedGameObject, GameObject> ObjectCache =
+            new Dictionary<SerializedGameObject, GameObject>();
+
         private static Dictionary<int, Type> _unityTypeMap = new Dictionary<int, Type>
         {
             {(int) CommonTypeIds.GameObject, typeof(SerializedGameObject)},
@@ -300,6 +303,7 @@ namespace EvoS.Framework.Assets
         public void ClearCache()
         {
             _referenceCache.Clear();
+            ObjectCache.Clear();
         }
 
         public override string ToString()

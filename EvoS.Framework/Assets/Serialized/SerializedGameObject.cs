@@ -11,10 +11,12 @@ namespace EvoS.Framework.Assets.Serialized
         public string Name { get; set; }
         public ushort Tag { get; set; }
         public bool IsActive { get; set; }
-        private readonly WeakReference<GameObject> _cachedChild = new WeakReference<GameObject>(null);
+        private readonly WeakReference<AssetFile> _assetFile = new WeakReference<AssetFile>(null);
 
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
+            _assetFile.SetTarget(assetFile);
+
             Components = new SerializedVector<SerializedComponent>();
             Components.DeserializeAsset(assetFile, stream);
             Layer = stream.ReadUInt32();
@@ -83,15 +85,16 @@ namespace EvoS.Framework.Assets.Serialized
                    ")";
         }
 
-        public GameObject Instantiate(bool ignoreCache =  false)
+        public GameObject Instantiate(bool ignoreCache = false)
         {
-            if (!ignoreCache && _cachedChild.TryGetTarget(out var child))
+            if (_assetFile.TryGetTarget(out var assetFile) && !ignoreCache &&
+                assetFile.ObjectCache.TryGetValue(this, out var child))
             {
                 return child;
             }
-            
+
             var gameObj = new GameObject();
-            _cachedChild.SetTarget(gameObj);
+            assetFile?.ObjectCache?.Add(this, gameObj);
             var names = ComponentNames();
             var index = 0;
 
@@ -116,6 +119,7 @@ namespace EvoS.Framework.Assets.Serialized
                         break;
                 }
             }
+
             return gameObj;
         }
     }
