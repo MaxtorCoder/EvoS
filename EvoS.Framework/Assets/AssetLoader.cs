@@ -28,6 +28,7 @@ namespace EvoS.Framework.Assets
             new Dictionary<string, SerializedMonoScript>();
 
         public Dictionary<string, SerializedGameObject> NetObjsByName = new Dictionary<string, SerializedGameObject>();
+        public Dictionary<uint, SerializedGameObject> NetworkScenes = new Dictionary<uint, SerializedGameObject>();
 
         public Dictionary<NetworkHash128, SerializedGameObject> NetObjsByAssetId =
             new Dictionary<NetworkHash128, SerializedGameObject>();
@@ -102,24 +103,11 @@ namespace EvoS.Framework.Assets
             return assetFile;
         }
 
-        public List<AssetFile> LoadAssetBundle(string fileName, bool loadNodes = false, bool strongRefs = false)
+        public void LoadAssetBundle(string fileName)
         {
             var unityFs = new UnityFs(this, Path.Join(_basePath, fileName));
 
             _assetBundles.Add(unityFs.Name, unityFs);
-
-            if (!loadNodes)
-            {
-                return null;
-            }
-
-            var assets = new List<AssetFile>();
-            foreach (var node in unityFs.Nodes)
-            {
-                assets.Add(LoadAsset($"archive:/{unityFs.Name}/{node.Name.ToLower()}", strongRefs));
-            }
-
-            return assets;
         }
 
         public void ConstructCaches()
@@ -221,7 +209,8 @@ namespace EvoS.Framework.Assets
             }
 
             Log.Print(LogType.Misc,
-                $"Loaded {NetworkedObjects.Count} networked game objects from {count} asset files.");
+                $"Loaded {NetworkScenes.Count} networked scenes and " +
+                $"{NetworkedObjects.Count} networked game objects from {count} asset files.");
         }
 
         private void InternalLoadNetworkedObjects(AssetFile assetFile)
@@ -250,6 +239,10 @@ namespace EvoS.Framework.Assets
                             Log.Print(LogType.Warning,
                                 $"Multiple objects with netId {netHash}, latest in {assetFile.Name}");
                         }
+                    }
+                    else
+                    {
+                        NetworkScenes.Add(netIdent.SceneId.Value, obj);
                     }
                 }
             }
@@ -294,7 +287,7 @@ namespace EvoS.Framework.Assets
                 {
                     var item = toRemove.Pop();
                     if (removed.Contains(item)) continue;
-                    
+
                     removed.Add(item);
                     roots.Remove(item);
 

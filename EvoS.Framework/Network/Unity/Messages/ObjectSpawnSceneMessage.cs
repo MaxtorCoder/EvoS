@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 
 namespace EvoS.Framework.Network.Unity.Messages
@@ -25,5 +26,15 @@ namespace EvoS.Framework.Network.Unity.Messages
         public NetworkSceneId sceneId;
         public Vector3 position;
         public byte[] payload;
+
+        public override string ToString()
+        {
+            return $"{nameof(ObjectSpawnSceneMessage)}(" +
+                   $"{nameof(netId)}: {netId}, " +
+                   $"{nameof(sceneId)}: {sceneId}, " +
+                   $"{nameof(position)}: {position}, " +
+                   $"{nameof(payload)}: {(payload != null ? Convert.ToBase64String(payload) : null)}" +
+                   ")";
+        }
     }
 }

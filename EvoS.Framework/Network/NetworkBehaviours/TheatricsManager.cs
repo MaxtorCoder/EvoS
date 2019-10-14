@@ -29,7 +29,6 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         private int m_turnToUpdate;
         private int m_numConnectionIdsAddedForPhase;
         private float m_phaseStartTime;
-        private static TheatricsManager s_instance;
         internal const string c_actorAnimDebugHeader = "<color=cyan>Theatrics: </color>";
 
         public TheatricsManager()

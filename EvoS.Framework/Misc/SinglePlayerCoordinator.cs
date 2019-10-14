@@ -2,12 +2,13 @@ using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
 {
     [Serializable]
     [SerializedMonoBehaviour("SinglePlayerCoordinator")]
-    public class SinglePlayerCoordinator : ISerializedItem
+    public class SinglePlayerCoordinator : MonoBehaviour
     {
         public SerializedArray<SinglePlayerState> m_script;
         public BoardRegion m_forbiddenSquares;
@@ -27,7 +28,7 @@ namespace EvoS.Framework.Misc
             DeserializeAsset(assetFile, stream);
         }
 
-        public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
+        public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             m_script = new SerializedArray<SinglePlayerState>(assetFile, stream);
             m_forbiddenSquares = new BoardRegion(assetFile, stream);
