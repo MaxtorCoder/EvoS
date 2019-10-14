@@ -13,11 +13,8 @@ namespace EvoS.Framework.Assets
 {
     public class AssetLoader
     {
-        public AssetFile MainAssetFile;
         private string _basePath;
-
-        private Dictionary<string, WeakReference<AssetFile>> _assetFiles =
-            new Dictionary<string, WeakReference<AssetFile>>();
+        private Dictionary<string, AssetFile> _assetFiles = new Dictionary<string, AssetFile>();
 
         private Dictionary<string, UnityFs> _assetBundles =
             new Dictionary<string, UnityFs>();
@@ -36,6 +33,7 @@ namespace EvoS.Framework.Assets
             new Dictionary<NetworkHash128, SerializedGameObject>();
 
         public Dictionary<string, SerializedGameObject>.ValueCollection NetworkedObjects => NetObjsByName.Values;
+        public Dictionary<string, UnityFs> AssetBundles => _assetBundles;
 
         public AssetLoader(string basePath)
         {
@@ -54,14 +52,10 @@ namespace EvoS.Framework.Assets
 
         public AssetFile LoadAsset(string name, bool strongRef = false)
         {
-            AssetFile assetFile = null;
-
-            if (_assetFiles.TryGetValue(name, out var existingRef) && existingRef.TryGetTarget(out assetFile))
+            if (_assetFiles.TryGetValue(name, out var assetFile))
             {
                 return assetFile;
             }
-
-            var assetIsMain = MainAssetFile == null;
 
             // check if the asset is part of a bundle
             if (name.StartsWith("archive:/"))
@@ -71,7 +65,7 @@ namespace EvoS.Framework.Assets
                 var assetName = nameInfo[2];
 
                 // check if the bundled asset is already loaded
-                if (_assetFiles.TryGetValue(assetName, out existingRef) && existingRef.TryGetTarget(out assetFile))
+                if (_assetFiles.TryGetValue(assetName, out assetFile))
                 {
                     return assetFile;
                 }
@@ -100,11 +94,8 @@ namespace EvoS.Framework.Assets
                 assetFile = new AssetFile(this, name, new StreamReader(Path.Join(_basePath, name)));
             }
 
-            _assetFiles[assetFile.Name] = new WeakReference<AssetFile>(assetFile);
-            _assetFiles[name] = new WeakReference<AssetFile>(assetFile);
-
-            // First loaded becomes "main" -- TODO this is arbitrary
-            if (assetIsMain) MainAssetFile = assetFile;
+            _assetFiles[assetFile.Name] = assetFile;
+            _assetFiles[name] = assetFile;
 
             if (strongRef) _strongRefs.Add(assetFile);
 
@@ -154,13 +145,9 @@ namespace EvoS.Framework.Assets
         {
             var stack = new Stack<AssetFile>();
             var seen = new HashSet<string>();
-            stack.Push(MainAssetFile);
-            foreach (var file in _assetFiles.Values)
+            foreach (var asset in _assetFiles.Values)
             {
-                if (file.TryGetTarget(out var asset))
-                {
-                    stack.Push(asset);
-                }
+                stack.Push(asset);
             }
 
             while (!stack.IsNullOrEmpty())
