@@ -19,6 +19,7 @@ namespace EvoS.Framework.Misc
         public int X => _pos.X;
         public int Y => _pos.Y;
         public int Height => _pos.Height;
+        public GridPos GridPos => _pos;
 
         public BoardSquare()
         {
@@ -27,6 +28,11 @@ namespace EvoS.Framework.Misc
         public BoardSquare(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);
+        }
+
+        public Vector3 ToVector3()
+        {
+            return new Vector3(_pos.worldX, Height, _pos.worldY);
         }
 
         public void ReevaluateSquare()
@@ -64,7 +70,7 @@ namespace EvoS.Framework.Misc
             LowerLeft,
             LowerRight,
             UpperRight,
-            UpperLeft,
+            UpperLeft
         }
 
         public enum VisibilityFlags : byte
@@ -72,7 +78,7 @@ namespace EvoS.Framework.Misc
             Self = 1,
             Team = 2,
             Objective = 4,
-            Revealed = 8,
+            Revealed = 8
         }
     }
 }

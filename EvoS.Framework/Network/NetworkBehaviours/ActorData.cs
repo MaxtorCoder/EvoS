@@ -103,7 +103,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public float KnockbackSpeed { get; set; }
         public string OnDeathAudioEvent { get; set; }
 
-    public SerializedVector<SerializedComponent> AdditionalNetworkObjectsToRegister { get; set; }
+        public SerializedVector<SerializedComponent> AdditionalNetworkObjectsToRegister { get; set; }
         /* Asset fields end */
 
         public override void Awake()
@@ -607,6 +607,57 @@ namespace EvoS.Framework.Network.NetworkBehaviours
                    $"{nameof(OnDeathAudioEvent)}: {OnDeathAudioEvent}, " +
                    $"{nameof(AdditionalNetworkObjectsToRegister)}: {AdditionalNetworkObjectsToRegister.Count} entries" +
                    ")";
+        }
+
+        public delegate void ActorDataDelegate();
+
+        public enum IntType
+        {
+            HP,
+            TP,
+            ABSORB,
+            MAX_HP,
+            MAX_TP,
+            HP_UNRESOLVED_DAMAGE,
+            HP_UNRESOLVED_HEALING,
+            NUM_TYPES,
+        }
+
+        public enum NetChannelIdOffset
+        {
+            Default,
+            ActorData,
+            Count,
+        }
+
+        public enum MovementType
+        {
+            None = -1, // 0xFFFFFFFF
+            Normal = 0,
+            Teleport = 1,
+            Knockback = 2,
+            Charge = 3,
+            Flight = 4,
+            WaypointFlight = 5,
+        }
+
+        public enum TeleportType
+        {
+            NotATeleport,
+            InitialSpawn,
+            Respawn,
+            Evasion_DontAdjustToVision,
+            Evasion_AdjustToVision,
+            Reappear,
+            Failsafe,
+            u001D,
+            TricksterAfterImage,
+        }
+
+        public enum MovementChangeType
+        {
+            MoreMovement,
+            LessMovement,
         }
     }
 }

@@ -8,8 +8,8 @@ namespace EvoS.Framework.Misc
         public int X { get; set; }
         public int Y { get; set; }
         public int Height { get; set; }
-//        public float worldX => (float) _x * Board.SquareSizeStatic;
-//        public float worldY => (float) _y * Board.SquareSizeStatic;
+        public float worldX => (float) X; // TODO * Board.SquareSizeStatic;
+        public float worldY => (float) Y; // TODO * Board.SquareSizeStatic;
 
         private GridPos()
         {
