@@ -11,8 +11,7 @@ namespace EvoS.Framework.Network.Unity
     {
         public string Name { get; private set; }
         private readonly List<Component> _components = new List<Component>();
-        [JsonIgnore]
-        public GameManager GameManager { get; private set; }
+        [JsonIgnore] public GameManager GameManager { get; private set; }
 
         public GameObject() : this(null)
         {
@@ -98,6 +97,19 @@ namespace EvoS.Framework.Network.Unity
         public T GetComponent<T>() where T : Component
         {
             return (T) GetComponent(typeof(T));
+        }
+
+        public override string ToString()
+        {
+            var pos = GetComponent<Transform>();
+
+            return $"{nameof(GameObject)}(" +
+                   $"{nameof(Name)}: {Name}, " +
+                   (pos != null ? $"Position: {pos.localPosition}, " +
+                                  (pos.children.Count != 0 ? $"{pos.children.Count} children" : "")
+                       : "") +
+                   $"{_components.Count} components" +
+                   ")";
         }
     }
 }

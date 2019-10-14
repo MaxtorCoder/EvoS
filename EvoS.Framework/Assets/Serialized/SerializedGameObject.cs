@@ -93,7 +93,7 @@ namespace EvoS.Framework.Assets.Serialized
                 return child;
             }
 
-            var gameObj = new GameObject();
+            var gameObj = new GameObject(Name);
             assetFile?.ObjectCache?.Add(this, gameObj);
             var names = ComponentNames();
             var index = 0;
@@ -106,6 +106,7 @@ namespace EvoS.Framework.Assets.Serialized
                 {
                     case Transform trans:
                         transform = trans;
+                        gameObj.AddComponent(trans);
                         break;
                     case Component comp:
                         comp.transform = transform;
