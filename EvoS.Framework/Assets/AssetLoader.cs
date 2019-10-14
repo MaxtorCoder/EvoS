@@ -239,8 +239,17 @@ namespace EvoS.Framework.Assets
                     var netHash = new NetworkHash128(netIdent.AssetId.Bytes);
                     if (!netHash.IsZero())
                     {
-                        NetObjsByName.Add(obj.Name, obj);
-                        NetObjsByAssetId.Add(netHash, obj);
+                        if (!NetObjsByName.TryAdd(obj.Name, obj))
+                        {
+                            Log.Print(LogType.Warning,
+                                $"Multiple objects with name {obj.Name}, latest in {assetFile.Name}");
+                        }
+
+                        if (!NetObjsByAssetId.TryAdd(netHash, obj))
+                        {
+                            Log.Print(LogType.Warning,
+                                $"Multiple objects with netId {netHash}, latest in {assetFile.Name}");
+                        }
                     }
                 }
             }
