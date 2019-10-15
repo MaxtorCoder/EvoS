@@ -12,9 +12,10 @@ namespace EvoS.Framework.Misc
     public class BoardSquare : MonoBehaviour
     {
         private GridPosProp _gridPosProp;
-        private GridPos _pos = GridPos.Invalid;
+        private GridPos _pos = new GridPos(-1, -1, 0);
         public SerializedComponent m_LOSHighlightObj;
         public SerializedArray<Vector3> m_vertices;
+        public const float s_LoSHeightOffset = 1.6f;
 
         public int X => _pos.X;
         public int Y => _pos.Y;

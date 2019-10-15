@@ -201,12 +201,15 @@ namespace EvoS.Framework.Assets
 
         public ISerializedItem ReadMonoScriptChild(SerializedMonoScript script)
         {
-            if (!_scriptTypeMap.ContainsKey(script.ClassName))
+            // TODO Add namespace
+            var key = '.' + script.ClassName;
+            
+            if (!_scriptTypeMap.ContainsKey(key))
             {
                 return null;
             }
 
-            var child = (ISerializedItem) Activator.CreateInstance(_scriptTypeMap[script.ClassName]);
+            var child = (ISerializedItem) Activator.CreateInstance(_scriptTypeMap[key]);
             child.DeserializeAsset(this, _stream);
 
             return child;

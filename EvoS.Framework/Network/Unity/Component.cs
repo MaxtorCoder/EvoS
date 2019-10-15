@@ -11,6 +11,7 @@ namespace EvoS.Framework.Network.Unity
         [JsonIgnore]
         public GameObject gameObject;
         public Transform transform;
+        public bool enabled = true;
 
         public Component GetComponent(Type type)
         {

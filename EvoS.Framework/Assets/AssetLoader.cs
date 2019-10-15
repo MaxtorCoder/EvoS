@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using EvoS.Framework.Assets.Bundles;
 using EvoS.Framework.Assets.Serialized;
+using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
@@ -116,6 +118,38 @@ namespace EvoS.Framework.Assets
 
             LoadNetworkedObjects();
 //            DumpNetworkObjectComponents();
+        }
+
+        public SerializedGameObject GetObjectByComponent<T>() where T : MonoBehaviour
+        {
+            return GetObjectsByComponent<T>().FirstOrDefault();
+        }
+
+        public IEnumerable<SerializedGameObject> GetObjectsByComponent<T>() where T : MonoBehaviour
+        {
+            var attribute = typeof(T).GetCustomAttribute<SerializedMonoBehaviourAttribute>();
+            if (attribute == null)
+            {
+                throw new InvalidDataException($"{typeof(T)} has no {nameof(SerializedMonoBehaviourAttribute)}!");
+            }
+
+            if (!ScriptsByName.TryGetValue(attribute.ClassName, out var script))
+            {
+                yield break;
+            }
+
+            foreach (var assetFile in AllAssetFiles())
+            {
+                foreach (var gameObject in assetFile.GetObjectsByComponent(script))
+                {
+                    yield return gameObject;
+                }
+            }
+        }
+
+        public SerializedGameObject GetObjectByComponent(SerializedMonoScript script)
+        {
+            return GetObjectsByComponent(script).FirstOrDefault();
         }
 
         public IEnumerable<SerializedGameObject> GetObjectsByComponent(SerializedMonoScript script)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using EvoS.Framework.Assets;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
@@ -17,7 +18,8 @@ namespace EvoS.Framework.Game
     public class GameManager
     {
         public readonly NetworkServer NetworkServer = new NetworkServer();
-        public readonly Board Board = new Board(); // TODO
+        private readonly Dictionary<int, GameObject> _gameObjects = new Dictionary<int, GameObject>();
+        public Board Board;
         private bool s_quitting;
         private GameStatus m_gameStatus;
         private LobbyGameplayOverrides m_gameplayOverrides;
@@ -45,8 +47,7 @@ namespace EvoS.Framework.Game
 
         public LobbyTeamInfo TeamInfo { get; private set; }
 
-        [JsonIgnore]
-        public LobbyGameConfig GameConfig => GameInfo.GameConfig;
+        [JsonIgnore] public LobbyGameConfig GameConfig => GameInfo.GameConfig;
 
         public LobbyGameplayOverrides GameplayOverrides
         {
