@@ -7,7 +7,6 @@ using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.Game;
-using EvoS.Framework.Network.NetworkBehaviours;
 
 namespace EvoS.Framework.Network.Unity
 {
@@ -59,26 +58,11 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        public static NetworkInstanceId GetNextNetworkId()
-        {
-            uint value = s_NextNetworkId;
-            s_NextNetworkId += 1u;
-            return new NetworkInstanceId(value);
-        }
-
         private void CacheBehaviours()
         {
             if (m_NetworkBehaviours == null)
             {
                 m_NetworkBehaviours = GetComponents<NetworkBehaviour>().ToArray();
-            }
-        }
-
-        public static void AddNetworkId(uint id)
-        {
-            if (id >= s_NextNetworkId)
-            {
-                s_NextNetworkId = id + 1u;
             }
         }
 
@@ -518,9 +502,26 @@ namespace EvoS.Framework.Network.Unity
 
         private bool m_Reset;
 
-        private static uint s_NextNetworkId = 1u;
-
         private static NetworkWriter s_UpdateWriter = new NetworkWriter();
+
+        public void OnStartServer()
+        {
+            CacheBehaviours();
+            if (netId.IsEmpty())
+                m_NetId = gameObject.GameManager.NetworkServer.GetNextNetworkId();
+
+            foreach (var networkBehaviour in m_NetworkBehaviours)
+            {
+                try
+                {
+                    networkBehaviour.OnStartServer();
+                }
+                catch (Exception ex)
+                {
+                    Log.Print(LogType.Error, $"Exception in OnStartServer:{ex.Message} {ex.StackTrace}");
+                }
+            }
+        }
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
@@ -535,10 +536,10 @@ namespace EvoS.Framework.Network.Unity
             stream.AlignTo();
         }
 
-
         public override string ToString()
         {
             return $"{nameof(NetworkIdentity)}(" +
+                   $"{nameof(netId)}: {netId}, " +
                    $"{nameof(SceneId)}: {SceneId}, " +
                    $"{nameof(AssetId)}: {AssetId}" +
                    ")";

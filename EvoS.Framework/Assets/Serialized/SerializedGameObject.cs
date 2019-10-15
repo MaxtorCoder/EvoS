@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EvoS.Framework.Game;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Assets.Serialized
@@ -85,9 +86,9 @@ namespace EvoS.Framework.Assets.Serialized
                    ")";
         }
 
-        public GameObject Instantiate(bool ignoreCache = false)
+        public GameObject Instantiate(GameManager manager = null)
         {
-            if (_assetFile.TryGetTarget(out var assetFile) && !ignoreCache &&
+            if (_assetFile.TryGetTarget(out var assetFile) &&
                 assetFile.ObjectCache.TryGetValue(this, out var child))
             {
                 return child;
@@ -120,6 +121,8 @@ namespace EvoS.Framework.Assets.Serialized
                         break;
                 }
             }
+
+            manager?.RegisterObject(gameObj);
 
             return gameObj;
         }

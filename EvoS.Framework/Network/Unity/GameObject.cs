@@ -11,7 +11,22 @@ namespace EvoS.Framework.Network.Unity
     {
         public string Name { get; private set; }
         private readonly List<Component> _components = new List<Component>();
-        [JsonIgnore] public GameManager GameManager { get; private set; }
+        private GameManager _gameManager;
+
+        [JsonIgnore]
+        public GameManager GameManager
+        {
+            get => _gameManager;
+            set
+            {
+                if (_gameManager != null)
+                {
+                    throw new ApplicationException($"GameObject {this} already registered!");
+                }
+
+                _gameManager = value;
+            }
+        }
 
         public GameObject() : this(null)
         {
@@ -23,21 +38,6 @@ namespace EvoS.Framework.Network.Unity
             foreach (Type componentType in components)
             {
                 AddComponent(componentType);
-            }
-        }
-
-        public void Register(GameManager manager)
-        {
-            if (GameManager != null)
-            {
-                throw new ApplicationException($"GameObject {this} already registered!");
-            }
-
-            GameManager = manager;
-
-            foreach (var component in GetComponents<MonoBehaviour>().ToList())
-            {
-                component.Awake();
             }
         }
 
@@ -105,8 +105,9 @@ namespace EvoS.Framework.Network.Unity
 
             return $"{nameof(GameObject)}(" +
                    $"{nameof(Name)}: {Name}, " +
-                   (pos != null ? $"Position: {pos.localPosition}, " +
-                                  (pos.children.Count != 0 ? $"{pos.children.Count} children" : "")
+                   (pos != null
+                       ? $"Position: {pos.localPosition}, " +
+                         (pos.children.Count != 0 ? $"{pos.children.Count} children" : "")
                        : "") +
                    $"{_components.Count} components" +
                    ")";

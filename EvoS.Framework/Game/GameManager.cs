@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using EvoS.Framework.Assets;
+using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network;
 using EvoS.Framework.Network.Game;
 using EvoS.Framework.Network.Game.Messages;
+using EvoS.Framework.Network.NetworkBehaviours;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Network.Unity;
 using EvoS.Framework.Network.Unity.Messages;
@@ -302,5 +304,51 @@ namespace EvoS.Framework.Game
 //                this.Message = GeneratedNetworkCode._ReadMessage_Replay(reader);
 //            }
 //        }
+
+
+        public void RegisterObject(GameObject gameObj)
+        {
+            
+            gameObj.GameManager = this;
+
+            foreach (var component in gameObj.GetComponents<MonoBehaviour>().ToList())
+            {
+                component.Awake();
+            }
+
+            var netIdent = gameObj.GetComponent<NetworkIdentity>();
+            if (netIdent != null)
+            {
+                netIdent.OnStartServer();
+            }
+        }
+
+        public TR SpawnObject<T, TR>(AssetLoader loader) where T : MonoBehaviour where TR : Component
+        {
+            return SpawnObject<T>(loader).GetComponent<TR>();
+        }
+
+        public GameObject SpawnObject<T>(AssetLoader loader) where T : MonoBehaviour
+        {
+            loader.ClearCache();
+            return loader.GetObjectByComponent<T>().Instantiate();
+        }
+
+        public T SpawnObject<T>(AssetLoader loader, string name) where T : Component
+        {
+            return SpawnObject(loader, name).GetComponent<T>();
+        }
+
+        public GameObject SpawnObject(AssetLoader loader, string name)
+        {
+            loader.ClearCache();
+            return loader.NetObjsByName[name].Instantiate();
+        }
+
+        public GameObject SpawnScene(AssetLoader loader, uint sceneId)
+        {
+            loader.ClearCache();
+            return loader.NetworkScenes[sceneId].Instantiate();
+        }
     }
 }
