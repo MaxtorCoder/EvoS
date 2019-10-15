@@ -210,8 +210,104 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         public override bool OnSerialize(NetworkWriter writer, bool forceAll)
         {
+            uint setBits = uint.MaxValue;
+            var initialPos = writer.Position;
+            if (!forceAll)
+            {
+                setBits = syncVarDirtyBits;
+                writer.WritePackedUInt32(setBits);
+            }
+
             Log.Print(LogType.Warning, $"{nameof(ActorTeamSensitiveData)}.{nameof(OnSerialize)} not implemented!");
-            return false;
+            writer.Write((sbyte) _actorIndex);
+
+
+            if (IsBitDirty(setBits, DirtyBit.FacingDirection))
+            {
+                // TODO
+                writer.Write((short) VectorUtils.HorizontalAngle_Deg(_facingDirAfterMovement));
+            }
+
+            if (IsBitDirty(setBits, DirtyBit.MoveFromBoardSquare))
+            {
+                writer.Write((short) MoveFromBoardSquare.X);
+                writer.Write((short) MoveFromBoardSquare.Y);
+            }
+
+            if (IsBitDirty(setBits, DirtyBit.InitialMoveStartSquare))
+            {
+                // TODO
+                writer.Write((short) InitialMoveStartSquare.X);
+                writer.Write((short) InitialMoveStartSquare.Y);
+            }
+
+            if (IsBitDirty(setBits, DirtyBit.LineData))
+            {
+                writer.Write(ServerClientUtils.CreateBitfieldFromBools(_movementLine != null,
+                    _numNodesInSnaredLine != 0, false, false, false, false, false, false));
+                if (_movementLine != null)
+                {
+                    LineData.SerializeLine(_movementLine, writer);
+                }
+
+                writer.Write(_numNodesInSnaredLine);
+            }
+
+            if (IsBitDirty(setBits, DirtyBit.MovementCameraBound))
+            {
+                writer.Write((short) MovementCameraBounds.center.X);
+                writer.Write((short) MovementCameraBounds.center.Z);
+                writer.Write((short) MovementCameraBounds.size.X);
+                writer.Write((short) MovementCameraBounds.size.Z);
+            }
+
+            if (IsBitDirty(setBits, DirtyBit.Respawn))
+            {
+                writer.Write((short) RespawnPickedSquare.X);
+                writer.Write((short) RespawnPickedSquare.Y);
+
+                writer.Write(false); // TODO respawningThisTurn
+
+                writer.Write((short) _respawnAvailableSquares.Count);
+                foreach (var square in _respawnAvailableSquares)
+                {
+                    writer.Write((short) square.X);
+                    writer.Write((short) square.Y);
+                }
+            }
+
+            var flag1 = IsBitDirty(setBits, DirtyBit.QueuedAbilities);
+            if (flag1 || IsBitDirty(setBits, DirtyBit.AbilityRequestDataForTargeter))
+                SerializeAbilityRequestData(writer);
+            if (flag1)
+            {
+                short queuedAbilitiesFlag = 0;
+                for (var index = 0; index < 14; ++index)
+                {
+                    var flag = (short) (1 << index);
+                    if (_queuedAbilities[index])
+                    {
+                        queuedAbilitiesFlag |= flag;
+                    }
+                }
+
+                writer.Write(queuedAbilitiesFlag);
+            }
+
+            if (IsBitDirty(setBits, DirtyBit.ToggledOnAbilities))
+            {
+                short toggledAbiltiesFlag = 0;
+                for (var index = 0; index < 14; ++index)
+                {
+                    var mask = (short) (1 << index);
+                    if (_abilityToggledOn[index])
+                        toggledAbiltiesFlag |= mask;
+                }
+
+                writer.Write(toggledAbiltiesFlag);
+            }
+
+            return initialPos != writer.Position;
         }
 
         public override void OnDeserialize(NetworkReader reader, bool initialState)
