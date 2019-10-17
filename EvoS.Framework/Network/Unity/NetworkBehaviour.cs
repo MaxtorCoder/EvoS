@@ -4,24 +4,25 @@ using System.ComponentModel;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.Game;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Network.Unity
 {
     public class NetworkBehaviour : MonoBehaviour
     {
         public NetworkInstanceId netId => myView.netId;
-        public ClientConnection connectionToServer => myView.connectionToServer;
-        public ClientConnection connectionToClient => myView.connectionToClient;
+        [JsonIgnore] public ClientConnection connectionToServer => myView.connectionToServer;
+        [JsonIgnore] public ClientConnection connectionToClient => myView.connectionToClient;
         public short playerControllerId => myView.playerControllerId;
         protected uint syncVarDirtyBits => m_SyncVarDirtyBits;
 
-        protected bool syncVarHookGuard
+        [JsonIgnore] protected bool syncVarHookGuard
         {
             get => m_SyncVarGuard;
             set => m_SyncVarGuard = value;
         }
 
-        private NetworkIdentity myView
+        [JsonIgnore] private NetworkIdentity myView
         {
             get
             {

@@ -10,6 +10,7 @@ using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Network.Unity;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Network.NetworkBehaviours
 {
@@ -48,7 +49,6 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         private List<GameObject> m_players = new List<GameObject>();
 
         private float m_timeRemainingInDecision = 20f;
-        private static GameFlowData s_gameFlowData;
 
 //        [SyncVar]
         private bool m_pause;
@@ -94,37 +94,37 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 //        [SyncVar(hook = "HookSetGameState")]
         private GameState m_gameState;
 
-        public bool Networkm_pause
+        [JsonIgnore] public bool Networkm_pause
         {
             get => m_pause;
             [param: In] set => SetSyncVar(value, ref m_pause, 1U);
         }
 
-        public bool Networkm_pausedForDebugging
+        [JsonIgnore] public bool Networkm_pausedForDebugging
         {
             get => m_pausedForDebugging;
             [param: In] set => SetSyncVar(value, ref m_pausedForDebugging, 2U);
         }
 
-        public bool Networkm_pausedByPlayerRequest
+        [JsonIgnore] public bool Networkm_pausedByPlayerRequest
         {
             get => m_pausedByPlayerRequest;
             [param: In] set => SetSyncVar(value, ref m_pausedByPlayerRequest, 4U);
         }
 
-        public bool Networkm_pausedForSinglePlayer
+        [JsonIgnore] public bool Networkm_pausedForSinglePlayer
         {
             get => m_pausedForSinglePlayer;
             [param: In] set => SetSyncVar(value, ref m_pausedForSinglePlayer, 8U);
         }
 
-        public ResolutionPauseState Networkm_resolutionPauseState
+        [JsonIgnore] public ResolutionPauseState Networkm_resolutionPauseState
         {
             get => m_resolutionPauseState;
             [param: In] set => SetSyncVar(value, ref m_resolutionPauseState, 16U);
         }
 
-        public float Networkm_startTime
+        [JsonIgnore] public float Networkm_startTime
         {
             get => m_startTime;
             [param: In]
@@ -143,7 +143,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             }
         }
 
-        public float Networkm_deploymentTime
+        [JsonIgnore] public float Networkm_deploymentTime
         {
             get => m_deploymentTime;
             [param: In]
@@ -162,7 +162,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             }
         }
 
-        public float Networkm_turnTime
+        [JsonIgnore] public float Networkm_turnTime
         {
             get => m_turnTime;
             [param: In]
@@ -181,7 +181,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             }
         }
 
-        public float Networkm_maxTurnTime
+        [JsonIgnore] public float Networkm_maxTurnTime
         {
             get => m_maxTurnTime;
             [param: In]
@@ -200,19 +200,19 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             }
         }
 
-        public float Networkm_timeRemainingInDecisionOverflow
+        [JsonIgnore] public float Networkm_timeRemainingInDecisionOverflow
         {
             get => m_timeRemainingInDecisionOverflow;
             [param: In] set => SetSyncVar(value, ref m_timeRemainingInDecisionOverflow, 512U);
         }
 
-        public bool Networkm_willEnterTimebankMode
+        [JsonIgnore] public bool Networkm_willEnterTimebankMode
         {
             get => m_willEnterTimebankMode;
             [param: In] set => SetSyncVar(value, ref m_willEnterTimebankMode, 1024U);
         }
 
-        public int Networkm_currentTurn
+        [JsonIgnore] public int Networkm_currentTurn
         {
             get => m_currentTurn;
             [param: In]
@@ -231,7 +231,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             }
         }
 
-        public GameState Networkm_gameState
+        [JsonIgnore] public GameState Networkm_gameState
         {
             get => m_gameState;
             [param: In]

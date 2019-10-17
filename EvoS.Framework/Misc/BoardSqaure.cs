@@ -5,6 +5,7 @@ using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Network.NetworkBehaviours;
 using EvoS.Framework.Network.Unity;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Misc
 {
@@ -15,7 +16,7 @@ namespace EvoS.Framework.Misc
         private GridPosProp _gridPosProp;
         private GridPos _pos = new GridPos(-1, -1, 0);
         public SerializedComponent m_LOSHighlightObj;
-        public SerializedArray<Vector3> m_vertices;
+        [JsonIgnore] public SerializedArray<Vector3> m_vertices;
         public const float s_LoSHeightOffset = 1.6f;
         private GameObject m_occupant;
         private ActorData m_occupantActor;
