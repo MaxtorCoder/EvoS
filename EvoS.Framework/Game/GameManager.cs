@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using EvoS.Framework.Assets;
-using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
-using EvoS.Framework.Network;
 using EvoS.Framework.Network.Game;
 using EvoS.Framework.Network.Game.Messages;
 using EvoS.Framework.Network.NetworkBehaviours;
@@ -263,7 +261,7 @@ namespace EvoS.Framework.Game
                     new CRCMessageEntry("FreelancerStats", 0),
                     new CRCMessageEntry("Manta_SyncComponent", 0),
                     new CRCMessageEntry("Rampart_SyncComponent", 0),
-                    new CRCMessageEntry("SinglePlayerManager", 0),
+                    new CRCMessageEntry("SinglePlayerManager", 0)
                 }
             });
 
@@ -351,8 +349,8 @@ namespace EvoS.Framework.Game
             SpawnObject(MiscLoader, "GameSceneSingletons", out var gameSceneSingletons);
             TheatricsManager = gameSceneSingletons.GetComponent<TheatricsManager>();
             AbilityModManager = gameSceneSingletons.GetComponent<AbilityModManager>();
-            SpawnObject<SharedEffectBarrierManager>(MiscLoader, "SharedEffectBarrierManager", out SharedEffectBarrierManager);
-            SpawnObject<SharedActionBuffer>(MiscLoader, "SharedActionBuffer", out var SharedActionBuffer);
+            SpawnObject(MiscLoader, "SharedEffectBarrierManager", out SharedEffectBarrierManager);
+            SpawnObject(MiscLoader, "SharedActionBuffer", out SharedActionBuffer);
             SharedActionBuffer.Networkm_actionPhase = ActionBufferPhase.Done;
 
             SpawnScene(MapLoader, 1, out var commonGameLogic);
