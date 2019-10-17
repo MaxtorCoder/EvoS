@@ -23,15 +23,31 @@ namespace EvoS.Framework.Game
         public readonly NetworkServer NetworkServer = new NetworkServer();
         private readonly Dictionary<uint, GameObject> _netObjects = new Dictionary<uint, GameObject>();
         private readonly List<GameObject> _gameObjects = new List<GameObject>();
+        public AbilityModManager AbilityModManager;
+        public BarrierManager BarrierManager;
         public Board Board;
-        public GameFlow GameFlow;
-        public GameFlowData GameFlowData;
-        public GameEventManager GameEventManager = new GameEventManager();
-        public MatchLogger MatchLogger;
-        public GameplayData GameplayData;
         public BrushCoordinator BrushCoordinator;
         public CollectTheCoins CollectTheCoins;
+        public GameEventManager GameEventManager = new GameEventManager();
+        public GameFlowData GameFlowData;
+        public GameFlow GameFlow;
+        public GameplayData GameplayData;
         public GameplayMutators GameplayMutators = new GameplayMutators();
+        public InterfaceManager InterfaceManager;
+        public MatchLogger MatchLogger;
+        public MatchObjectiveKill MatchObjectiveKill;
+        public ObjectivePoints ObjectivePoints;
+        public ServerActionBuffer ServerActionBuffer;
+        public ServerCombatManager ServerCombatManager;
+        public ServerEffectManager ServerEffectManager;
+        public SharedActionBuffer SharedActionBuffer;
+        public SharedEffectBarrierManager SharedEffectBarrierManager;
+        public SpawnPointManager SpawnPointManager;
+        public SpoilsManager SpoilsManager;
+        public TeamSelectData TeamSelectData;
+        public TeamStatusDisplay TeamStatusDisplay;
+        public TheatricsManager TheatricsManager;
+
         private bool s_quitting;
         private GameStatus m_gameStatus;
         private LobbyGameplayOverrides m_gameplayOverrides;
@@ -75,8 +91,6 @@ namespace EvoS.Framework.Game
 
         public List<LobbyPlayerInfo> TeamPlayerInfo { get; private set; }
 
-        public LobbyPlayerInfo PlayerInfo { get; private set; }
-
         public LobbyGameSummary GameSummary { get; private set; }
 
         public LobbyGameSummaryOverrides GameSummaryOverrides { get; private set; }
@@ -88,6 +102,9 @@ namespace EvoS.Framework.Game
         public float GameStatusTime { get; private set; }
 
         public static bool IsEditorAndNotGame() => false;
+        public AssetLoader MapLoader;
+        public AssetLoader AssetsLoader;
+        public AssetLoader MiscLoader;
 
         public GameManager()
         {
@@ -168,11 +185,6 @@ namespace EvoS.Framework.Game
         public void SetTeamInfo(LobbyTeamInfo teamInfo)
         {
             TeamInfo = teamInfo;
-        }
-
-        public void SetPlayerInfo(LobbyPlayerInfo playerInfo)
-        {
-            PlayerInfo = playerInfo;
         }
 
         public void SetTeamPlayerInfo(List<LobbyPlayerInfo> teamPlayerInfo)
@@ -317,6 +329,76 @@ namespace EvoS.Framework.Game
 //            }
 //        }
 
+        public void LaunchGame(string resourceFolder)
+        {
+            MapLoader = new AssetLoader(resourceFolder);
+            MapLoader.LoadAssetBundle("Bundles/scenes/maps.bundle");
+            MapLoader.LoadAsset($"archive:/buildplayer-robotfactory_opu_gamemode/buildplayer-{GameConfig.Map.ToLower()}");
+            MapLoader.ConstructCaches();
+
+            AssetsLoader = new AssetLoader(resourceFolder);
+            AssetsLoader.LoadAsset("resources.assets");
+            AssetsLoader.ConstructCaches();
+
+            MiscLoader = new AssetLoader(resourceFolder);
+            MiscLoader.LoadAssetBundle("Bundles/scenes/frontend.bundle");
+            MiscLoader.LoadAsset("archive:/buildplayer-options_ui/buildplayer-clientenvironmentsingletons");
+            MiscLoader.ConstructCaches();
+
+            SpawnObject<Board, Board>(MapLoader, out Board);
+
+            SpawnObject(MiscLoader, "ApplicationSingletonsNetId", out _);
+            SpawnObject(MiscLoader, "GameSceneSingletons", out var gameSceneSingletons);
+            TheatricsManager = gameSceneSingletons.GetComponent<TheatricsManager>();
+            AbilityModManager = gameSceneSingletons.GetComponent<AbilityModManager>();
+            SpawnObject<SharedEffectBarrierManager>(MiscLoader, "SharedEffectBarrierManager", out SharedEffectBarrierManager);
+            SpawnObject<SharedActionBuffer>(MiscLoader, "SharedActionBuffer", out var SharedActionBuffer);
+            SharedActionBuffer.Networkm_actionPhase = ActionBufferPhase.Done;
+
+            SpawnScene(MapLoader, 1, out var commonGameLogic);
+            InterfaceManager = commonGameLogic.GetComponent<InterfaceManager>();
+            GameFlow = commonGameLogic.GetComponent<GameFlow>();
+            MatchLogger = commonGameLogic.GetComponent<MatchLogger>();
+            ServerCombatManager = commonGameLogic.GetComponent<ServerCombatManager>();
+            ServerEffectManager = commonGameLogic.GetComponent<ServerEffectManager>();
+            TeamStatusDisplay = commonGameLogic.GetComponent<TeamStatusDisplay>();
+            ServerActionBuffer = commonGameLogic.GetComponent<ServerActionBuffer>();
+            TeamSelectData = commonGameLogic.GetComponent<TeamSelectData>();
+            BarrierManager = commonGameLogic.GetComponent<BarrierManager>();
+            SpawnScene(MapLoader, 2, out BrushCoordinator);
+            SpawnScene(MapLoader, 3, out var sceneGameLogic);
+            GameFlowData = sceneGameLogic.GetComponent<GameFlowData>();
+            GameplayData = sceneGameLogic.GetComponent<GameplayData>();
+            SpoilsManager = sceneGameLogic.GetComponent<SpoilsManager>();
+            ObjectivePoints = sceneGameLogic.GetComponent<ObjectivePoints>();
+            SpawnPointManager = sceneGameLogic.GetComponent<SpawnPointManager>();
+            MatchObjectiveKill = sceneGameLogic.GetComponent<MatchObjectiveKill>();
+
+            foreach (var playerInfo in TeamPlayerInfo)
+            {
+                SpawnPlayerCharacter(playerInfo);
+            }
+            
+            DumpNetObjects();
+        }
+
+        public void DumpNetObjects()
+        {
+            foreach (var (k, v) in _netObjects)
+            {
+                Console.WriteLine($"{k}: {v}");
+            }
+        }
+
+        private void SpawnPlayerCharacter(LobbyPlayerInfo playerInfo)
+        {
+            // TODO would normally check playerInfo.CharacterInfo.CharacterType
+
+            SpawnObject<ActorTeamSensitiveData>(MiscLoader, "ActorTeamSensitiveData_Friendly", out var scoundrelFriendly);
+            SpawnObject(AssetsLoader, "Scoundrel", out var scoundrel);
+            var scoundrelActor = scoundrel.GetComponent<ActorData>();
+            scoundrelFriendly.SetActorIndex(scoundrelActor.ActorIndex);
+        }
 
         public void RegisterObject(GameObject gameObj)
         {
@@ -378,10 +460,17 @@ namespace EvoS.Framework.Game
             if (register) RegisterObject(obj);
         }
 
-        public void SpawnScene(AssetLoader loader, uint sceneId, out GameObject scene)
+        public void SpawnScene(AssetLoader loader, uint sceneId, out GameObject scene, bool register = true)
         {
             loader.ClearCache();
-            scene = loader.NetworkScenes[sceneId].Instantiate(this);
+            scene = loader.NetworkScenes[sceneId].Instantiate();
+            if (register) RegisterObject(scene);
+        }
+
+        public void SpawnScene<T>(AssetLoader loader, uint sceneId, out T component) where T: Component
+        {
+            SpawnScene(loader, sceneId, out var scene, false);
+            component = scene.GetComponent<T>();
         }
     }
 }
