@@ -55,6 +55,15 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             m_visionStatesSync.InitializeBehaviour(this, kListm_visionStatesSync);
         }
 
+        public override void OnStartServer()
+        {
+            for (int index = 0; index < 3; ++index)
+            {
+                this.m_movementStatesSync.Add(0);
+                this.m_visionStatesSync.Add(0);
+            }
+        }
+
         public BarrierManager(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);

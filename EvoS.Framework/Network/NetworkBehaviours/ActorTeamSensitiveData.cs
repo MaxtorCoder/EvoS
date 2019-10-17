@@ -170,6 +170,14 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             DeserializeAsset(assetFile, stream);
         }
 
+        public void SetActorIndex(int actorIndex)
+        {
+            if (_actorIndex == actorIndex && _associatedActor != null)
+                return;
+            _actorIndex = actorIndex;
+            _associatedActor = GameFlowData?.FindActorByActorIndex(_actorIndex);
+        }
+
         public override void Awake()
         {
             for (int index = 0; index < 14; ++index)

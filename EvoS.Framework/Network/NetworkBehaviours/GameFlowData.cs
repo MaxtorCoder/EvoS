@@ -534,6 +534,18 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             Networkm_maxTurnTime = maxTurnTime;
         }
 
+        public GameObject GetThinCoverRoot()
+        {
+            if (m_thinCoverRoot == null)
+            {
+                m_thinCoverRoot = new GameObject("ThinCoverRoot");
+//                UnityEngine.Object.DontDestroyOnLoad(m_thinCoverRoot);
+                GameManager.RegisterObject(m_thinCoverRoot);
+            }
+
+            return m_thinCoverRoot;
+        }
+
         private void HookSetCurrentTurn(int turn)
         {
             if (EvoSGameConfig.NetworkIsServer)

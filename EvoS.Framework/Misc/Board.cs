@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Network.NetworkBehaviours;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
@@ -65,6 +66,72 @@ namespace EvoS.Framework.Misc
 //            Board.BaselineHeightStatic = BaselineHeight;
 //            this.m_normalPathBuildScratchPool = new BuildNormalPathNodePool();
 //            this.m_normalPathNodeHeap = new BuildNormalPathHeap(60);
+        }
+
+        public void SetThinCover(
+            int x,
+            int y,
+            ActorCover.CoverDirections side,
+            ThinCover.CoverType coverType)
+        {
+            _boardSquares[x, y].SetThinCover(side, coverType);
+        }
+
+        public int method_3()
+        {
+            return m_maxX;
+        }
+
+        public int method_4()
+        {
+            return m_maxY;
+        }
+
+        public BoardSquare method_5(float float_0, float float_1)
+        {
+            BoardSquare boardSquare = null;
+            int index1 = Mathf.RoundToInt(float_0 / squareSize);
+            int index2 = Mathf.RoundToInt(float_1 / squareSize);
+            if (index1 >= 0 && index1 < method_3() && (index2 >= 0 && index2 < method_4()))
+                boardSquare = _boardSquares[index1, index2];
+            return boardSquare;
+        }
+
+        public BoardSquare method_9(Transform transform_0)
+        {
+            BoardSquare boardSquare = null;
+            if (transform_0 != null)
+                boardSquare = method_5(transform_0.position.X, transform_0.position.Z);
+            return boardSquare;
+        }
+
+        public BoardSquare method_10(int int_0, int int_1)
+        {
+            BoardSquare boardSquare = null;
+            if (int_0 >= 0 && int_0 < method_3() && (int_1 >= 0 && int_1 < method_4()))
+                boardSquare = _boardSquares[int_0, int_1];
+            return boardSquare;
+        }
+
+        public List<BoardSquare> method_21(BoardSquare boardSquare_0, BoardSquare boardSquare_1)
+        {
+            var boardSquareList = new List<BoardSquare>();
+            if (boardSquare_0 == null || boardSquare_1 == null) return boardSquareList;
+            
+            var num1 = Mathf.Min(boardSquare_0.X, boardSquare_1.X);
+            var num2 = Mathf.Max(boardSquare_0.X, boardSquare_1.X);
+            var num3 = Mathf.Min(boardSquare_0.Y, boardSquare_1.Y);
+            var num4 = Mathf.Max(boardSquare_0.Y, boardSquare_1.Y);
+            for (var int_1 = num3; int_1 <= num4; ++int_1)
+            {
+                for (var int_0 = num1; int_0 <= num2; ++int_0)
+                {
+                    var boardSquare = method_10(int_0, int_1);
+                    boardSquareList.Add(boardSquare);
+                }
+            }
+
+            return boardSquareList;
         }
 
         public void ReevaluateBoard()
