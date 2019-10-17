@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EvoS.Framework.Logging;
 
 namespace EvoS.Framework.Assets
 {
@@ -26,7 +27,11 @@ namespace EvoS.Framework.Assets
 
                 if (entry.TypeId == (int) CommonTypeIds.MonoBehaviour)
                 {
-                    ScriptTypeInfos.Add(entry.Unknown2, new TypeTreeInfo(stream));
+                    var info = new TypeTreeInfo(stream);
+                    if (!ScriptTypeInfos.TryAdd(entry.Unknown2, info))
+                    {
+                        Log.Print(LogType.Warning, $"Multiple scripts with id={entry.Unknown2}!");
+                    }
                 }
                 else
                 {

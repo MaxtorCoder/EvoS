@@ -1,16 +1,34 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using EvoS.Framework.Assets.Serialized;
+using System.Linq;
 using EvoS.Framework.Game;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Network.Unity
 {
     public class GameObject
     {
-        public string Name { get; private set; }
+        public string Name { get; set; }
         private readonly List<Component> _components = new List<Component>();
-        public GameManager GameManager { get; private set; }
+        private GameManager _gameManager;
+
+        [JsonIgnore] public Transform transform;
+
+        [JsonIgnore]
+        public GameManager GameManager
+        {
+            get => _gameManager;
+            set
+            {
+                if (_gameManager != null)
+                {
+                    throw new ApplicationException($"GameObject {this} already registered!");
+                }
+
+                _gameManager = value;
+            }
+        }
 
         public GameObject() : this(null)
         {
@@ -22,21 +40,6 @@ namespace EvoS.Framework.Network.Unity
             foreach (Type componentType in components)
             {
                 AddComponent(componentType);
-            }
-        }
-
-        public void Register(GameManager manager)
-        {
-            if (GameManager != null)
-            {
-                throw new ApplicationException($"GameObject {this} already registered!");
-            }
-
-            GameManager = manager;
-
-            foreach (var component in GetComponents<MonoBehaviour>())
-            {
-                component.Awake();
             }
         }
 
@@ -56,19 +59,28 @@ namespace EvoS.Framework.Network.Unity
             return _components.AsReadOnly();
         }
 
-        private void AddComponent(Type type)
+        private Component AddComponent(Type type)
         {
-            var component = (Component) Activator.CreateInstance(type);
-            component.gameObject = this;
-
-            _components.Add(component);
+            return AddComponent((Component) Activator.CreateInstance(type));
         }
 
-        public void AddComponent(Component component)
+        public T AddComponent<T>() where T : Component
+        {
+            return (T) AddComponent(typeof(T));
+        }
+
+        public Component AddComponent(Component component)
         {
             component.gameObject = this;
 
             _components.Add(component);
+
+            if (GameManager != null && component is MonoBehaviour behaviour)
+            {
+                behaviour.Awake();
+            }
+
+            return component;
         }
 
         public Component GetComponent(Type type)
@@ -87,6 +99,20 @@ namespace EvoS.Framework.Network.Unity
         public T GetComponent<T>() where T : Component
         {
             return (T) GetComponent(typeof(T));
+        }
+
+        public override string ToString()
+        {
+            var pos = GetComponent<Transform>();
+
+            return $"{nameof(GameObject)}(" +
+                   $"{nameof(Name)}: {Name}, " +
+                   (pos != null
+                       ? $"Position: {pos.localPosition}, " +
+                         (pos.children.Count != 0 ? $"{pos.children.Count} children" : "")
+                       : "") +
+                   $"{_components.Count} components" +
+                   ")";
         }
     }
 }

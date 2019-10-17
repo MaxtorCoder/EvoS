@@ -15,5 +15,6 @@ namespace EvoS.Framework.Assets
     {
         public const string NetworkIdentity = "UnityEngine.Networking.NetworkIdentity";
         public const string BoardSquare = ".BoardSquare";
+        public const string SinglePlayerCoordinator = ".SinglePlayerCoordinator";
     }
 }

@@ -1,8 +1,10 @@
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Assets
@@ -335,6 +337,16 @@ namespace EvoS.Framework.Assets
         public void Dispose()
         {
             _stream?.Dispose();
+        }
+
+        public ColorRGBA ReadColorRGBA()
+        {
+            return new ColorRGBA(
+                ReadSingle(),
+                ReadSingle(),
+                ReadSingle(),
+                ReadSingle()
+            );
         }
     }
 }

@@ -1,10 +1,38 @@
 using System;
 using System.Collections.Generic;
+using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Game;
+using EvoS.Framework.Logging;
 
 namespace EvoS.Framework.Network.Unity
 {
     public class ServerClientUtils
     {
+        public static ActionBufferPhase GetCurrentActionPhase()
+        {
+            ActionBufferPhase actionBufferPhase = ActionBufferPhase.Done;
+//            if (!NetworkServer.active)
+//            {
+//                if (ClientActionBuffer.Get() != null)
+//                    actionBufferPhase = ClientActionBuffer.Get().CurrentActionPhase;
+//                else if (GameManager.Get() != null && GameManager.Get().GameStatus == GameStatus.Started)
+//                    Log.Error("Trying to examine current action phase, but ClientActionBuffer does not exist.");
+//            }
+            return actionBufferPhase;
+        }
+
+        public static AbilityPriority GetCurrentAbilityPhase()
+        {
+            AbilityPriority abilityPriority = AbilityPriority.INVALID;
+//            if (!NetworkServer.active)
+//            {
+//                if (ClientActionBuffer.Get() != null)
+//                    abilityPriority = ClientActionBuffer.Get().AbilityPhase;
+//                else
+//                    Log.Error("Trying to examine current ability phase, but ClientActionBuffer does not exist.");
+//            }
+            return abilityPriority;
+        }
         public static byte CreateBitfieldFromBoolsList(List<bool> bools)
         {
             byte num1 = 0;

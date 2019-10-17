@@ -1,22 +1,36 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using EvoS.Framework.Assets;
+using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network;
 using EvoS.Framework.Network.Game;
 using EvoS.Framework.Network.Game.Messages;
+using EvoS.Framework.Network.NetworkBehaviours;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Network.Unity;
 using EvoS.Framework.Network.Unity.Messages;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Game
 {
     public class GameManager
     {
         public readonly NetworkServer NetworkServer = new NetworkServer();
-        public readonly Board Board = new Board(); // TODO
+        private readonly Dictionary<int, GameObject> _gameObjects = new Dictionary<int, GameObject>();
+        public Board Board;
+        public GameFlow GameFlow;
+        public GameFlowData GameFlowData;
+        public GameEventManager GameEventManager = new GameEventManager();
+        public MatchLogger MatchLogger;
+        public GameplayData GameplayData;
+        public BrushCoordinator BrushCoordinator;
+        public CollectTheCoins CollectTheCoins;
+        public GameplayMutators GameplayMutators = new GameplayMutators();
         private bool s_quitting;
         private GameStatus m_gameStatus;
         private LobbyGameplayOverrides m_gameplayOverrides;
@@ -44,7 +58,7 @@ namespace EvoS.Framework.Game
 
         public LobbyTeamInfo TeamInfo { get; private set; }
 
-        public LobbyGameConfig GameConfig => GameInfo.GameConfig;
+        [JsonIgnore] public LobbyGameConfig GameConfig => GameInfo.GameConfig;
 
         public LobbyGameplayOverrides GameplayOverrides
         {
@@ -68,16 +82,17 @@ namespace EvoS.Framework.Game
 
         public bool EnableHiddenGameItems { get; set; }
 
-        public GameStatus GameStatus
-        {
-            get { return m_gameStatus; }
-        }
+        public GameStatus GameStatus => m_gameStatus;
 
         public float GameStatusTime { get; private set; }
 
-        internal static bool IsEditorAndNotGame()
+        public static bool IsEditorAndNotGame() => false;
+
+        public GameManager()
         {
-            return false;
+            var dummyObject = new GameObject("Fake");
+            dummyObject.AddComponent(GameplayMutators);
+            RegisterObject(dummyObject);
         }
 
         public void Reset()
@@ -93,7 +108,7 @@ namespace EvoS.Framework.Game
 //            this.GameplayOverrides.SetBaseCharacterConfigs(GameWideData.Get());
         }
 
-        internal void SetGameStatus(GameStatus gameStatus, GameResult gameResult = GameResult.NoResult,
+        public void SetGameStatus(GameStatus gameStatus, GameResult gameResult = GameResult.NoResult,
             bool notify = true)
         {
             if (gameStatus == m_gameStatus)
@@ -299,5 +314,51 @@ namespace EvoS.Framework.Game
 //                this.Message = GeneratedNetworkCode._ReadMessage_Replay(reader);
 //            }
 //        }
+
+
+        public void RegisterObject(GameObject gameObj)
+        {
+            
+            gameObj.GameManager = this;
+
+            foreach (var component in gameObj.GetComponents<MonoBehaviour>().ToList())
+            {
+                component.Awake();
+            }
+
+            var netIdent = gameObj.GetComponent<NetworkIdentity>();
+            if (netIdent != null)
+            {
+                netIdent.OnStartServer();
+            }
+        }
+
+        public TR SpawnObject<T, TR>(AssetLoader loader) where T : MonoBehaviour where TR : Component
+        {
+            return SpawnObject<T>(loader).GetComponent<TR>();
+        }
+
+        public GameObject SpawnObject<T>(AssetLoader loader) where T : MonoBehaviour
+        {
+            loader.ClearCache();
+            return loader.GetObjectByComponent<T>().Instantiate();
+        }
+
+        public T SpawnObject<T>(AssetLoader loader, string name) where T : Component
+        {
+            return SpawnObject(loader, name).GetComponent<T>();
+        }
+
+        public GameObject SpawnObject(AssetLoader loader, string name)
+        {
+            loader.ClearCache();
+            return loader.NetObjsByName[name].Instantiate();
+        }
+
+        public GameObject SpawnScene(AssetLoader loader, uint sceneId)
+        {
+            loader.ClearCache();
+            return loader.NetworkScenes[sceneId].Instantiate();
+        }
     }
 }

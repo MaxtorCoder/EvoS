@@ -9,7 +9,7 @@ namespace EvoS.Framework.Assets.Serialized.Behaviours
 
         public SerializedMonoBehaviourAttribute(string className)
         {
-            ClassName = className;
+            ClassName = className.Contains(".") ? className : '.' + className;
         }
     }
 }

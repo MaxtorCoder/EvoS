@@ -4,10 +4,10 @@ using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Network.Unity;
 
-namespace EvoS.Framework.Network.NetworkBehaviours
+namespace EvoS.Framework.Misc
 {
     [SerializedMonoBehaviour("Passive")]
-    public class Passive : NetworkBehaviour
+    public class Passive : MonoBehaviour
     {
         public string PassiveName { get; set; }
         public SerializedComponent SequencePrefab { get; set; }

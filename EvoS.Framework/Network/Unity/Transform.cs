@@ -1,11 +1,13 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Numerics;
-using Newtonsoft.Json;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Network.Unity
 {
-    public class Transform : Component
+    public class Transform : Component, IEnumerable<Transform>
     {
         [JsonIgnore] public Vector3 position = Vector3.Zero;
         public Vector3 localPosition = Vector3.Zero;
@@ -14,10 +16,7 @@ namespace EvoS.Framework.Network.Unity
         [JsonIgnore] public Vector3 localScale { get; set; } = Vector3.One;
         [JsonIgnore] public SerializedVector<Transform> children { get; set; }
         [JsonIgnore] public Transform father { get; set; }
-
-        public Transform()
-        {
-        }
+        [JsonIgnore] public int childCount => children.Count;
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
@@ -43,5 +42,8 @@ namespace EvoS.Framework.Network.Unity
                    $"{nameof(father)}: {(father != null ? "Exists" : "null")}" +
                    ")";
         }
+
+        public IEnumerator<Transform> GetEnumerator() => children.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => children.GetEnumerator();
     }
 }

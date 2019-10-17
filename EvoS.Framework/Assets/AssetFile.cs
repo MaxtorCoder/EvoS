@@ -28,6 +28,9 @@ namespace EvoS.Framework.Assets
         private Dictionary<long, ISerializedItem> _referenceCache =
             new Dictionary<long, ISerializedItem>();
 
+        public Dictionary<SerializedGameObject, GameObject> ObjectCache =
+            new Dictionary<SerializedGameObject, GameObject>();
+
         private static Dictionary<int, Type> _unityTypeMap = new Dictionary<int, Type>
         {
             {(int) CommonTypeIds.GameObject, typeof(SerializedGameObject)},
@@ -198,12 +201,15 @@ namespace EvoS.Framework.Assets
 
         public ISerializedItem ReadMonoScriptChild(SerializedMonoScript script)
         {
-            if (!_scriptTypeMap.ContainsKey(script.ClassName))
+            // TODO Add namespace
+            var key = '.' + script.ClassName;
+            
+            if (!_scriptTypeMap.ContainsKey(key))
             {
                 return null;
             }
 
-            var child = (ISerializedItem) Activator.CreateInstance(_scriptTypeMap[script.ClassName]);
+            var child = (ISerializedItem) Activator.CreateInstance(_scriptTypeMap[key]);
             child.DeserializeAsset(this, _stream);
 
             return child;
@@ -300,6 +306,7 @@ namespace EvoS.Framework.Assets
         public void ClearCache()
         {
             _referenceCache.Clear();
+            ObjectCache.Clear();
         }
 
         public override string ToString()
