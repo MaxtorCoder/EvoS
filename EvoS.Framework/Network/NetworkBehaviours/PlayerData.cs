@@ -86,9 +86,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         public override string ToString()
         {
-            return $"{nameof(PlayerData)}>(" +
-                   $"{nameof(ActorData)}: {ActorData}, " +
-                   ")";
+            return $"[PlayerData: ({m_playerIndex}) {m_playerHandle}] {m_player}";
         }
     }
 }

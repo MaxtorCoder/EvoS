@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Assets.Serialized
 {
@@ -7,7 +8,7 @@ namespace EvoS.Framework.Assets.Serialized
     {
         public int FileId { get; set; }
         public long PathId { get; set; }
-        private WeakReference<AssetFile> _assetFile;
+        [JsonIgnore] private WeakReference<AssetFile> _assetFile;
 
         public SerializedComponent()
         {

@@ -5,6 +5,7 @@ using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Network.NetworkBehaviours;
 using EvoS.Framework.Network.Unity;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Misc
 {
@@ -15,11 +16,13 @@ namespace EvoS.Framework.Misc
         private GridPosProp _gridPosProp;
         private GridPos _pos = new GridPos(-1, -1, 0);
         public SerializedComponent m_LOSHighlightObj;
-        public SerializedArray<Vector3> m_vertices;
+        [JsonIgnore] public SerializedArray<Vector3> m_vertices;
         public const float s_LoSHeightOffset = 1.6f;
         private GameObject m_occupant;
         private ActorData m_occupantActor;
+        private ThinCover.CoverType[] m_thinCoverTypes = new ThinCover.CoverType[4];
 
+        public int BrushRegion { get; set; }
         public int X => _pos.X;
         public int Y => _pos.Y;
         public int Height => _pos.Height;
@@ -47,9 +50,46 @@ namespace EvoS.Framework.Misc
         {
         }
 
+        public ThinCover.CoverType method_0(ActorCover.CoverDirections coverDirections_0)
+        {
+            return m_thinCoverTypes[(int) coverDirections_0];
+        }
+
+        public void SetThinCover(ActorCover.CoverDirections squareSide, ThinCover.CoverType coverType)
+        {
+            m_thinCoverTypes[(int) squareSide] = coverType;
+        }
+
+        public bool method_1()
+        {
+            foreach (var coverType in m_thinCoverTypes)
+            {
+                if (coverType != ThinCover.CoverType.None)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public bool method_2()
+        {
+            foreach (var coverType in m_thinCoverTypes)
+            {
+                if (coverType == ThinCover.CoverType.Full)
+                    return true;
+            }
+
+            return false;
+        }
+
         public GridPos method_3()
         {
-            return this._pos;
+            return _pos;
+        }
+
+        public bool method_4()
+        {
+            return BrushRegion != -1;
         }
 
         public BoardSquare(AssetFile assetFile, StreamReader stream)
@@ -76,9 +116,9 @@ namespace EvoS.Framework.Misc
 
         public override void Awake()
         {
-            // TODO
-//            for (int index = 0; index < this.m_thinCoverTypes.Length; ++index)
-//                this.m_thinCoverTypes[index] = ThinCover.CoverType.None;
+            BrushRegion = -1;
+            for (var index = 0; index < m_thinCoverTypes.Length; ++index)
+                m_thinCoverTypes[index] = ThinCover.CoverType.None;
         }
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
@@ -91,9 +131,9 @@ namespace EvoS.Framework.Misc
         public override string ToString()
         {
             return $"{nameof(BoardSquare)}>(" +
-                   $"{nameof(_gridPosProp)}: {_gridPosProp}, " +
-                   $"{nameof(m_LOSHighlightObj)}: {m_LOSHighlightObj}, " +
-                   $"{nameof(m_vertices)}: [{string.Join(", ", m_vertices)}], " +
+                   $"{nameof(_gridPosProp)}: {_gridPosProp}" +
+//                   $"{nameof(m_LOSHighlightObj)}: {m_LOSHighlightObj}, " +
+//                   $"{nameof(m_vertices)}: [{string.Join(", ", m_vertices)}], " +
                    ")";
         }
 

@@ -91,6 +91,7 @@ namespace EvoS.Framework.Assets.Serialized
             if (_assetFile.TryGetTarget(out var assetFile) &&
                 assetFile.ObjectCache.TryGetValue(this, out var child))
             {
+                manager?.RegisterObject(child);
                 return child;
             }
 

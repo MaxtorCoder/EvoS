@@ -3,6 +3,7 @@ using System.Linq;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
@@ -36,8 +37,52 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public override void Awake()
         {
             m_regionsLastDisruptionTurn.InitializeBehaviour(this, kListm_regionsLastDisruptionTurn);
+            Start();
         }
 
+        private void Start()
+        {
+            foreach (var region in m_regions)
+            {
+                region.Initialize(this);
+                if (EvoSGameConfig.NetworkIsServer)
+                    m_regionsLastDisruptionTurn.Add(-1);
+            }
+
+            TrySetupBrushSquares();
+        }
+
+        private void TrySetupBrushSquares()
+        {
+            if (m_setupBrush || Board == null || (GameFlowData == null || !m_cameraCreated))
+                return;
+            SetupBrushSquares();
+//            FogOfWar.CalculateFogOfWarForTeam(Team.TeamA);
+//            FogOfWar.CalculateFogOfWarForTeam(Team.TeamB);
+            m_setupBrush = true;
+        }
+
+        private void SetupBrushSquares()
+        {
+            for (var index = 0; index < m_regions.Length; ++index)
+            {
+                if (m_regions[index] == null)
+                {
+                    Log.Print(LogType.Error,$"Null brush region ({index}); fix brush coordinator's data.");
+                }
+                else
+                {
+                    foreach (var boardSquare in m_regions[index].method_0())
+                    {
+                        if (boardSquare.BrushRegion == -1)
+                            boardSquare.BrushRegion = index;
+                        else
+                            Log.Print(LogType.Error,
+                                $"Two brush regions ({boardSquare.BrushRegion} and {index}) are claiming the same boardSquare ({boardSquare.name})");
+                    }
+                }
+            }
+        }
         public bool DisableAllBrush()
         {
 //            if (SinglePlayerManager.Get() != null && !SinglePlayerManager.Get().EnableBrush())

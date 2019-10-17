@@ -2,25 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EvoS.Framework.Assets;
+using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.Game;
+using Newtonsoft.Json;
 
 namespace EvoS.Framework.Network.Unity
 {
     public class NetworkBehaviour : MonoBehaviour
     {
         public NetworkInstanceId netId => myView.netId;
-        public ClientConnection connectionToServer => myView.connectionToServer;
-        public ClientConnection connectionToClient => myView.connectionToClient;
+        [JsonIgnore] public ClientConnection connectionToServer => myView.connectionToServer;
+        [JsonIgnore] public ClientConnection connectionToClient => myView.connectionToClient;
         public short playerControllerId => myView.playerControllerId;
         protected uint syncVarDirtyBits => m_SyncVarDirtyBits;
 
+        [JsonIgnore]
         protected bool syncVarHookGuard
         {
             get => m_SyncVarGuard;
             set => m_SyncVarGuard = value;
         }
 
+        [JsonIgnore]
         private NetworkIdentity myView
         {
             get
@@ -79,8 +83,9 @@ namespace EvoS.Framework.Network.Unity
                 invoker.invokeClass = invokeClass;
                 invoker.invokeFunction = func;
                 s_CmdHandlerDelegates[cmdHash] = invoker;
-                Log.Print(LogType.Debug,
-                    string.Concat("RegisterCommandDelegate hash:", cmdHash, " ", func.GetMethodName()));
+                if (EvoSGameConfig.DebugNetworkBehaviour)
+                    Log.Print(LogType.Debug,
+                        string.Concat("RegisterCommandDelegate hash:", cmdHash, " ", func.GetMethodName()));
             }
         }
 
@@ -94,8 +99,9 @@ namespace EvoS.Framework.Network.Unity
                 invoker.invokeClass = invokeClass;
                 invoker.invokeFunction = func;
                 s_CmdHandlerDelegates[cmdHash] = invoker;
-                Log.Print(LogType.Debug,
-                    string.Concat("RegisterRpcDelegate hash:", cmdHash, " ", func.GetMethodName()));
+                if (EvoSGameConfig.DebugNetworkBehaviour)
+                    Log.Print(LogType.Debug,
+                        string.Concat("RegisterRpcDelegate hash:", cmdHash, " ", func.GetMethodName()));
             }
         }
 
@@ -109,8 +115,9 @@ namespace EvoS.Framework.Network.Unity
                 invoker.invokeClass = invokeClass;
                 invoker.invokeFunction = func;
                 s_CmdHandlerDelegates[cmdHash] = invoker;
-                Log.Print(LogType.Debug,
-                    string.Concat("RegisterEventDelegate hash:", cmdHash, " ", func.GetMethodName()));
+                if (EvoSGameConfig.DebugNetworkBehaviour)
+                    Log.Print(LogType.Debug,
+                        string.Concat("RegisterEventDelegate hash:", cmdHash, " ", func.GetMethodName()));
             }
         }
 
@@ -124,8 +131,9 @@ namespace EvoS.Framework.Network.Unity
                 invoker.invokeClass = invokeClass;
                 invoker.invokeFunction = func;
                 s_CmdHandlerDelegates[cmdHash] = invoker;
-                Log.Print(LogType.Debug,
-                    string.Concat("RegisterSyncListDelegate hash:", cmdHash, " ", func.GetMethodName()));
+                if (EvoSGameConfig.DebugNetworkBehaviour)
+                    Log.Print(LogType.Debug,
+                        string.Concat("RegisterSyncListDelegate hash:", cmdHash, " ", func.GetMethodName()));
             }
         }
 
@@ -217,7 +225,10 @@ namespace EvoS.Framework.Network.Unity
             Log.Print(LogType.Debug, "DumpInvokers size:" + s_CmdHandlerDelegates.Count);
             foreach (KeyValuePair<int, Invoker> keyValuePair in s_CmdHandlerDelegates)
             {
-                Log.Print(LogType.Debug, string.Concat("  Invoker:", keyValuePair.Value.invokeClass, ":", keyValuePair.Value.invokeFunction.GetMethodName(), " ", keyValuePair.Value.invokeType, " ", keyValuePair.Key));
+                Log.Print(LogType.Debug,
+                    string.Concat("  Invoker:", keyValuePair.Value.invokeClass, ":",
+                        keyValuePair.Value.invokeFunction.GetMethodName(), " ", keyValuePair.Value.invokeType, " ",
+                        keyValuePair.Key));
             }
         }
 
@@ -429,9 +440,10 @@ namespace EvoS.Framework.Network.Unity
 
                 if (networkInstanceId != networkInstanceId2)
                 {
-                    Log.Print(LogType.Debug,
-                        string.Concat("SetSyncVar GameObject ", GetType().Name, " bit [", dirtyBit, "] netfieldId:",
-                            networkInstanceId2, "->", networkInstanceId));
+                    if (EvoSGameConfig.DebugSyncVars)
+                        Log.Print(LogType.Debug,
+                            string.Concat("SetSyncVar GameObject ", GetType().Name, " bit [", dirtyBit, "] netfieldId:",
+                                networkInstanceId2, "->", networkInstanceId));
 
                     SetDirtyBit(dirtyBit);
                     gameObjectField = newGameObject;
@@ -457,8 +469,10 @@ namespace EvoS.Framework.Network.Unity
 
             if (flag)
             {
-                Log.Print(LogType.Debug,
-                    string.Concat("SetSyncVar ", GetType().Name, " bit [", dirtyBit, "] ", fieldValue, "->", value));
+                if (EvoSGameConfig.DebugSyncVars)
+                    Log.Print(LogType.Debug,
+                        string.Concat("SetSyncVar ", GetType().Name, " bit [", dirtyBit, "] ", fieldValue, "->",
+                            value));
 
                 SetDirtyBit(dirtyBit);
                 fieldValue = value;

@@ -14,7 +14,7 @@ namespace EvoS.Framework.Network.Unity
         [JsonIgnore] public Quaternion rotation = Quaternion.Identity;
         [JsonIgnore] public Quaternion localRotation { get; set; } = Quaternion.Identity;
         [JsonIgnore] public Vector3 localScale { get; set; } = Vector3.One;
-        [JsonIgnore] public SerializedVector<Transform> children { get; set; }
+        [JsonIgnore] public SerializedVector<Transform> children { get; } = new SerializedVector<Transform>();
         [JsonIgnore] public Transform father { get; set; }
         [JsonIgnore] public int childCount => children.Count;
 
@@ -27,7 +27,7 @@ namespace EvoS.Framework.Network.Unity
             localRotation = stream.ReadQuaternion();
             localPosition = stream.ReadVector3();
             localScale = stream.ReadVector3();
-            children = new SerializedVector<Transform>(assetFile, stream);
+            children.DeserializeAsset(assetFile, stream);
             father = (Transform) new SerializedComponent(assetFile, stream).LoadValue();
         }
 
