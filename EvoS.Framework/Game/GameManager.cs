@@ -471,6 +471,7 @@ namespace EvoS.Framework.Game
         {
             SpawnScene(loader, sceneId, out var scene, false);
             component = scene.GetComponent<T>();
+            RegisterObject(scene);
         }
     }
 }
