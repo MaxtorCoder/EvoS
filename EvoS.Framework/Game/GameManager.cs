@@ -21,7 +21,8 @@ namespace EvoS.Framework.Game
     public class GameManager
     {
         public readonly NetworkServer NetworkServer = new NetworkServer();
-        private readonly Dictionary<int, GameObject> _gameObjects = new Dictionary<int, GameObject>();
+        private readonly Dictionary<uint, GameObject> _netObjects = new Dictionary<uint, GameObject>();
+        private readonly List<GameObject> _gameObjects = new List<GameObject>();
         public Board Board;
         public GameFlow GameFlow;
         public GameFlowData GameFlowData;
@@ -91,6 +92,7 @@ namespace EvoS.Framework.Game
         public GameManager()
         {
             var dummyObject = new GameObject("Fake");
+            dummyObject.transform = new Transform();
             dummyObject.AddComponent(GameplayMutators);
             RegisterObject(dummyObject);
         }
@@ -318,18 +320,32 @@ namespace EvoS.Framework.Game
 
         public void RegisterObject(GameObject gameObj)
         {
-            
+            if (gameObj.GameManager == this)
+                return;
+            if (gameObj.GameManager != null)
+                throw new InvalidOperationException($"Object registered with another GameManager! {gameObj}");
+
             gameObj.GameManager = this;
+            _gameObjects.Add(gameObj);
 
             foreach (var component in gameObj.GetComponents<MonoBehaviour>().ToList())
             {
                 component.Awake();
             }
 
+            // recursively register children and parent
+            foreach (var child in gameObj.transform.children)
+            {
+                RegisterObject(child.gameObject);
+            }
+            if (gameObj.transform.father?.gameObject != null)
+                RegisterObject(gameObj.transform.father.gameObject);
+
             var netIdent = gameObj.GetComponent<NetworkIdentity>();
             if (netIdent != null)
             {
                 netIdent.OnStartServer();
+                _netObjects.Add(netIdent.netId.Value, gameObj);
             }
         }
 
@@ -341,7 +357,7 @@ namespace EvoS.Framework.Game
         public GameObject SpawnObject<T>(AssetLoader loader) where T : MonoBehaviour
         {
             loader.ClearCache();
-            return loader.GetObjectByComponent<T>().Instantiate();
+            return loader.GetObjectByComponent<T>().Instantiate(this);
         }
 
         public T SpawnObject<T>(AssetLoader loader, string name) where T : Component
@@ -352,13 +368,13 @@ namespace EvoS.Framework.Game
         public GameObject SpawnObject(AssetLoader loader, string name)
         {
             loader.ClearCache();
-            return loader.NetObjsByName[name].Instantiate();
+            return loader.NetObjsByName[name].Instantiate(this);
         }
 
         public GameObject SpawnScene(AssetLoader loader, uint sceneId)
         {
             loader.ClearCache();
-            return loader.NetworkScenes[sceneId].Instantiate();
+            return loader.NetworkScenes[sceneId].Instantiate(this);
         }
     }
 }
