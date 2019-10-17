@@ -1,6 +1,7 @@
 using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Network.NetworkBehaviours
@@ -9,6 +10,9 @@ namespace EvoS.Framework.Network.NetworkBehaviours
     [SerializedMonoBehaviour("ActorTurnSM")]
     public class ActorTurnSM : NetworkBehaviour
     {
+        public TurnStateEnum CurrentState { get; private set; }
+        public TurnStateEnum PreviousState { get; private set; }
+        
         public ActorTurnSM()
         {
         }

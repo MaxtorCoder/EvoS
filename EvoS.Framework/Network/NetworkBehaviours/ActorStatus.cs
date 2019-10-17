@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Network.NetworkBehaviours
@@ -15,6 +18,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         private static int kListm_statusDurations = 625641650;
         private SyncListUInt _statusCounts = new SyncListUInt();
         private SyncListUInt _statusDurations = new SyncListUInt();
+        private List<Ability> _passivePendingStatusSources = new List<Ability>();
         private int[] _statusCountsPrevious;
         private int[] _clientStatusCountAdjustments;
         private ActorData _actorData;
@@ -38,6 +42,36 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         {
             DeserializeAsset(assetFile, stream);
         }
+
+        public bool HasStatus(StatusType status, bool includePending = true)
+        {
+            var index1 = (int) status;
+            var num = index1 >= _statusCounts.Count ? 0 : (int) _statusCounts[index1];
+            bool flag;
+            if (!(flag = num + _clientStatusCountAdjustments[index1] > 0) && includePending &&
+                _passivePendingStatusSources.Count > 0)
+            {
+                for (var index2 = 0; index2 < _passivePendingStatusSources.Count && !flag; ++index2)
+                {
+                    var pendingStatusSource = _passivePendingStatusSources[index2];
+                    flag = ((flag ? 1 : 0) | (pendingStatusSource == null
+                                ? 0
+                                : (pendingStatusSource.HasPassivePendingStatus(status, _actorData) ? 1 : 0))) != 0;
+                }
+            }
+
+            if (GameplayMutators != null)
+            {
+                int currentTurn = GameFlowData.CurrentTurn;
+                if (!flag)
+                    flag |= GameplayMutators.IsStatusActive(status, currentTurn);
+                if (flag)
+                    flag = !GameplayMutators.IsStatusSuppressed(status, currentTurn);
+            }
+
+            return flag;
+        }
+
 
         public override void Awake()
         {

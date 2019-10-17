@@ -2,14 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EvoS.Framework.Assets;
-using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
-using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Game;
 
 namespace EvoS.Framework.Network.Unity
 {
-//    [RequireComponent(typeof(NetworkIdentity))]
     public class NetworkBehaviour : MonoBehaviour
     {
         public NetworkInstanceId netId => myView.netId;
@@ -591,9 +588,5 @@ namespace EvoS.Framework.Network.Unity
             public Type invokeClass;
             public CmdDelegate invokeFunction;
         }
-
-        public GameManager GameManager => gameObject.GameManager;
-        public Board Board => gameObject.GameManager.Board;
-        public NetworkServer NetworkServer => gameObject.GameManager.NetworkServer;
     }
 }

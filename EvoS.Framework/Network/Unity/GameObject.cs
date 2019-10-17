@@ -9,9 +9,11 @@ namespace EvoS.Framework.Network.Unity
 {
     public class GameObject
     {
-        public string Name { get; private set; }
+        public string Name { get; set; }
         private readonly List<Component> _components = new List<Component>();
         private GameManager _gameManager;
+
+        [JsonIgnore] public Transform transform;
 
         [JsonIgnore]
         public GameManager GameManager

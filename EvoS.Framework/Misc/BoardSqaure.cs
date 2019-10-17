@@ -3,6 +3,7 @@ using System.Numerics;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Network.NetworkBehaviours;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
@@ -16,19 +17,49 @@ namespace EvoS.Framework.Misc
         public SerializedComponent m_LOSHighlightObj;
         public SerializedArray<Vector3> m_vertices;
         public const float s_LoSHeightOffset = 1.6f;
+        private GameObject m_occupant;
+        private ActorData m_occupantActor;
 
         public int X => _pos.X;
         public int Y => _pos.Y;
         public int Height => _pos.Height;
         public GridPos GridPos => _pos;
+        public float worldX => _pos.worldX;
+        public float worldY => _pos.worldY;
+
+        public GameObject occupant
+        {
+            get => m_occupant;
+            set
+            {
+                m_occupant = value;
+                m_occupantActor = m_occupant?.GetComponent<ActorData>();
+            }
+        }
+
+        public ActorData OccupantActor
+        {
+            get => m_occupantActor;
+            set => occupant = value?.gameObject;
+        }
 
         public BoardSquare()
         {
         }
 
+        public GridPos method_3()
+        {
+            return this._pos;
+        }
+
         public BoardSquare(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);
+        }
+
+        public Vector3 method_13()
+        {
+            return new Vector3(worldX, Height, worldY);
         }
 
         public Vector3 ToVector3()

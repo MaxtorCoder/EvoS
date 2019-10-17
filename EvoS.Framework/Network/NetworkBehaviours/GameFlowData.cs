@@ -7,6 +7,8 @@ using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Misc;
+using EvoS.Framework.Network.Static;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Network.NetworkBehaviours
@@ -64,7 +66,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
 //        [SyncVar]
         private ResolutionPauseState m_resolutionPauseState;
-        internal PlayerData m_localPlayerData;
+        public PlayerData m_localPlayerData;
         private GameObject m_actorRoot;
         private GameObject m_thinCoverRoot;
         private GameObject m_brushRegionBorderRoot;
@@ -250,7 +252,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         public int CurrentTurn => m_currentTurn;
 
-        internal GameState gameState
+        public GameState gameState
         {
             get => m_gameState;
             set
@@ -298,7 +300,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             }
         }
 
-        internal ActorData POVActorData => activeOwnedActorData;
+        public ActorData POVActorData => activeOwnedActorData;
 
         public ActorData activeOwnedActorData
         {
@@ -328,10 +330,10 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             }
         }
 
-        internal static event Action<ActorData> s_onAddActor = delegate { };
-        internal static event Action<ActorData> s_onRemoveActor = delegate { };
-        internal static event Action<ActorData> s_onActiveOwnedActorChange = delegate { };
-        internal static event Action<GameState> s_onGameStateChanged = delegate { };
+        public event Action<ActorData> s_onAddActor = delegate { };
+        public event Action<ActorData> s_onRemoveActor = delegate { };
+        public event Action<ActorData> s_onActiveOwnedActorChange = delegate { };
+        public event Action<GameState> s_onGameStateChanged = delegate { };
 
         public GameFlowData()
         {
@@ -340,6 +342,11 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public GameFlowData(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);
+        }
+
+        public bool IsInDecisionState()
+        {
+            return m_gameState == GameState.BothTeams_Decision;
         }
 
         private void SetGameState(GameState value)
@@ -368,6 +375,51 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             if (s_onGameStateChanged == null)
                 return;
             s_onGameStateChanged(m_gameState);
+        }
+
+        public void RemoveReferencesToDestroyedActor(ActorData actor)
+        {
+            if (actor != null)
+            {
+                if (m_teamAPlayerAndBots.Contains(actor))
+                    m_teamAPlayerAndBots.Remove(actor);
+                if (m_teamBPlayerAndBots.Contains(actor))
+                    m_teamBPlayerAndBots.Remove(actor);
+                if (m_teamObjectsPlayerAndBots.Contains(actor))
+                    m_teamObjectsPlayerAndBots.Remove(actor);
+                if (m_teamA.Contains(actor))
+                    m_teamA.Remove(actor);
+                if (m_teamB.Contains(actor))
+                    m_teamB.Remove(actor);
+                if (m_teamObjects.Contains(actor))
+                    m_teamObjects.Remove(actor);
+                if (m_players.Contains(actor.gameObject))
+                    m_players.Remove(actor.gameObject);
+                if (m_actors.Contains(actor))
+                    m_actors.Remove(actor);
+                SetLocalPlayerData();
+                if (GameFlowData.s_onRemoveActor == null)
+                    return;
+                GameFlowData.s_onRemoveActor(actor);
+            }
+            else
+                Log.Print(LogType.Error, "Trying to destroy a null actor.");
+        }
+
+        public void SetLocalPlayerData()
+        {
+//            m_localPlayerData = null;
+//            if (GameFlow == null)
+//                return;
+//            foreach (var player in m_players)
+//            {
+//                var component = player?.GetComponent<PlayerData>();
+//                if (component == null) continue;
+//                if (!GameFlow.playerDetails.TryGetValue(component.GetPlayer(), out PlayerDetails playerDetails) ||
+//                    !playerDetails.IsLocal()) continue;
+//                m_localPlayerData = component;
+//                break;
+//            }
         }
 
         private void IncrementTurn()
@@ -489,6 +541,182 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             while (m_currentTurn < turn)
                 IncrementTurn();
             Networkm_currentTurn = turn;
+        }
+
+        public void AddPlayer(GameObject player)
+        {
+            m_players.Add(player);
+            SetLocalPlayerData();
+        }
+
+        public void RemoveExistingPlayer(GameObject player)
+        {
+            if (!m_players.Contains(player))
+                return;
+            m_players.Remove(player);
+        }
+
+        public List<ActorData> GetActors()
+        {
+            return m_actors;
+        }
+
+        public List<ActorData> GetActorsVisibleToActor(
+            ActorData observer,
+            bool targetableOnly = true)
+        {
+            var actorDataList = new List<ActorData>();
+            if (observer == null) return actorDataList;
+
+            foreach (var actor in m_actors)
+            {
+                if (!actor.IsDead() && actor.IsActorVisibleToActor(observer) &&
+                    (!targetableOnly || !actor.IgnoreForAbilityHits))
+                    actorDataList.Add(actor);
+            }
+
+            return actorDataList;
+        }
+
+        public List<ActorData> GetAllActorsForPlayer(int playerIndex)
+        {
+            var actorDataList = new List<ActorData>();
+            foreach (var actor in m_actors)
+            {
+                if (actor.PlayerIndex == playerIndex)
+                    actorDataList.Add(actor);
+            }
+
+            return actorDataList;
+        }
+
+        public void AddActor(ActorData actor)
+        {
+            Log.Print(LogType.Game, $"Registering actor {actor}");
+            m_actors.Add(actor);
+            if (!EvoSGameConfig.NetworkIsServer || s_onAddActor == null)
+                return;
+            s_onAddActor(actor);
+        }
+
+        public ActorData FindActorByActorIndex(int actorIndex)
+        {
+            ActorData actorData = null;
+            foreach (var actor in m_actors)
+            {
+                if (actor.ActorIndex == actorIndex)
+                {
+                    actorData = actor;
+                    break;
+                }
+            }
+
+            if (actorData == null && actorIndex > 0 &&
+                (CurrentTurn > 0 && GameManager != null) &&
+                (GameManager.GameConfig != null && GameManager.GameConfig.GameType != GameType.Tutorial))
+                Log.Print(LogType.Warning, $"Failed to find actor index {actorIndex}");
+            return actorData;
+        }
+
+        public ActorData FindActorByPlayerIndex(int playerIndex)
+        {
+            foreach (var player in m_players)
+            {
+                var component = player.GetComponent<ActorData>();
+                if (component != null && component.PlayerIndex == playerIndex)
+                    return component;
+            }
+
+            Log.Print(LogType.Warning, $"Failed to find player index {playerIndex}");
+            return null;
+        }
+
+        public ActorData FindActorByPlayer(Player player)
+        {
+            foreach (var actor in m_actors)
+            {
+                var playerData = actor.PlayerData;
+                if (playerData != null && playerData.GetPlayer() == player)
+                    return actor;
+            }
+
+            return null;
+        }
+
+        public List<ActorData> GetAllTeamMembers(Team team)
+        {
+            return GetAllActorsOnTeam(team);
+        }
+
+        public void RemoveFromTeam(ActorData actorData)
+        {
+            m_teamA.Remove(actorData);
+            m_teamB.Remove(actorData);
+            m_teamObjects.Remove(actorData);
+            m_teamAPlayerAndBots.Remove(actorData);
+            m_teamBPlayerAndBots.Remove(actorData);
+            m_teamObjectsPlayerAndBots.Remove(actorData);
+        }
+
+        public void AddToTeam(ActorData actorData)
+        {
+            if (GameplayUtils.IsPlayerControlled(actorData))
+            {
+                if (actorData.Team == Team.TeamA && !m_teamAPlayerAndBots.Contains(actorData))
+                {
+                    m_teamBPlayerAndBots.Remove(actorData);
+                    m_teamObjectsPlayerAndBots.Remove(actorData);
+                    m_teamAPlayerAndBots.Add(actorData);
+                }
+                else if (actorData.Team == Team.TeamB && !m_teamBPlayerAndBots.Contains(actorData))
+                {
+                    m_teamAPlayerAndBots.Remove(actorData);
+                    m_teamObjectsPlayerAndBots.Remove(actorData);
+                    m_teamBPlayerAndBots.Add(actorData);
+                }
+                else if (actorData.Team == Team.Objects && !m_teamObjectsPlayerAndBots.Contains(actorData))
+                {
+                    m_teamAPlayerAndBots.Remove(actorData);
+                    m_teamBPlayerAndBots.Remove(actorData);
+                    m_teamObjectsPlayerAndBots.Add(actorData);
+                }
+            }
+
+            if (actorData.Team == Team.TeamA && !m_teamA.Contains(actorData))
+            {
+                m_teamB.Remove(actorData);
+                m_teamObjects.Remove(actorData);
+                m_teamA.Add(actorData);
+            }
+            else if (actorData.Team == Team.TeamB && !m_teamB.Contains(actorData))
+            {
+                m_teamA.Remove(actorData);
+                m_teamObjects.Remove(actorData);
+                m_teamB.Add(actorData);
+            }
+            else
+            {
+                if (actorData.Team != Team.Objects || m_teamObjects.Contains(actorData))
+                    return;
+                m_teamA.Remove(actorData);
+                m_teamB.Remove(actorData);
+                m_teamObjects.Add(actorData);
+            }
+        }
+
+        private List<ActorData> GetAllActorsOnTeam(Team team)
+        {
+            switch (team)
+            {
+                case Team.TeamA:
+                    return m_teamA;
+                case Team.TeamB:
+                    return m_teamB;
+                case Team.Objects:
+                    return m_teamObjects;
+                default:
+                    return new List<ActorData>();
+            }
         }
 
         public override bool OnSerialize(NetworkWriter writer, bool forceAll)

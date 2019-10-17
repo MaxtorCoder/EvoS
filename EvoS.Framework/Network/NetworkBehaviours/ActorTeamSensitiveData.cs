@@ -130,14 +130,20 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             get
             {
                 // TODO
-//          if (_associatedActor == null && _actorIndex != ActorData.s_invalidActorIndex && GameFlowData.Get() != null)
-//          {
-//              ActorData actorByActorIndex = GameFlowData.Get().FindActorByActorIndex(_actorIndex);
-//              if (actorByActorIndex != null)
-//                  _associatedActor = actorByActorIndex;
-//          }
+                if (_associatedActor == null && _actorIndex != ActorData.s_invalidActorIndex &&
+                    GameFlowData != null)
+                {
+                    var actorByActorIndex = GameFlowData.FindActorByActorIndex(_actorIndex);
+                    if (actorByActorIndex != null)
+                        _associatedActor = actorByActorIndex;
+                }
+
                 return _associatedActor;
             }
+        }
+
+        public void MarkAsRespawning()
+        {
         }
 
         public int ActorIndex => _actorIndex;
@@ -221,24 +227,23 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             Log.Print(LogType.Warning, $"{nameof(ActorTeamSensitiveData)}.{nameof(OnSerialize)} not implemented!");
             writer.Write((sbyte) _actorIndex);
 
-
             if (IsBitDirty(setBits, DirtyBit.FacingDirection))
             {
-                // TODO
+                // TODO - this is likely wrong
                 writer.Write((short) VectorUtils.HorizontalAngle_Deg(_facingDirAfterMovement));
             }
 
             if (IsBitDirty(setBits, DirtyBit.MoveFromBoardSquare))
             {
-                writer.Write((short) MoveFromBoardSquare.X);
-                writer.Write((short) MoveFromBoardSquare.Y);
+                writer.Write((short) (MoveFromBoardSquare?.X ?? -1));
+                writer.Write((short) (MoveFromBoardSquare?.Y ?? -1));
             }
 
             if (IsBitDirty(setBits, DirtyBit.InitialMoveStartSquare))
             {
                 // TODO
-                writer.Write((short) InitialMoveStartSquare.X);
-                writer.Write((short) InitialMoveStartSquare.Y);
+                writer.Write((short) (InitialMoveStartSquare?.X ?? -1));
+                writer.Write((short) (InitialMoveStartSquare?.X ?? -1));
             }
 
             if (IsBitDirty(setBits, DirtyBit.LineData))
@@ -250,7 +255,10 @@ namespace EvoS.Framework.Network.NetworkBehaviours
                     LineData.SerializeLine(_movementLine, writer);
                 }
 
-                writer.Write(_numNodesInSnaredLine);
+                if (_numNodesInSnaredLine != 0)
+                {
+                    writer.Write(_numNodesInSnaredLine);
+                }
             }
 
             if (IsBitDirty(setBits, DirtyBit.MovementCameraBound))
@@ -263,8 +271,8 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
             if (IsBitDirty(setBits, DirtyBit.Respawn))
             {
-                writer.Write((short) RespawnPickedSquare.X);
-                writer.Write((short) RespawnPickedSquare.Y);
+                writer.Write((short) (RespawnPickedSquare?.X ?? -1));
+                writer.Write((short) (RespawnPickedSquare?.Y ?? -1));
 
                 writer.Write(false); // TODO respawningThisTurn
 

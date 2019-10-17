@@ -21,6 +21,11 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         private Dictionary<Player, PlayerDetails> m_playerDetails =
             new Dictionary<Player, PlayerDetails>(new PlayerComparer());
 
+        internal Dictionary<Player, PlayerDetails> playerDetails
+        {
+            get { return m_playerDetails; }
+        }
+
         public GameFlow()
         {
         }
@@ -28,6 +33,43 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public GameFlow(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);
+        }
+
+        public Player GetPlayerFromConnectionId(int connectionId)
+        {
+            foreach (var (key, _) in m_playerDetails)
+            {
+                if (key.m_connectionId == connectionId)
+                    return key;
+            }
+
+            return new Player();
+        }
+
+        public string GetPlayerHandleFromConnectionId(int connectionId)
+        {
+            foreach (var (key, value) in m_playerDetails)
+            {
+                if (key.m_connectionId == connectionId)
+                {
+                    return value.m_handle;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        public string GetPlayerHandleFromAccountId(long accountId)
+        {
+            foreach (var (key, value) in m_playerDetails)
+            {
+                if (key.m_accountId == accountId)
+                {
+                    return value.m_handle;
+                }
+            }
+
+            return string.Empty;
         }
 
         public override bool OnSerialize(NetworkWriter writer, bool initialState)

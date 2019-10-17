@@ -25,6 +25,11 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         {
         }
 
+        public void OnResolveStart()
+        {
+//            this.HideAllyMovementLinesIfResolving();
+        }
+
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
@@ -96,6 +95,11 @@ namespace EvoS.Framework.Misc
                 if (component != null)
                     _boardSquares[component.X, component.Y] = component;
             }
+        }
+
+        public void MarkForUpdateValidSquares(bool value = true)
+        {
+            m_needToUpdateValidSquares = value;
         }
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)

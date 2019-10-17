@@ -38,6 +38,30 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             m_regionsLastDisruptionTurn.InitializeBehaviour(this, kListm_regionsLastDisruptionTurn);
         }
 
+        public bool DisableAllBrush()
+        {
+//            if (SinglePlayerManager.Get() != null && !SinglePlayerManager.Get().EnableBrush())
+//                return true;
+            if (DebugParameters.Get() != null)
+                return DebugParameters.Get().GetParameterAsBool("DisableBrush");
+            return false;
+        }
+
+        public bool IsRegionFunctioning(int regionIndex)
+        {
+            if (DisableAllBrush())
+                return false;
+            bool flag;
+            if (regionIndex >= 0 && regionIndex < m_regions.Length)
+            {
+                int num = m_regionsLastDisruptionTurn[regionIndex];
+                flag = num <= 0 || GameFlowData.CurrentTurn - num >= GameplayData.m_brushDisruptionTurns;
+            }
+            else
+                flag = false;
+            return flag;
+        }
+
         public BrushCoordinator(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);

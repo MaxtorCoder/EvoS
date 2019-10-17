@@ -2,6 +2,7 @@ using System;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Network.Static;
 using EvoS.Framework.Network.Unity;
 using Newtonsoft.Json;
@@ -21,17 +22,44 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         private int m_playerIndex = s_invalidPlayerIndex;
         public bool m_reconnecting;
         public bool m_isLocal;
-        [JsonIgnore]
-        public ActorData ActorData;
+        [JsonIgnore] public ActorData ActorData;
+        internal Team m_spectatingTeam;
         public SerializedComponent SerializedActorData;
         public Player m_player;
 
         public int PlayerIndex => m_playerIndex;
 //        private FogOfWar m_fogOfWar;
 
-        public void Awake()
+        public override void Awake()
         {
             ActorData = GetComponent<ActorData>();
+        }
+
+        public Team GetTeamViewing()
+        {
+//            if (GameFlowData.LocalPlayerData == this && GameFlowData.activeOwnedActorData != null)
+//                return GameFlowData.activeOwnedActorData.method_76();
+
+            return ActorData?.Team ?? m_spectatingTeam;
+        }
+
+        public bool IsViewingTeam(Team targetTeam)
+        {
+            Team teamViewing = GetTeamViewing();
+            if (teamViewing != targetTeam)
+                return teamViewing == Team.Invalid;
+            return true;
+        }
+
+        public Player GetPlayer()
+        {
+            return m_player;
+        }
+
+        public PlayerDetails LookupDetails()
+        {
+            GameFlow.playerDetails.TryGetValue(m_player, out var playerDetails);
+            return playerDetails;
         }
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)

@@ -108,6 +108,7 @@ namespace EvoS.Framework.Assets.Serialized
                     case Transform trans:
                         transform = trans;
                         gameObj.AddComponent(trans);
+                        gameObj.transform = trans;
                         break;
                     case Component comp:
                         comp.transform = transform;

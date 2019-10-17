@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
@@ -22,6 +23,14 @@ namespace EvoS.Framework.Game
         public readonly NetworkServer NetworkServer = new NetworkServer();
         private readonly Dictionary<int, GameObject> _gameObjects = new Dictionary<int, GameObject>();
         public Board Board;
+        public GameFlow GameFlow;
+        public GameFlowData GameFlowData;
+        public GameEventManager GameEventManager = new GameEventManager();
+        public MatchLogger MatchLogger;
+        public GameplayData GameplayData;
+        public BrushCoordinator BrushCoordinator;
+        public CollectTheCoins CollectTheCoins;
+        public GameplayMutators GameplayMutators = new GameplayMutators();
         private bool s_quitting;
         private GameStatus m_gameStatus;
         private LobbyGameplayOverrides m_gameplayOverrides;
@@ -73,16 +82,17 @@ namespace EvoS.Framework.Game
 
         public bool EnableHiddenGameItems { get; set; }
 
-        public GameStatus GameStatus
-        {
-            get { return m_gameStatus; }
-        }
+        public GameStatus GameStatus => m_gameStatus;
 
         public float GameStatusTime { get; private set; }
 
-        internal static bool IsEditorAndNotGame()
+        public static bool IsEditorAndNotGame() => false;
+
+        public GameManager()
         {
-            return false;
+            var dummyObject = new GameObject("Fake");
+            dummyObject.AddComponent(GameplayMutators);
+            RegisterObject(dummyObject);
         }
 
         public void Reset()
@@ -98,7 +108,7 @@ namespace EvoS.Framework.Game
 //            this.GameplayOverrides.SetBaseCharacterConfigs(GameWideData.Get());
         }
 
-        internal void SetGameStatus(GameStatus gameStatus, GameResult gameResult = GameResult.NoResult,
+        public void SetGameStatus(GameStatus gameStatus, GameResult gameResult = GameResult.NoResult,
             bool notify = true)
         {
             if (gameStatus == m_gameStatus)

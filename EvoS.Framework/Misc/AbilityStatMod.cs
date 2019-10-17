@@ -8,9 +8,9 @@ namespace EvoS.Framework.Misc
     [Serializable]
     public class AbilityStatMod : ISerializedItem
     {
-        public StatType Stat;
-        public ModType ModType;
-        public float ModValue;
+        public StatType stat;
+        public ModType modType;
+        public float modValue;
 
         public AbilityStatMod GetShallowCopy()
         {
@@ -19,20 +19,20 @@ namespace EvoS.Framework.Misc
 
         public override string ToString()
         {
-            return "[" + Stat + "] " + ModType + " " + ModValue;
+            return "[" + stat + "] " + modType + " " + modValue;
         }
 
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
-            Stat = (StatType) stream.ReadInt32();
-            ModType = (ModType) stream.ReadInt32();
-            ModValue = stream.ReadSingle();
+            stat = (StatType) stream.ReadInt32();
+            modType = (ModType) stream.ReadInt32();
+            modValue = stream.ReadSingle();
         }
 
         public string GetOperationsString()
         {
             return
-                $"{Stat.ToString()} {(ModType != ModType.Multiplier ? ((double) ModValue < 0.0 ? '-' : '+') : 'x')}{(ModType == ModType.BaseAdd || ModType == ModType.BonusAdd ? ((int) Math.Abs(ModValue)).ToString() : ModValue.ToString("F2"))}{(ModType != ModType.BonusAdd ? (ModType != ModType.BaseAdd ? (ModType != ModType.PercentAdd ? char.MinValue : 'x') : '_') : '^')}";
+                $"{stat.ToString()} {(modType != ModType.Multiplier ? ((double) modValue < 0.0 ? '-' : '+') : 'x')}{(modType == ModType.BaseAdd || modType == ModType.BonusAdd ? ((int) Math.Abs(modValue)).ToString() : modValue.ToString("F2"))}{(modType != ModType.BonusAdd ? (modType != ModType.BaseAdd ? (modType != ModType.PercentAdd ? char.MinValue : 'x') : '_') : '^')}";
         }
     }
 }
