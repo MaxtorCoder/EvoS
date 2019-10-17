@@ -349,32 +349,39 @@ namespace EvoS.Framework.Game
             }
         }
 
-        public TR SpawnObject<T, TR>(AssetLoader loader) where T : MonoBehaviour where TR : Component
+        public void SpawnObject<T, TR>(AssetLoader loader, out TR component)
+            where T : MonoBehaviour where TR : Component
         {
-            return SpawnObject<T>(loader).GetComponent<TR>();
+            SpawnObject<T>(loader, out var obj, false);
+            component = obj.GetComponent<TR>();
+            RegisterObject(obj);
         }
 
-        public GameObject SpawnObject<T>(AssetLoader loader) where T : MonoBehaviour
+        public void SpawnObject<T>(AssetLoader loader, out GameObject obj, bool register = true) where T : MonoBehaviour
         {
             loader.ClearCache();
-            return loader.GetObjectByComponent<T>().Instantiate(this);
+            obj = loader.GetObjectByComponent<T>().Instantiate();
+            if (register) RegisterObject(obj);
         }
 
-        public T SpawnObject<T>(AssetLoader loader, string name) where T : Component
+        public void SpawnObject<T>(AssetLoader loader, string name, out T component) where T : Component
         {
-            return SpawnObject(loader, name).GetComponent<T>();
+            SpawnObject(loader, name, out var obj, false);
+            component = obj.GetComponent<T>();
+            RegisterObject(obj);
         }
 
-        public GameObject SpawnObject(AssetLoader loader, string name)
-        {
-            loader.ClearCache();
-            return loader.NetObjsByName[name].Instantiate(this);
-        }
-
-        public GameObject SpawnScene(AssetLoader loader, uint sceneId)
+        public void SpawnObject(AssetLoader loader, string name, out GameObject obj, bool register = true)
         {
             loader.ClearCache();
-            return loader.NetworkScenes[sceneId].Instantiate(this);
+            obj = loader.NetObjsByName[name].Instantiate();
+            if (register) RegisterObject(obj);
+        }
+
+        public void SpawnScene(AssetLoader loader, uint sceneId, out GameObject scene)
+        {
+            loader.ClearCache();
+            scene = loader.NetworkScenes[sceneId].Instantiate(this);
         }
     }
 }
