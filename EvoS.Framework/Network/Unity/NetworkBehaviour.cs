@@ -503,6 +503,20 @@ namespace EvoS.Framework.Network.Unity
             return -1;
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected void SendRPCInternal(NetworkWriter writer, int channelId, string rpcName)
+        {
+//            if (!this.isServer)
+//            {
+//                Log.Print(LogType.Warning, "ClientRpc call on un-spawned object");
+//            }
+//            else
+//            {
+            writer.FinishMessage();
+            NetworkServer.SendWriterToReady(gameObject, writer, channelId);
+//            }
+        }
+
         public virtual bool OnSerialize(NetworkWriter writer, bool initialState)
         {
             if (!initialState)

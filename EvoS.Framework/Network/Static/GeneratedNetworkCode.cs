@@ -1,3 +1,4 @@
+using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Network.Static
@@ -42,6 +43,23 @@ namespace EvoS.Framework.Network.Static
             writer.Write(count);
             for (ushort index = 0; (int) index < (int) count; ++index)
                 value.SerializeItem(writer, value.GetItem(index));
+        }
+
+        public static GridPosProp _ReadGridPosProp_None(NetworkReader reader)
+        {
+            return new GridPosProp()
+            {
+                m_x = (int) reader.ReadPackedUInt32(),
+                m_y = (int) reader.ReadPackedUInt32(),
+                m_height = (int) reader.ReadPackedUInt32()
+            };
+        }
+
+        public static void _WriteGridPosProp_None(NetworkWriter writer, GridPosProp value)
+        {
+            writer.WritePackedUInt32((uint) value.m_x);
+            writer.WritePackedUInt32((uint) value.m_y);
+            writer.WritePackedUInt32((uint) value.m_height);
         }
     }
 }

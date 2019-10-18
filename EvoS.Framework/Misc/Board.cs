@@ -113,11 +113,37 @@ namespace EvoS.Framework.Misc
             return boardSquare;
         }
 
+        public bool method_17(BoardSquare boardSquare_0, BoardSquare boardSquare_1)
+        {
+            var flag1 = boardSquare_0.X != boardSquare_1.X || boardSquare_0.Y != boardSquare_1.Y;
+            var flag2 = boardSquare_0.X >= boardSquare_1.X - 1 && boardSquare_0.X <= boardSquare_1.X + 1;
+            var flag3 = boardSquare_0.Y >= boardSquare_1.Y - 1 && boardSquare_0.Y <= boardSquare_1.Y + 1;
+            if (flag1 && flag2)
+                return flag3;
+            return false;
+        }
+
+
+        public bool method_18(BoardSquare boardSquare_0, BoardSquare boardSquare_1)
+        {
+            return boardSquare_0.X == boardSquare_1.X &&
+                   (boardSquare_0.Y == boardSquare_1.Y + 1 || boardSquare_0.Y == boardSquare_1.Y - 1) ||
+                   boardSquare_0.Y == boardSquare_1.Y &&
+                   (boardSquare_0.X == boardSquare_1.X + 1 || boardSquare_0.X == boardSquare_1.X - 1);
+        }
+
+        public bool method_19(BoardSquare boardSquare_0, BoardSquare boardSquare_1)
+        {
+            if (method_17(boardSquare_0, boardSquare_1) && boardSquare_0.X != boardSquare_1.X)
+                return boardSquare_0.Y != boardSquare_1.Y;
+            return false;
+        }
+
         public List<BoardSquare> method_21(BoardSquare boardSquare_0, BoardSquare boardSquare_1)
         {
             var boardSquareList = new List<BoardSquare>();
             if (boardSquare_0 == null || boardSquare_1 == null) return boardSquareList;
-            
+
             var num1 = Mathf.Min(boardSquare_0.X, boardSquare_1.X);
             var num2 = Mathf.Max(boardSquare_0.X, boardSquare_1.X);
             var num3 = Mathf.Min(boardSquare_0.Y, boardSquare_1.Y);
@@ -195,6 +221,14 @@ namespace EvoS.Framework.Misc
             if (x >= 0 && x < m_maxX && (y >= 0 && y < m_maxY))
                 return _boardSquares[x, y];
             return null;
+        }
+
+        public BoardSquare GetBoardSquare(GridPos gridPos_0) // 11
+        {
+            var boardSquare = (BoardSquare) null;
+            if (gridPos_0.X >= 0 && gridPos_0.X < method_3() && (gridPos_0.Y >= 0 && gridPos_0.Y < method_4()))
+                boardSquare = _boardSquares[gridPos_0.X, gridPos_0.Y];
+            return boardSquare;
         }
     }
 }

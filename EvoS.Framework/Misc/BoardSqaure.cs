@@ -121,6 +121,14 @@ namespace EvoS.Framework.Misc
                 m_thinCoverTypes[index] = ThinCover.CoverType.None;
         }
 
+        public float HorizontalDistanceOnBoardTo(BoardSquare other)
+        {
+            float a = Mathf.Abs(X - other.X);
+            float b = Mathf.Abs(Y - other.Y);
+            float num = Mathf.Min(a, b);
+            return (float) (Mathf.Max(a, b) - (double) num + num * 1.5);
+        }
+
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             _gridPosProp = new GridPosProp(assetFile, stream);
