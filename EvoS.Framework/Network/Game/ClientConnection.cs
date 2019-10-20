@@ -16,19 +16,21 @@ namespace EvoS.Framework.Network.Game
 
     public class ClientConnection
     {
-        private vtortola.WebSockets.WebSocket Socket;
-        public GameManager ActiveGame { private get; set; }
+        protected vtortola.WebSockets.WebSocket Socket;
+        public GameManager ActiveGame { get; set; }
 
         public string address => Socket.RemoteEndpoint.ToString();
 
-        private UNetSerializer Serializer = new UNetSerializer();
-        private HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
-        private HashSet<NetworkInstanceId> _clientOwnedObjects;
+        protected UNetSerializer Serializer = new UNetSerializer();
+        protected HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
+        protected HashSet<NetworkInstanceId> _clientOwnedObjects;
         public bool isReady;
-        private static int _connectionIdCounter;
-        private uint lastMessageOutgoingSeqNum;
+        protected static int _connectionIdCounter;
+        protected uint lastMessageOutgoingSeqNum;
         public readonly int connectionId = Interlocked.Increment(ref _connectionIdCounter);
-        private NetworkWriter m_Writer = new NetworkWriter();
+        protected NetworkWriter m_Writer = new NetworkWriter();
+        
+        protected ClientConnection() {}
 
         public ClientConnection(vtortola.WebSockets.WebSocket socket)
         {
@@ -44,7 +46,7 @@ namespace EvoS.Framework.Network.Game
             Serializer.RegisterHandler(msgId, msg => handler(player, (T) msg));
         }
 
-        private void SetupLoginHandler()
+        protected void SetupLoginHandler()
         {
             // The client sends AddPlayer and then LoginRequest, instead we'll use the session token to determine
             // which Game the connection is fore
