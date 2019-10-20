@@ -259,7 +259,7 @@ namespace EvoS.Framework.Assets
                 var netIdent = obj.GetComponent<NetworkIdentity>();
                 if (netIdent != null)
                 {
-                    var netHash = new NetworkHash128(netIdent.AssetId.Bytes);
+                    var netHash = netIdent.assetId;
                     if (!netHash.IsZero())
                     {
                         if (!NetObjsByName.TryAdd(obj.Name, obj))
@@ -276,7 +276,7 @@ namespace EvoS.Framework.Assets
                     }
                     else
                     {
-                        NetworkScenes.Add(netIdent.SceneId.Value, obj);
+                        NetworkScenes.Add(netIdent.sceneId.Value, obj);
                     }
                 }
             }
@@ -288,7 +288,7 @@ namespace EvoS.Framework.Assets
             {
                 var netIdent = obj.GetComponent<NetworkIdentity>();
 
-                Log.Print(LogType.Misc, $"{netIdent.AssetId.ToHex()} {obj.Name}");
+                Log.Print(LogType.Misc, $"{netIdent.assetId} {obj.Name}");
                 Log.Print(LogType.Misc, $"  {string.Join(", ", obj.ComponentNames())}");
             }
         }

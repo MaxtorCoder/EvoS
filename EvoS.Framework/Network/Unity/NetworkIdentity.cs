@@ -5,6 +5,7 @@ using System.Linq;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.Game;
 
@@ -13,11 +14,7 @@ namespace EvoS.Framework.Network.Unity
     [SerializedMonoBehaviour("NetworkIdentity")]
     public class NetworkIdentity : MonoBehaviour
     {
-        public NetworkSceneId SceneId { get; set; }
-        public Hash128 AssetId { get; set; }
-        public bool ServerOnly { get; set; }
         public bool LocalPlayerAuthority { get; set; }
-
         public NetworkInstanceId netId => m_NetId;
         public NetworkSceneId sceneId => m_SceneId;
         public NetworkServer Server { set; private get; }
@@ -526,11 +523,9 @@ namespace EvoS.Framework.Network.Unity
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
-            SceneId = new NetworkSceneId(stream.ReadUInt32());
-
-            AssetId = new Hash128();
-            AssetId.DeserializeAsset(assetFile, stream);
-            ServerOnly = stream.ReadBoolean();
+            m_SceneId = new NetworkSceneId(stream.ReadUInt32());
+            m_AssetId = new NetworkHash128(new Hash128(assetFile, stream).Bytes);
+            m_ServerOnly = stream.ReadBoolean();
             stream.AlignTo();
             LocalPlayerAuthority = stream.ReadBoolean();
             stream.AlignTo();
@@ -540,8 +535,8 @@ namespace EvoS.Framework.Network.Unity
         {
             return $"{nameof(NetworkIdentity)}(" +
                    $"{nameof(netId)}: {netId}, " +
-                   $"{nameof(SceneId)}: {SceneId}, " +
-                   $"{nameof(AssetId)}: {AssetId}" +
+                   $"{nameof(m_SceneId)}: {m_SceneId}, " +
+                   $"{nameof(m_AssetId)}: {m_AssetId}" +
                    ")";
         }
     }

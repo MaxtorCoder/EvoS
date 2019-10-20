@@ -6,6 +6,15 @@ namespace EvoS.Framework.Assets.Serialized
     {
         public byte[] Bytes = new byte[16];
 
+        public Hash128()
+        {
+        }
+
+        public Hash128(AssetFile assetFile, StreamReader stream)
+        {
+            DeserializeAsset(assetFile, stream);
+        }
+
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             for (int i = 0; i < Bytes.Length; i++)
