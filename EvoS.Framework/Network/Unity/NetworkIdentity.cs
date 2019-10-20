@@ -110,16 +110,18 @@ namespace EvoS.Framework.Network.Unity
         public void UNetSerializeAllVars(NetworkWriter writer)
         {
             CacheBehaviours();
-            
+
             for (int i = 0; i < m_NetworkBehaviours.Length; i++)
             {
                 NetworkBehaviour networkBehaviour = m_NetworkBehaviours[i];
-                Log.Print(LogType.Debug,
-                    $"Will serialize {GetType().Name}.{networkBehaviour.GetType().Name} at {writer.Position}");
+                if (EvoSGameConfig.DebugNetSerialize)
+                    Log.Print(LogType.Debug,
+                        $"Will serialize {GetType().Name}.{networkBehaviour.GetType().Name} at {writer.Position}");
                 networkBehaviour.OnSerialize(writer, true);
             }
 
-            Log.Print(LogType.Debug, $"Finished UNetSerializeAllVars at {writer.Position}");
+            if (EvoSGameConfig.DebugNetSerialize)
+                Log.Print(LogType.Debug, $"Finished UNetSerializeAllVars at {writer.Position}");
         }
 
         private bool GetInvokeComponent(int cmdHash, Type invokeClass, out NetworkBehaviour invokeComponent)
@@ -292,12 +294,14 @@ namespace EvoS.Framework.Network.Unity
 
             foreach (var networkBehaviour in m_NetworkBehaviours)
             {
-                Log.Print(LogType.Debug,
-                    $"Will deserialize {GetType().Name}.{networkBehaviour.GetType().Name} at {reader.Position}/{reader.Length}");
+                if (EvoSGameConfig.DebugNetSerialize)
+                    Log.Print(LogType.Debug,
+                        $"Will deserialize {GetType().Name}.{networkBehaviour.GetType().Name} at {reader.Position}/{reader.Length}");
                 networkBehaviour.OnDeserialize(reader, initialState);
             }
 
-            Log.Print(LogType.Debug, $"Finished OnUpdateVars at {reader.Position}/{reader.Length}");
+            if (EvoSGameConfig.DebugNetSerialize)
+                Log.Print(LogType.Debug, $"Finished OnUpdateVars at {reader.Position}/{reader.Length}");
             if (reader.Position != reader.Length)
             {
                 var remain = reader.ReadBytes((int) (reader.Length - reader.Position));

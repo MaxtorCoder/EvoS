@@ -7,5 +7,6 @@ namespace EvoS.Framework.Game
         public static bool NetworkIsClient = true;
         public static bool DebugNetworkBehaviour = false;
         public static bool DebugSyncVars = false;
+        public static bool DebugNetSerialize = false;
     }
 }
