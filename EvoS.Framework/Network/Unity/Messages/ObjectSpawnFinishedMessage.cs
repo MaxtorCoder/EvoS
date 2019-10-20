@@ -7,12 +7,19 @@ namespace EvoS.Framework.Network.Unity.Messages
 
         public override void Deserialize(NetworkReader reader)
         {
-            this.state = reader.ReadPackedUInt32();
+            state = reader.ReadPackedUInt32();
         }
 
         public override void Serialize(NetworkWriter writer)
         {
-            writer.WritePackedUInt32(this.state);
+            writer.WritePackedUInt32(state);
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(ObjectSpawnFinishedMessage)}(" +
+                   $"{nameof(state)}: {state}" +
+                   ")";
         }
     }
 }
