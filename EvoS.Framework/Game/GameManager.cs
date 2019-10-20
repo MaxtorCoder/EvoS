@@ -282,32 +282,44 @@ namespace EvoS.Framework.Game
             player.Connection.Send(54, new SpawningObjectsNotification
             {
                 PlayerId = player.LoginRequest.PlayerId,
-                SpawnableObjectCount = 43
+                SpawnableObjectCount = _netObjects.Count
             });
             player.Connection.Send(12, new ObjectSpawnFinishedMessage {state = 0});
-            player.Connection.Send(10, new ObjectSpawnSceneMessage
+
+            var updateWriter = new NetworkWriter();
+            foreach (var netObj in _netObjects.Values)
             {
-                netId = new NetworkInstanceId(5),
-                sceneId = new NetworkSceneId(1),
-                position = Vector3.Zero,
-                payload = Convert.FromBase64String("AAAAAAAAAwAAAAADAAAAAA==")
-            });
-            player.Connection.Send(10, new ObjectSpawnSceneMessage
-            {
-                netId = new NetworkInstanceId(6),
-                sceneId = new NetworkSceneId(2),
-                position = new Vector3(18.7f, 2.0f, 19.4f),
-                payload = Convert.FromBase64String(
-                    "CwD7//////v/////+//////7//////v/////+//////7//////v/////+//////7//////v/////")
-            });
-            player.Connection.Send(10, new ObjectSpawnSceneMessage
-            {
-                netId = new NetworkInstanceId(7),
-                sceneId = new NetworkSceneId(3),
-                position = Vector3.Zero,
-                payload = Convert.FromBase64String(
-                    "AAAAAAAAAAAAAIA/AADgQAAAoEEAANBBAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=")
-            });
+                var netIdent = netObj.GetComponent<NetworkIdentity>();
+                updateWriter.SeekZero();
+                netIdent.UNetSerializeAllVars(updateWriter);
+
+                if (netIdent.sceneId.Value != 0)
+                {
+                    var spawnMsg = new ObjectSpawnSceneMessage
+                    {
+                        position = netObj.transform.position,
+                        netId = netIdent.netId,
+                        sceneId = netIdent.sceneId,
+                        payload = updateWriter.ToArray()
+                    };
+
+                    player.Connection.Send(10, spawnMsg);
+                }
+                else
+                {
+                    var spawnMsg = new ObjectSpawnMessage
+                    {
+                        position = netObj.transform.position,
+                        netId = netIdent.netId,
+                        rotation = netObj.transform.rotation,
+                        assetId = netIdent.assetId,
+                        payload = updateWriter.ToArray()
+                    };
+
+                    player.Connection.Send(3, spawnMsg);
+                }
+            }
+
             player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = false});
             player.Connection.Send(12, new ObjectSpawnFinishedMessage {state = 1});
         }
@@ -331,7 +343,8 @@ namespace EvoS.Framework.Game
         {
             MapLoader = new AssetLoader(resourceFolder);
             MapLoader.LoadAssetBundle("Bundles/scenes/maps.bundle");
-            MapLoader.LoadAsset($"archive:/buildplayer-robotfactory_opu_gamemode/buildplayer-{GameConfig.Map.ToLower()}");
+            MapLoader.LoadAsset(
+                $"archive:/buildplayer-robotfactory_opu_gamemode/buildplayer-{GameConfig.Map.ToLower()}");
             MapLoader.ConstructCaches();
 
             AssetsLoader = new AssetLoader(resourceFolder);
@@ -376,7 +389,7 @@ namespace EvoS.Framework.Game
             {
                 SpawnPlayerCharacter(playerInfo);
             }
-            
+
             DumpNetObjects();
         }
 
@@ -392,7 +405,8 @@ namespace EvoS.Framework.Game
         {
             // TODO would normally check playerInfo.CharacterInfo.CharacterType
 
-            SpawnObject<ActorTeamSensitiveData>(MiscLoader, "ActorTeamSensitiveData_Friendly", out var scoundrelFriendly);
+            SpawnObject<ActorTeamSensitiveData>(MiscLoader, "ActorTeamSensitiveData_Friendly",
+                out var scoundrelFriendly);
             SpawnObject(AssetsLoader, "Scoundrel", out var scoundrel);
             var scoundrelActor = scoundrel.GetComponent<ActorData>();
             scoundrelFriendly.SetActorIndex(scoundrelActor.ActorIndex);
@@ -418,6 +432,7 @@ namespace EvoS.Framework.Game
             {
                 RegisterObject(child.gameObject);
             }
+
             if (gameObj.transform.father?.gameObject != null)
                 RegisterObject(gameObj.transform.father.gameObject);
 
@@ -465,7 +480,7 @@ namespace EvoS.Framework.Game
             if (register) RegisterObject(scene);
         }
 
-        public void SpawnScene<T>(AssetLoader loader, uint sceneId, out T component) where T: Component
+        public void SpawnScene<T>(AssetLoader loader, uint sceneId, out T component) where T : Component
         {
             SpawnScene(loader, sceneId, out var scene, false);
             component = scene.GetComponent<T>();
