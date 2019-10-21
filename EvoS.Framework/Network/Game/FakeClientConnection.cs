@@ -12,6 +12,8 @@ namespace EvoS.Framework.Network.Game
             isReady = true;
         }
 
+        public override string address { get; } = "fake client";
+
         public override void SendByChannel(short msgType, MessageBase msg, int channelId)
         {
             Log.Print(LogType.Packet, $"SendByChannel(channel={channelId}, {msgType}, {msg})");

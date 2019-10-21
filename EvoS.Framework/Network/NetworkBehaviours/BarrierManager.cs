@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized.Behaviours;
@@ -32,9 +33,10 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         static BarrierManager()
         {
-//            RegisterRpcDelegate(typeof(BarrierManager), kRpcRpcUpdateBarriers, BarrierManager.InvokeRpcRpcUpdateBarriers);
+            RegisterRpcDelegate(typeof(BarrierManager), kRpcRpcUpdateBarriers, InvokeRpcRpcUpdateBarriers);
             RegisterSyncListDelegate(typeof(BarrierManager), kListm_barrierIdSync, InvokeSyncListm_barrierIdSync);
-            RegisterSyncListDelegate(typeof(BarrierManager), kListm_movementStatesSync, InvokeSyncListm_movementStatesSync);
+            RegisterSyncListDelegate(typeof(BarrierManager), kListm_movementStatesSync,
+                InvokeSyncListm_movementStatesSync);
             RegisterSyncListDelegate(typeof(BarrierManager), kListm_visionStatesSync, InvokeSyncListm_visionStatesSync);
         }
 
@@ -59,8 +61,8 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         {
             for (int index = 0; index < 3; ++index)
             {
-                this.m_movementStatesSync.Add(0);
-                this.m_visionStatesSync.Add(0);
+                m_movementStatesSync.Add(0);
+                m_visionStatesSync.Add(0);
             }
         }
 
@@ -93,6 +95,72 @@ namespace EvoS.Framework.Network.NetworkBehaviours
                 Log.Print(LogType.Error, "SyncList m_visionStatesSync called on server.");
             else
                 ((BarrierManager) obj).m_visionStatesSync.HandleMsg(reader);
+        }
+
+//        [ClientRpc]
+        private void RpcUpdateBarriers()
+        {
+//            if (EvoSGameConfig.NetworkIsServer)
+//                return;
+//            bool flag = false;
+//            for (int index = 0; index < m_barriers.Count; ++index)
+//            {
+//                if (m_barriers[index].ConsiderAsCover)
+//                {
+//                    flag = true;
+//                    break;
+//                }
+//            }
+//
+//            m_barriers.Clear();
+//            if (m_barrierIdSync.Count > 50)
+//                Log.Print(LogType.Error, "More than 50 barriers active?");
+//            for (int index = 0; index < m_barrierIdSync.Count; ++index)
+//            {
+//                foreach (BarrierSerializeInfo info in m_clientBarrierInfo)
+//                {
+//                    if (info.m_guid == m_barrierIdSync[index])
+//                    {
+//                        Barrier fromSerializeInfo = Barrier.CreateBarrierFromSerializeInfo(info);
+//                        if (fromSerializeInfo.ConsiderAsCover)
+//                            flag = true;
+//                        List<ActorData> visionUpdaters;
+//                        this.AddBarrier(fromSerializeInfo, false, out visionUpdaters);
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            this.ClientUpdateMovementAndVision();
+//            this.UpdateHasAbilityBlockingBarriers();
+//            if (!flag)
+//                return;
+//            GameFlowData.UpdateCoverFromBarriersForAllActors();
+        }
+
+        protected static void InvokeRpcRpcUpdateBarriers(NetworkBehaviour obj, NetworkReader reader)
+        {
+            if (!EvoSGameConfig.NetworkIsClient)
+                Log.Print(LogType.Error, "RPC RpcUpdateBarriers called on server.");
+            else
+                ((BarrierManager) obj).RpcUpdateBarriers();
+        }
+
+        public void CallRpcUpdateBarriers()
+        {
+            if (!EvoSGameConfig.NetworkIsServer)
+            {
+                Log.Print(LogType.Error, "RPC Function RpcUpdateBarriers called on client.");
+            }
+            else
+            {
+                NetworkWriter writer = new NetworkWriter();
+                writer.Write((short) 0);
+                writer.Write((short) 2);
+                writer.WritePackedUInt32((uint) kRpcRpcUpdateBarriers);
+                writer.Write(GetComponent<NetworkIdentity>().netId);
+                SendRPCInternal(writer, 0, "RpcUpdateBarriers");
+            }
         }
 
         public override bool OnSerialize(NetworkWriter writer, bool forceAll)

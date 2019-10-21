@@ -1,3 +1,4 @@
+using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Unity;
 
@@ -5,6 +6,33 @@ namespace EvoS.Framework.Network.Static
 {
     public class GeneratedNetworkCode
     {
+        public static DisplayConsoleTextMessage _ReadDisplayConsoleTextMessage_None(NetworkReader reader)
+        {
+            return new DisplayConsoleTextMessage()
+            {
+                Term = reader.ReadString(),
+                Context = reader.ReadString(),
+                Token = reader.ReadString(),
+                Unlocalized = reader.ReadString(),
+                MessageType = (ConsoleMessageType) reader.ReadInt32(),
+                RestrictVisibiltyToTeam = (Team) reader.ReadInt32(),
+                SenderHandle = reader.ReadString(),
+                CharacterType = (CharacterType) reader.ReadInt32()
+            };
+        }
+
+        public static void _WriteDisplayConsoleTextMessage_None(NetworkWriter writer, DisplayConsoleTextMessage value)
+        {
+            writer.Write(value.Term);
+            writer.Write(value.Context);
+            writer.Write(value.Token);
+            writer.Write(value.Unlocalized);
+            writer.Write((int) value.MessageType);
+            writer.Write((int) value.RestrictVisibiltyToTeam);
+            writer.Write(value.SenderHandle);
+            writer.Write((int) value.CharacterType);
+        }
+
         public static void _ReadStructSyncListTempCoverInfo_None(
             NetworkReader reader,
             SyncListTempCoverInfo instance)

@@ -27,7 +27,16 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public SerializedComponent SerializedActorData;
         public Player m_player;
 
-        public int PlayerIndex => m_playerIndex;
+        public int PlayerIndex
+        {
+            get => m_playerIndex;
+            set
+            {
+                if (m_playerIndex != s_invalidPlayerIndex || value == s_invalidPlayerIndex || (GameFlowData == null))
+                    return;
+                m_playerIndex = value;
+            }
+        }
 //        private FogOfWar m_fogOfWar;
 
         public override void Awake()

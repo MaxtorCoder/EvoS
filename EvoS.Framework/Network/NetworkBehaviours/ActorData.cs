@@ -1212,7 +1212,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 //            method_4().ForceUpdateVisibility();
         }
 
-        private void Start()
+        public override void OnStartServer() // Was Start()
         {
             if (EvoSGameConfig.NetworkIsClient)
             {
@@ -2131,8 +2131,8 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         public void SetTeam(Team team)
         {
-//            m_team = team;
-//            GameFlowData.AddToTeam(this);
+            m_team = team;
+            GameFlowData.AddToTeam(this);
 //            TeamStatusDisplay.GetTeamStatusDisplay().RebuildTeamDisplay();
 //            if (EvoSGameConfig.NetworkIsServer)
 //                ;

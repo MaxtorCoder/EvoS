@@ -71,6 +71,28 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             m_points.InitializeBehaviour(this, kListm_points);
         }
 
+        public override void OnStartServer() // Was Start()
+        {
+            if (EvoSGameConfig.NetworkIsServer)
+            {
+                m_points.Add(m_startingPointsTeamA);
+                m_points.Add(m_startingPointsTeamB);
+            }
+
+            for (int index = 0; index <= 1; ++index)
+                m_clientNumDeathInTurn.Add(0);
+            m_displayedPoints[0] = m_points[0];
+            m_displayedPoints[1] = m_points[1];
+            m_respawningPlayers = new HashSet<ActorData>();
+            m_inSuddenDeath = false;
+            if (EvoSGameConfig.NetworkIsServer)
+                Networkm_matchState = MatchState.InMatch;
+            // TODO
+//            m_objectives =
+//                new List<MatchObjective>(
+//                    (IEnumerable<MatchObjective>) gameObject.GetComponentsInChildren<MatchObjective>());
+        }
+
         public GameResult Networkm_gameResult
         {
             get => m_gameResult;

@@ -19,7 +19,7 @@ namespace EvoS.Framework.Network.Game
         protected vtortola.WebSockets.WebSocket Socket;
         public GameManager ActiveGame { get; set; }
 
-        public string address => Socket.RemoteEndpoint.ToString();
+        public virtual string address => Socket.RemoteEndpoint.ToString();
 
         protected UNetSerializer Serializer = new UNetSerializer();
         protected HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
@@ -160,7 +160,8 @@ namespace EvoS.Framework.Network.Game
             bytes[2] = (byte) (num >> 16 & byte.MaxValue);
             bytes[3] = (byte) (num >> 24 & byte.MaxValue);
             channelId = 0;
-            throw new NotImplementedException();
+            SendWSMessage(bytes, numBytes);
+            return true;
         }
 
         public void Send(short msgType, MessageBase msg)
@@ -172,6 +173,18 @@ namespace EvoS.Framework.Network.Game
         {
             var responseStream = new MemoryStream();
             responseStream.Write(msg.AsArraySegment().Array, 0, msg.AsArraySegment().Count);
+
+            using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
+            {
+                await writer.WriteAsync(UNetMessage.Serialize(responseStream.ToArray()));
+                await writer.FlushAsync();
+            }
+        }
+
+        public async Task SendWSMessage(byte[] bytes, int count)
+        {
+            var responseStream = new MemoryStream();
+            responseStream.Write(bytes, 0, count);
 
             using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
             {

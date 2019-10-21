@@ -17,6 +17,13 @@ namespace EvoS.Framework.Misc
         {
         }
 
+        public GridPosProp(int x, int y, int height)
+        {
+            m_x = x;
+            m_y = y;
+            m_height = height;
+        }
+
         public GridPosProp(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);
