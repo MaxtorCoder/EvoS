@@ -4,7 +4,10 @@ namespace EvoS.Framework.Network.Unity
     {
         public virtual void Awake()
         {
-            
+        }
+
+        public virtual void OnDestroy()
+        {
         }
     }
 }

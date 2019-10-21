@@ -8,9 +8,12 @@ namespace EvoS.Framework.Network.Unity
 {
     public class NetworkServer
     {
-        public static ushort maxPacketSize = 1440;
+        private static uint s_NextNetworkId = 1u;
+        public ushort maxPacketSize = 1440;
         public List<ClientConnection> connections = new List<ClientConnection>();
         public int numChannels => 36; // TODO
+
+        public NetworkInstanceId GetNextNetworkId() => new NetworkInstanceId(s_NextNetworkId++);
 
         public void SendWriterToReady(
             GameObject contextObj,

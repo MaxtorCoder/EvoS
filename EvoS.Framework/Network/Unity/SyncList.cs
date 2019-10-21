@@ -21,9 +21,9 @@ namespace EvoS.Framework.Network.Unity
             set => m_Callback = value;
         }
 
-        protected abstract void SerializeItem(NetworkWriter writer, T item);
+        public abstract void SerializeItem(NetworkWriter writer, T item);
 
-        protected abstract T DeserializeItem(NetworkReader reader);
+        public abstract T DeserializeItem(NetworkReader reader);
 
         public void InitializeBehaviour(NetworkBehaviour beh, int cmdHash)
         {

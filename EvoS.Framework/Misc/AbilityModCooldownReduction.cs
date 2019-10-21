@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Network.NetworkBehaviours;
 
 namespace EvoS.Framework.Misc
 {

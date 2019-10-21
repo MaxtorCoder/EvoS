@@ -4,12 +4,12 @@ namespace EvoS.Framework.Network.Unity
 {
     public sealed class SyncListFloat : SyncList<float>
     {
-        protected override void SerializeItem(NetworkWriter writer, float item)
+        public override void SerializeItem(NetworkWriter writer, float item)
         {
             writer.Write(item);
         }
 
-        protected override float DeserializeItem(NetworkReader reader)
+        public override float DeserializeItem(NetworkReader reader)
         {
             return reader.ReadSingle();
         }

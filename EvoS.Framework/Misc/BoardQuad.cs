@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Net.Mime;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Logging;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
@@ -21,6 +24,28 @@ namespace EvoS.Framework.Misc
         public BoardQuad(AssetFile assetFile, StreamReader stream)
         {
             DeserializeAsset(assetFile, stream);
+        }
+
+        public List<BoardSquare> GetSquares(Component context)
+        {
+            List<BoardSquare> boardSquareList;
+            if (m_corner1 != null && m_corner2 != null)
+            {
+                boardSquareList = context.Board.method_21(
+                    m_corner1.GetComponent<BoardSquare>() != null
+                        ? m_corner1.GetComponent<BoardSquare>()
+                        : context.Board.method_9(m_corner1),
+                    m_corner2.GetComponent<BoardSquare>() != null
+                        ? m_corner2.GetComponent<BoardSquare>()
+                        : context.Board.method_9(m_corner2));
+            }
+            else
+            {
+                boardSquareList = new List<BoardSquare>();
+                Log.Print(LogType.Debug, $"BoardRegion {m_name} has a BoardQuad with null corners.");
+            }
+
+            return boardSquareList;
         }
 
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)

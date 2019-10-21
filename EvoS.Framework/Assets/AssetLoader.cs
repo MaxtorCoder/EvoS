@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using EvoS.Framework.Assets.Bundles;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
@@ -13,11 +15,8 @@ namespace EvoS.Framework.Assets
 {
     public class AssetLoader
     {
-        public AssetFile MainAssetFile;
-        private string _basePath;
-
-        private Dictionary<string, WeakReference<AssetFile>> _assetFiles =
-            new Dictionary<string, WeakReference<AssetFile>>();
+        public static string BasePath;
+        private Dictionary<string, AssetFile> _assetFiles = new Dictionary<string, AssetFile>();
 
         private Dictionary<string, UnityFs> _assetBundles =
             new Dictionary<string, UnityFs>();
@@ -31,15 +30,20 @@ namespace EvoS.Framework.Assets
             new Dictionary<string, SerializedMonoScript>();
 
         public Dictionary<string, SerializedGameObject> NetObjsByName = new Dictionary<string, SerializedGameObject>();
+        public Dictionary<uint, SerializedGameObject> NetworkScenes = new Dictionary<uint, SerializedGameObject>();
 
         public Dictionary<NetworkHash128, SerializedGameObject> NetObjsByAssetId =
             new Dictionary<NetworkHash128, SerializedGameObject>();
 
         public Dictionary<string, SerializedGameObject>.ValueCollection NetworkedObjects => NetObjsByName.Values;
+        public Dictionary<string, UnityFs> AssetBundles => _assetBundles;
 
-        public AssetLoader(string basePath)
+        public AssetLoader()
         {
-            _basePath = basePath;
+            if (BasePath == null && !FindAssetRoot())
+            {
+                throw new FileNotFoundException("Failed to find resources.assets");
+            }
         }
 
         public SerializedGameObject GetNetObj(string assetId)
@@ -54,14 +58,10 @@ namespace EvoS.Framework.Assets
 
         public AssetFile LoadAsset(string name, bool strongRef = false)
         {
-            AssetFile assetFile = null;
-
-            if (_assetFiles.TryGetValue(name, out var existingRef) && existingRef.TryGetTarget(out assetFile))
+            if (_assetFiles.TryGetValue(name, out var assetFile))
             {
                 return assetFile;
             }
-
-            var assetIsMain = MainAssetFile == null;
 
             // check if the asset is part of a bundle
             if (name.StartsWith("archive:/"))
@@ -71,7 +71,7 @@ namespace EvoS.Framework.Assets
                 var assetName = nameInfo[2];
 
                 // check if the bundled asset is already loaded
-                if (_assetFiles.TryGetValue(assetName, out existingRef) && existingRef.TryGetTarget(out assetFile))
+                if (_assetFiles.TryGetValue(assetName, out assetFile))
                 {
                     return assetFile;
                 }
@@ -97,38 +97,22 @@ namespace EvoS.Framework.Assets
             }
             else
             {
-                assetFile = new AssetFile(this, name, new StreamReader(Path.Join(_basePath, name)));
+                assetFile = new AssetFile(this, name, new StreamReader(Path.Join(BasePath, name)));
             }
 
-            _assetFiles[assetFile.Name] = new WeakReference<AssetFile>(assetFile);
-            _assetFiles[name] = new WeakReference<AssetFile>(assetFile);
-
-            // First loaded becomes "main" -- TODO this is arbitrary
-            if (assetIsMain) MainAssetFile = assetFile;
+            _assetFiles[assetFile.Name] = assetFile;
+            _assetFiles[name] = assetFile;
 
             if (strongRef) _strongRefs.Add(assetFile);
 
             return assetFile;
         }
 
-        public List<AssetFile> LoadAssetBundle(string fileName, bool loadNodes = false, bool strongRefs = false)
+        public void LoadAssetBundle(string fileName)
         {
-            var unityFs = new UnityFs(this, Path.Join(_basePath, fileName));
+            var unityFs = new UnityFs(this, Path.Join(BasePath, fileName));
 
             _assetBundles.Add(unityFs.Name, unityFs);
-
-            if (!loadNodes)
-            {
-                return null;
-            }
-
-            var assets = new List<AssetFile>();
-            foreach (var node in unityFs.Nodes)
-            {
-                assets.Add(LoadAsset($"archive:/{unityFs.Name}/{node.Name.ToLower()}", strongRefs));
-            }
-
-            return assets;
         }
 
         public void ConstructCaches()
@@ -137,6 +121,38 @@ namespace EvoS.Framework.Assets
 
             LoadNetworkedObjects();
 //            DumpNetworkObjectComponents();
+        }
+
+        public SerializedGameObject GetObjectByComponent<T>() where T : MonoBehaviour
+        {
+            return GetObjectsByComponent<T>().FirstOrDefault();
+        }
+
+        public IEnumerable<SerializedGameObject> GetObjectsByComponent<T>() where T : MonoBehaviour
+        {
+            var attribute = typeof(T).GetCustomAttribute<SerializedMonoBehaviourAttribute>();
+            if (attribute == null)
+            {
+                throw new InvalidDataException($"{typeof(T)} has no {nameof(SerializedMonoBehaviourAttribute)}!");
+            }
+
+            if (!ScriptsByName.TryGetValue(attribute.ClassName, out var script))
+            {
+                yield break;
+            }
+
+            foreach (var assetFile in AllAssetFiles())
+            {
+                foreach (var gameObject in assetFile.GetObjectsByComponent(script))
+                {
+                    yield return gameObject;
+                }
+            }
+        }
+
+        public SerializedGameObject GetObjectByComponent(SerializedMonoScript script)
+        {
+            return GetObjectsByComponent(script).FirstOrDefault();
         }
 
         public IEnumerable<SerializedGameObject> GetObjectsByComponent(SerializedMonoScript script)
@@ -154,13 +170,9 @@ namespace EvoS.Framework.Assets
         {
             var stack = new Stack<AssetFile>();
             var seen = new HashSet<string>();
-            stack.Push(MainAssetFile);
-            foreach (var file in _assetFiles.Values)
+            foreach (var asset in _assetFiles.Values)
             {
-                if (file.TryGetTarget(out var asset))
-                {
-                    stack.Push(asset);
-                }
+                stack.Push(asset);
             }
 
             while (!stack.IsNullOrEmpty())
@@ -234,7 +246,8 @@ namespace EvoS.Framework.Assets
             }
 
             Log.Print(LogType.Misc,
-                $"Loaded {NetworkedObjects.Count} networked game objects from {count} asset files.");
+                $"Loaded {NetworkScenes.Count} networked scenes and " +
+                $"{NetworkedObjects.Count} networked game objects from {count} asset files.");
         }
 
         private void InternalLoadNetworkedObjects(AssetFile assetFile)
@@ -249,11 +262,24 @@ namespace EvoS.Framework.Assets
                 var netIdent = obj.GetComponent<NetworkIdentity>();
                 if (netIdent != null)
                 {
-                    var netHash = new NetworkHash128(netIdent.AssetId.Bytes);
+                    var netHash = netIdent.assetId;
                     if (!netHash.IsZero())
                     {
-                        NetObjsByName.Add(obj.Name, obj);
-                        NetObjsByAssetId.Add(netHash, obj);
+                        if (!NetObjsByName.TryAdd(obj.Name, obj))
+                        {
+                            Log.Print(LogType.Warning,
+                                $"Multiple objects with name {obj.Name}, latest in {assetFile.Name}");
+                        }
+
+                        if (!NetObjsByAssetId.TryAdd(netHash, obj))
+                        {
+                            Log.Print(LogType.Warning,
+                                $"Multiple objects with netId {netHash}, latest in {assetFile.Name}");
+                        }
+                    }
+                    else
+                    {
+                        NetworkScenes.Add(netIdent.sceneId.Value, obj);
                     }
                 }
             }
@@ -265,7 +291,7 @@ namespace EvoS.Framework.Assets
             {
                 var netIdent = obj.GetComponent<NetworkIdentity>();
 
-                Log.Print(LogType.Misc, $"{netIdent.AssetId.ToHex()} {obj.Name}");
+                Log.Print(LogType.Misc, $"{netIdent.assetId} {obj.Name}");
                 Log.Print(LogType.Misc, $"  {string.Join(", ", obj.ComponentNames())}");
             }
         }
@@ -282,6 +308,62 @@ namespace EvoS.Framework.Assets
         {
             _strongRefs.Remove(assetFile);
             _assetFiles.Remove(assetFile.Name);
+        }
+
+        public void DumpAssetFileDepTree()
+        {
+            var removed = new List<AssetFile>();
+            var roots = AllAssetFiles().ToList();
+
+            foreach (var file in AllAssetFiles())
+            {
+                if (removed.Contains(file)) continue;
+
+                var toRemove = new Stack<AssetFile>(file.ExternalAssetRefs);
+                while (toRemove.Count != 0)
+                {
+                    var item = toRemove.Pop();
+                    if (removed.Contains(item)) continue;
+
+                    removed.Add(item);
+                    roots.Remove(item);
+
+                    foreach (var child in item.ExternalAssetRefs)
+                    {
+                        toRemove.Push(child);
+                    }
+                }
+            }
+
+            void DumpTree(AssetFile child, int depth = 0)
+            {
+                Console.WriteLine($"{new string(' ', 2 * depth)}{child.Name}");
+                foreach (var assetRef in child.ExternalAssetRefs)
+                {
+                    DumpTree(assetRef, depth + 1);
+                }
+            }
+
+            foreach (var assetFile in roots)
+            {
+                DumpTree(assetFile);
+            }
+        }
+
+        public static bool FindAssetRoot(string hint = null)
+        {
+            bool CheckValid(string path)
+            {
+                if (!File.Exists(Path.Join(path, "resources.assets"))) return false;
+
+                Log.Print(LogType.Misc, $"Assets root = {path}");
+                BasePath = path;
+                return true;
+            }
+
+            return hint != null && CheckValid(hint) ||
+                   CheckValid("Win64\\AtlasReactor_Data") ||
+                   CheckValid("AtlasReactor_Data");
         }
     }
 }

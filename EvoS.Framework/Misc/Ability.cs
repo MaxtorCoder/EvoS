@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Network.NetworkBehaviours;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
@@ -72,6 +73,11 @@ namespace EvoS.Framework.Misc
 //        public List<TargeterTemplateSwapData> m_targeterTemplateSwaps;
         public SerializedVector<TargeterTemplateSwapData> m_targeterTemplateSwaps;
         private AbilityMod m_currentAbilityMod;
+
+        public virtual bool HasPassivePendingStatus(StatusType status, ActorData owner)
+        {
+            return false;
+        }
 
 //        public Sprite sprite { get; set; }
 

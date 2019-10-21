@@ -9,7 +9,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
     [Serializable]
     [SerializedMonoBehaviour("ActorController")]
     public class ActorController : NetworkBehaviour
-    
+
     {
         public ActorController()
         {
@@ -38,6 +38,15 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         {
             return $"{nameof(ActorController)}>(" +
                    ")";
+        }
+
+        public enum PingType
+        {
+            Default,
+            Assist,
+            Defend,
+            Enemy,
+            Move,
         }
     }
 }

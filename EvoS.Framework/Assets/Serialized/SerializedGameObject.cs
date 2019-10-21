@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EvoS.Framework.Game;
 using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Assets.Serialized
@@ -11,10 +12,12 @@ namespace EvoS.Framework.Assets.Serialized
         public string Name { get; set; }
         public ushort Tag { get; set; }
         public bool IsActive { get; set; }
-        private readonly WeakReference<GameObject> _cachedChild = new WeakReference<GameObject>(null);
+        private readonly WeakReference<AssetFile> _assetFile = new WeakReference<AssetFile>(null);
 
         public void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
+            _assetFile.SetTarget(assetFile);
+
             Components = new SerializedVector<SerializedComponent>();
             Components.DeserializeAsset(assetFile, stream);
             Layer = stream.ReadUInt32();
@@ -83,15 +86,17 @@ namespace EvoS.Framework.Assets.Serialized
                    ")";
         }
 
-        public GameObject Instantiate(bool ignoreCache =  false)
+        public GameObject Instantiate(GameManager manager = null)
         {
-            if (!ignoreCache && _cachedChild.TryGetTarget(out var child))
+            if (_assetFile.TryGetTarget(out var assetFile) &&
+                assetFile.ObjectCache.TryGetValue(this, out var child))
             {
+                manager?.RegisterObject(child);
                 return child;
             }
-            
-            var gameObj = new GameObject();
-            _cachedChild.SetTarget(gameObj);
+
+            var gameObj = new GameObject(Name);
+            assetFile?.ObjectCache?.Add(this, gameObj);
             var names = ComponentNames();
             var index = 0;
 
@@ -103,6 +108,8 @@ namespace EvoS.Framework.Assets.Serialized
                 {
                     case Transform trans:
                         transform = trans;
+                        gameObj.AddComponent(trans);
+                        gameObj.transform = trans;
                         break;
                     case Component comp:
                         comp.transform = transform;
@@ -116,6 +123,9 @@ namespace EvoS.Framework.Assets.Serialized
                         break;
                 }
             }
+
+            manager?.RegisterObject(gameObj);
+
             return gameObj;
         }
     }

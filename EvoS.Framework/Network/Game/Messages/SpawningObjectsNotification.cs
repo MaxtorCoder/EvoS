@@ -19,5 +19,13 @@ namespace EvoS.Framework.Network.Game.Messages
             PlayerId = (int) reader.ReadPackedUInt32();
             SpawnableObjectCount = (int) reader.ReadPackedUInt32();
         }
+
+        public override string ToString()
+        {
+            return $"{nameof(SpawningObjectsNotification)}(" +
+                   $"{nameof(PlayerId)}: {PlayerId}, " +
+                   $"{nameof(SpawnableObjectCount)}: {SpawnableObjectCount}" +
+                   ")";
+        }
     }
 }
