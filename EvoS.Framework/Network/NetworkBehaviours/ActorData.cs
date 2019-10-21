@@ -2106,19 +2106,19 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         public void SetClientFriendlyTeamSensitiveData(ActorTeamSensitiveData friendlyTSD)
         {
-//            if (m_teamSensitiveData_friendly == friendlyTSD)
-//                return;
-//            Log.Print(LogType.Game, "Setting Friendly TeamSensitiveData for " + method_95());
-//            m_teamSensitiveData_friendly = friendlyTSD;
+            if (m_teamSensitiveData_friendly == friendlyTSD)
+                return;
+            Log.Print(LogType.Game, "Setting Friendly TeamSensitiveData for " + method_95());
+            m_teamSensitiveData_friendly = friendlyTSD;
 //            m_teamSensitiveData_friendly.OnClientAssociatedWithActor(this);
         }
 
         public void SetClientHostileTeamSensitiveData(ActorTeamSensitiveData hostileTSD)
         {
-//            if (m_teamSensitiveData_hostile == hostileTSD)
-//                return;
-//            Log.Print(LogType.Game, "Setting Hostile TeamSensitiveData for " + method_95());
-//            m_teamSensitiveData_hostile = hostileTSD;
+            if (m_teamSensitiveData_hostile == hostileTSD)
+                return;
+            Log.Print(LogType.Game, "Setting Hostile TeamSensitiveData for " + method_95());
+            m_teamSensitiveData_hostile = hostileTSD;
 //            m_teamSensitiveData_hostile.OnClientAssociatedWithActor(this);
         }
 

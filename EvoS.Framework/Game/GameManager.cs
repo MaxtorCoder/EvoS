@@ -428,6 +428,7 @@ namespace EvoS.Framework.Game
             SpawnObject(AssetsLoader, "Scoundrel", out var scoundrel);
             var scoundrelActor = scoundrel.GetComponent<ActorData>();
             var scoundrelPlayerData = scoundrel.GetComponent<PlayerData>();
+            scoundrelActor.SetClientFriendlyTeamSensitiveData(scoundrelFriendly);
             scoundrelPlayerData.m_player = GameFlow.GetPlayerFromConnectionId(1); // TODO hardcoded connection id
             scoundrelPlayerData.PlayerIndex = 0;
 
