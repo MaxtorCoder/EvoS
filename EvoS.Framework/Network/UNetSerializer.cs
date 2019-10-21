@@ -84,7 +84,7 @@ namespace EvoS.Framework.Network
                     else
                     {
                         Log.Print(LogType.Warning,
-                            $"Unhandled {deserialized.GetType().Name} - {JsonConvert.SerializeObject(deserialized)}");
+                            $"Unhandled {msg.msgType}:{deserialized.GetType().Name} - {JsonConvert.SerializeObject(deserialized)}");
                     }
                 }
             }

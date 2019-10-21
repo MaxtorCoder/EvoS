@@ -235,6 +235,19 @@ namespace EvoS.Framework.Game
         {
             _players.Add(loginReq.PlayerId, new GamePlayer(connection, loginReq, msg));
             connection.ActiveGame = this;
+            
+            var gfPlayer = GameFlow.GetPlayerFromConnectionId(connection.connectionId);
+            gfPlayer.m_id = (byte) loginReq.PlayerId;
+            gfPlayer.m_valid = true;
+            gfPlayer.m_accountId = long.Parse(loginReq.AccountId);
+            gfPlayer.m_connectionId = connection.connectionId;
+            GameFlow.playerDetails[gfPlayer] = new PlayerDetails(PlayerGameAccountType.Human)
+            {
+                m_team =  Team.TeamA,
+                m_handle = "test handle",
+                m_accountId = gfPlayer.m_accountId,
+                m_lobbyPlayerInfoId = 0
+            };
 
             // This isn't actually correct, but the client logs a warning with what it expected and continues
             connection.Send(14, new CRCMessage
@@ -278,7 +291,7 @@ namespace EvoS.Framework.Game
         }
 
         private void OnAssetsLoadedNotification(GamePlayer player, AssetsLoadedNotification msg)
-        {
+        {   
             player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = true});
             player.Connection.Send(54, new SpawningObjectsNotification
             {
@@ -290,7 +303,7 @@ namespace EvoS.Framework.Game
             foreach (var netObj in _netObjects.Values)
             {
                 var netIdent = netObj.GetComponent<NetworkIdentity>();
-                player.Connection.AddToVisList(netIdent);
+                netIdent.AddObserver(player.Connection);
             }
 
             player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = false});
@@ -347,9 +360,9 @@ namespace EvoS.Framework.Game
             ServerActionBuffer = commonGameLogic.GetComponent<ServerActionBuffer>();
             TeamSelectData = commonGameLogic.GetComponent<TeamSelectData>();
             BarrierManager = commonGameLogic.GetComponent<BarrierManager>();
-            
+
             SpawnObject<Board, Board>(MapLoader, out Board);
-            
+
             SpawnScene(MapLoader, 2, out BrushCoordinator);
             SpawnScene(MapLoader, 3, out var sceneGameLogic);
             GameFlowData = sceneGameLogic.GetComponent<GameFlowData>();
@@ -383,7 +396,26 @@ namespace EvoS.Framework.Game
                 out var scoundrelFriendly);
             SpawnObject(AssetsLoader, "Scoundrel", out var scoundrel);
             var scoundrelActor = scoundrel.GetComponent<ActorData>();
+            var scoundrelPlayerData = scoundrel.GetComponent<PlayerData>();
+            scoundrelPlayerData.m_player = GameFlow.GetPlayerFromConnectionId(1); // TODO hardcoded connection id
+            scoundrelPlayerData.PlayerIndex = 0;
+
+            scoundrelActor.ServerLastKnownPosSquare = Board.GetBoardSquare(5, 5);
+            scoundrelActor.UpdateDisplayName("Foo bar player");
+            scoundrelActor.ActorIndex = 0;
+            scoundrelActor.PlayerIndex = 0;
             scoundrelFriendly.SetActorIndex(scoundrelActor.ActorIndex);
+            scoundrelActor.SetTeam(Team.TeamA);
+
+            GameFlowData.AddPlayer(scoundrel);
+
+            var netChar = scoundrel.GetComponent<NetworkIdentity>();
+            var netAtsd = scoundrelFriendly.GetComponent<NetworkIdentity>();
+            foreach (var player in _players.Values)
+            {
+                netChar.AddObserver(player.Connection);
+                netAtsd.AddObserver(player.Connection);
+            }
         }
 
         public void RegisterObject(GameObject gameObj)
@@ -454,7 +486,7 @@ namespace EvoS.Framework.Game
                 scene = o.Value;
                 return;
             }
-            
+
             loader.ClearCache();
             scene = loader.NetworkScenes[sceneId].Instantiate();
             if (register) RegisterObject(scene);
