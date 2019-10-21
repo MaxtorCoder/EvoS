@@ -433,6 +433,7 @@ namespace EvoS.Framework.Game
             scoundrelPlayerData.PlayerIndex = 0;
 
             scoundrelActor.ServerLastKnownPosSquare = Board.GetBoardSquare(5, 5);
+            scoundrelActor.InitialMoveStartSquare = Board.GetBoardSquare(5, 5);
             scoundrelActor.UpdateDisplayName("Foo bar player");
             scoundrelActor.ActorIndex = 0;
             scoundrelActor.PlayerIndex = 0;
