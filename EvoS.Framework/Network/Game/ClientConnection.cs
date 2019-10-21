@@ -16,19 +16,21 @@ namespace EvoS.Framework.Network.Game
 
     public class ClientConnection
     {
-        private vtortola.WebSockets.WebSocket Socket;
-        public GameManager ActiveGame { private get; set; }
+        protected vtortola.WebSockets.WebSocket Socket;
+        public GameManager ActiveGame { get; set; }
 
-        public string address => Socket.RemoteEndpoint.ToString();
+        public virtual string address => Socket.RemoteEndpoint.ToString();
 
-        private UNetSerializer Serializer = new UNetSerializer();
-        private HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
-        private HashSet<NetworkInstanceId> _clientOwnedObjects;
+        protected UNetSerializer Serializer = new UNetSerializer();
+        protected HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
+        protected HashSet<NetworkInstanceId> _clientOwnedObjects;
         public bool isReady;
-        private static int _connectionIdCounter;
-        private uint lastMessageOutgoingSeqNum;
+        protected static int _connectionIdCounter;
+        protected uint lastMessageOutgoingSeqNum;
         public readonly int connectionId = Interlocked.Increment(ref _connectionIdCounter);
-        private NetworkWriter m_Writer = new NetworkWriter();
+        protected NetworkWriter m_Writer = new NetworkWriter();
+        
+        protected ClientConnection() {}
 
         public ClientConnection(vtortola.WebSockets.WebSocket socket)
         {
@@ -44,7 +46,7 @@ namespace EvoS.Framework.Network.Game
             Serializer.RegisterHandler(msgId, msg => handler(player, (T) msg));
         }
 
-        private void SetupLoginHandler()
+        protected void SetupLoginHandler()
         {
             // The client sends AddPlayer and then LoginRequest, instead we'll use the session token to determine
             // which Game the connection is fore
@@ -158,7 +160,8 @@ namespace EvoS.Framework.Network.Game
             bytes[2] = (byte) (num >> 16 & byte.MaxValue);
             bytes[3] = (byte) (num >> 24 & byte.MaxValue);
             channelId = 0;
-            throw new NotImplementedException();
+            SendWSMessage(bytes, numBytes);
+            return true;
         }
 
         public void Send(short msgType, MessageBase msg)
@@ -170,6 +173,18 @@ namespace EvoS.Framework.Network.Game
         {
             var responseStream = new MemoryStream();
             responseStream.Write(msg.AsArraySegment().Array, 0, msg.AsArraySegment().Count);
+
+            using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
+            {
+                await writer.WriteAsync(UNetMessage.Serialize(responseStream.ToArray()));
+                await writer.FlushAsync();
+            }
+        }
+
+        public async Task SendWSMessage(byte[] bytes, int count)
+        {
+            var responseStream = new MemoryStream();
+            responseStream.Write(bytes, 0, count);
 
             using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
             {

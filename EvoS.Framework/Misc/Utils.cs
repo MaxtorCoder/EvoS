@@ -122,5 +122,17 @@ namespace EvoS.Framework.Misc
                 return props;
             }
         }
+
+        public static string ToHex(byte[] bytes, in int numBytes)
+        {
+            var dest = new byte[numBytes];
+            Array.Copy(bytes, dest, numBytes);
+            return ToHex(dest);
+        }
+
+        public static string ToHex(byte[] bytes)
+        {
+            return BitConverter.ToString(bytes).Replace("-", "");
+        }
     }
 }

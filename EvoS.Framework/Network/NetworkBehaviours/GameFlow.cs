@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized.Behaviours;
 using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Misc;
 using EvoS.Framework.Network.Static;
@@ -21,9 +22,12 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         private Dictionary<Player, PlayerDetails> m_playerDetails =
             new Dictionary<Player, PlayerDetails>(new PlayerComparer());
 
-        internal Dictionary<Player, PlayerDetails> playerDetails
+        internal Dictionary<Player, PlayerDetails> playerDetails => m_playerDetails;
+
+        static GameFlow()
         {
-            get { return m_playerDetails; }
+            RegisterRpcDelegate(typeof (GameFlow), kRpcRpcDisplayConsoleText, InvokeRpcRpcDisplayConsoleText);
+            RegisterRpcDelegate(typeof (GameFlow), kRpcRpcSetMatchTime, InvokeRpcRpcSetMatchTime);
         }
 
         public GameFlow()
@@ -128,6 +132,58 @@ namespace EvoS.Framework.Network.NetworkBehaviours
                 m_playerDetails[index2] = playerDetails;
 //                if ((bool) (GameFlowData.Get()) && GameFlowData.Get().LocalPlayerData == null)
 //                    GameFlowData.Get().SetLocalPlayerData();
+            }
+        }
+
+        protected static void InvokeRpcRpcDisplayConsoleText(NetworkBehaviour obj, NetworkReader reader)
+        {
+            if (!EvoSGameConfig.NetworkIsClient)
+                Log.Print(LogType.Error, "RPC RpcDisplayConsoleText called on server.");
+//            else
+//                ((GameFlow) obj).RpcDisplayConsoleText(GeneratedNetworkCode._ReadDisplayConsoleTextMessage_None(reader));
+        }
+
+        protected static void InvokeRpcRpcSetMatchTime(NetworkBehaviour obj, NetworkReader reader)
+        {
+            if (!EvoSGameConfig.NetworkIsClient)
+                Log.Print(LogType.Error, "RPC RpcSetMatchTime called on server.");
+//            else
+//                ((GameFlow) obj).RpcSetMatchTime(reader.ReadSingle());
+        }
+
+        public void CallRpcDisplayConsoleText(DisplayConsoleTextMessage message)
+        {
+            if (!EvoSGameConfig.NetworkIsServer)
+            {
+                Log.Print(LogType.Error, "RPC Function RpcDisplayConsoleText called on client.");
+            }
+            else
+            {
+                var writer = new NetworkWriter();
+                writer.Write((short) 0);
+                writer.Write((short) 2);
+                writer.WritePackedUInt32((uint) kRpcRpcDisplayConsoleText);
+                writer.Write(GetComponent<NetworkIdentity>().netId);
+                GeneratedNetworkCode._WriteDisplayConsoleTextMessage_None(writer, message);
+                SendRPCInternal(writer, 0, "RpcDisplayConsoleText");
+            }
+        }
+
+        public void CallRpcSetMatchTime(float timeSinceMatchStart)
+        {
+            if (!EvoSGameConfig.NetworkIsServer)
+            {
+                Log.Print(LogType.Error, "RPC Function RpcSetMatchTime called on client.");
+            }
+            else
+            {
+                var writer = new NetworkWriter();
+                writer.Write((short) 0);
+                writer.Write((short) 2);
+                writer.WritePackedUInt32((uint) kRpcRpcSetMatchTime);
+                writer.Write(GetComponent<NetworkIdentity>().netId);
+                writer.Write(timeSinceMatchStart);
+                SendRPCInternal(writer, 0, "RpcSetMatchTime");
             }
         }
 

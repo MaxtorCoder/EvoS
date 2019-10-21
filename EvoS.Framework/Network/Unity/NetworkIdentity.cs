@@ -5,6 +5,7 @@ using System.Linq;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Assets.Serialized;
 using EvoS.Framework.Assets.Serialized.Behaviours;
+using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.Game;
 
@@ -13,11 +14,7 @@ namespace EvoS.Framework.Network.Unity
     [SerializedMonoBehaviour("NetworkIdentity")]
     public class NetworkIdentity : MonoBehaviour
     {
-        public NetworkSceneId SceneId { get; set; }
-        public Hash128 AssetId { get; set; }
-        public bool ServerOnly { get; set; }
         public bool LocalPlayerAuthority { get; set; }
-
         public NetworkInstanceId netId => m_NetId;
         public NetworkSceneId sceneId => m_SceneId;
         public NetworkServer Server { set; private get; }
@@ -113,16 +110,18 @@ namespace EvoS.Framework.Network.Unity
         public void UNetSerializeAllVars(NetworkWriter writer)
         {
             CacheBehaviours();
-            
+
             for (int i = 0; i < m_NetworkBehaviours.Length; i++)
             {
                 NetworkBehaviour networkBehaviour = m_NetworkBehaviours[i];
-                Log.Print(LogType.Debug,
-                    $"Will serialize {GetType().Name}.{networkBehaviour.GetType().Name} at {writer.Position}");
+                if (EvoSGameConfig.DebugNetSerialize)
+                    Log.Print(LogType.Debug,
+                        $"Will serialize {GetType().Name}.{networkBehaviour.GetType().Name} at {writer.Position}");
                 networkBehaviour.OnSerialize(writer, true);
             }
 
-            Log.Print(LogType.Debug, $"Finished UNetSerializeAllVars at {writer.Position}");
+            if (EvoSGameConfig.DebugNetSerialize)
+                Log.Print(LogType.Debug, $"Finished UNetSerializeAllVars at {writer.Position}");
         }
 
         private bool GetInvokeComponent(int cmdHash, Type invokeClass, out NetworkBehaviour invokeComponent)
@@ -285,6 +284,52 @@ namespace EvoS.Framework.Network.Unity
                 cmdDelegate(obj, reader);
             }
         }
+        
+        public void UNetUpdate()
+        {
+            uint num = 0;
+            foreach (var netBehav in m_NetworkBehaviours)
+            {
+                var dirtyChannel = netBehav.GetDirtyChannel();
+                if (dirtyChannel != -1)
+                    num |= (uint) (1 << dirtyChannel);
+            }
+            if (num == 0U)
+                return;
+            for (var channelId = 0; channelId < NetworkServer.numChannels; ++channelId)
+            {
+                if (((int) num & 1 << channelId) == 0) continue;
+                
+                s_UpdateWriter.StartMessage(8);
+                s_UpdateWriter.Write(netId);
+                var flag = false;
+                foreach (var netBehav in m_NetworkBehaviours)
+                {
+                    var position = s_UpdateWriter.Position;
+                    var networkBehaviour = netBehav;
+                    if (networkBehaviour.GetDirtyChannel() != channelId)
+                    {
+                        networkBehaviour.OnSerialize(s_UpdateWriter, false);
+                    }
+                    else
+                    {
+                        if (networkBehaviour.OnSerialize(s_UpdateWriter, false))
+                        {
+                            networkBehaviour.ClearAllDirtyBits();
+                            flag = true;
+                        }
+                        if (s_UpdateWriter.Position - position > NetworkServer.maxPacketSize)
+                            Log.Print(LogType.Warning,
+                                $"Large state update of {(s_UpdateWriter.Position - position)} bytes for netId:{netId} from script:{networkBehaviour}");
+                    }
+                }
+                if (flag)
+                {
+                    s_UpdateWriter.FinishMessage();
+                    NetworkServer.SendWriterToReady(gameObject, s_UpdateWriter, channelId);
+                }
+            }
+        }
 
         public void OnUpdateVars(NetworkReader reader, bool initialState)
         {
@@ -295,12 +340,14 @@ namespace EvoS.Framework.Network.Unity
 
             foreach (var networkBehaviour in m_NetworkBehaviours)
             {
-                Log.Print(LogType.Debug,
-                    $"Will deserialize {GetType().Name}.{networkBehaviour.GetType().Name} at {reader.Position}/{reader.Length}");
+                if (EvoSGameConfig.DebugNetSerialize)
+                    Log.Print(LogType.Debug,
+                        $"Will deserialize {GetType().Name}.{networkBehaviour.GetType().Name} at {reader.Position}/{reader.Length}");
                 networkBehaviour.OnDeserialize(reader, initialState);
             }
 
-            Log.Print(LogType.Debug, $"Finished OnUpdateVars at {reader.Position}/{reader.Length}");
+            if (EvoSGameConfig.DebugNetSerialize)
+                Log.Print(LogType.Debug, $"Finished OnUpdateVars at {reader.Position}/{reader.Length}");
             if (reader.Position != reader.Length)
             {
                 var remain = reader.ReadBytes((int) (reader.Length - reader.Position));
@@ -502,7 +549,7 @@ namespace EvoS.Framework.Network.Unity
 
         private bool m_Reset;
 
-        private static NetworkWriter s_UpdateWriter = new NetworkWriter();
+        private NetworkWriter s_UpdateWriter = new NetworkWriter(); // TODO could be shared per NetworkServer
 
         public void OnStartServer()
         {
@@ -526,11 +573,9 @@ namespace EvoS.Framework.Network.Unity
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
         {
             stream.AlignTo();
-            SceneId = new NetworkSceneId(stream.ReadUInt32());
-
-            AssetId = new Hash128();
-            AssetId.DeserializeAsset(assetFile, stream);
-            ServerOnly = stream.ReadBoolean();
+            m_SceneId = new NetworkSceneId(stream.ReadUInt32());
+            m_AssetId = new NetworkHash128(new Hash128(assetFile, stream).Bytes);
+            m_ServerOnly = stream.ReadBoolean();
             stream.AlignTo();
             LocalPlayerAuthority = stream.ReadBoolean();
             stream.AlignTo();
@@ -540,8 +585,8 @@ namespace EvoS.Framework.Network.Unity
         {
             return $"{nameof(NetworkIdentity)}(" +
                    $"{nameof(netId)}: {netId}, " +
-                   $"{nameof(SceneId)}: {SceneId}, " +
-                   $"{nameof(AssetId)}: {AssetId}" +
+                   $"{nameof(m_SceneId)}: {m_SceneId}, " +
+                   $"{nameof(m_AssetId)}: {m_AssetId}" +
                    ")";
         }
     }

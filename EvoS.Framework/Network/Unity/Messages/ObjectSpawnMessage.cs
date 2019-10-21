@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 
 namespace EvoS.Framework.Network.Unity.Messages
@@ -31,5 +32,16 @@ namespace EvoS.Framework.Network.Unity.Messages
         public Vector3 position;
         public byte[] payload;
         public Quaternion rotation;
+
+        public override string ToString()
+        {
+            return $"{nameof(ObjectSpawnMessage)}(" +
+                   $"{nameof(netId)}: {netId}, " +
+                   $"{nameof(assetId)}: {assetId}, " +
+                   $"{nameof(position)}: {position}, " +
+                   $"{nameof(rotation)}: {rotation}, " +
+                   $"{nameof(payload)}: {(payload != null ? Convert.ToBase64String(payload) : null)}" +
+                   ")";
+        }
     }
 }

@@ -31,11 +31,9 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         private ActorData _associatedActor;
         private Vector3 _facingDirAfterMovement;
-
         private BoardSquare _lastMovementDestination;
-
-//        private BoardSquarePathInfo _lastMovementPath;
-//        private GameEventManager.EventType _lastMovementWaitForEvent;
+        private BoardSquarePathInfo _lastMovementPath;
+        private GameEventManager.EventType _lastMovementWaitForEvent;
         private ActorData.MovementType _lastMovementType;
         private BoardSquare _moveFromBoardSquare;
         private BoardSquare _initialMoveStartSquare;
@@ -46,6 +44,11 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         private bool _disappearingAfterMovement;
         private bool _assignedInitialBoardSquare;
         private float _lastPingChatTime;
+
+        static ActorTeamSensitiveData()
+        {
+            RegisterRpcDelegate(typeof(ActorTeamSensitiveData), kRpcRpcMovement, InvokeRpcRpcMovement);
+        }
 
         public Vector3 FacingDirAfterMovement
         {
@@ -187,9 +190,92 @@ namespace EvoS.Framework.Network.NetworkBehaviours
             }
         }
 
+//        [ClientRpc]
+        private void RpcMovement(
+            GameEventManager.EventType wait,
+            GridPosProp start,
+            GridPosProp end_grid,
+            byte[] pathBytes,
+            ActorData.MovementType type,
+            bool disappearAfterMovement,
+            bool respawning)
+        {
+            if (EvoSGameConfig.NetworkIsServer)
+                return;
+            ProcessMovement(wait, GridPos.FromGridPosProp(start),
+                Board.GetBoardSquare(GridPos.FromGridPosProp(end_grid)), MovementUtils.DeSerializePath(this, pathBytes),
+                type, disappearAfterMovement, respawning);
+        }
+
+        private void ProcessMovement(
+            GameEventManager.EventType wait,
+            GridPos start,
+            BoardSquare end,
+            BoardSquarePathInfo path,
+            ActorData.MovementType type,
+            bool disappearAfterMovement,
+            bool respawning)
+        {
+//            this.FlushQueuedMovement();
+            bool flag1;
+            bool flag2 = (flag1 = end != null) && _lastMovementDestination != end;
+            bool flag3 = Actor?.CurrentBoardSquare == null;
+            bool flag4 = flag1 && !flag2 && (!flag3 && path != null) &&
+                         path.GetPathEndpoint().square == Actor.CurrentBoardSquare;
+            _lastMovementDestination = end;
+            _lastMovementPath = path;
+            _lastMovementWaitForEvent = wait;
+            _lastMovementType = type;
+            _disappearingAfterMovement = disappearAfterMovement;
+            bool flag5 = false;
+//    if (Actor?.method_9() != null) // TODO ?
+//      flag5 = Actor.method_9().AmMoving(); 
+            int num = 0;
+            if (GameFlowData != null)
+                num = GameFlowData.CurrentTurn;
+            if (!flag5 && wait == GameEventManager.EventType.Invalid && (Actor != null && Actor.LastDeathTurn != num) &&
+                (!Actor.method_38() || respawning))
+            {
+                if (!flag2 && (!flag3 || !flag1) && !flag4)
+                {
+                    if (!flag1 && disappearAfterMovement)
+                        Actor.OnMovementWhileDisappeared(type);
+                }
+                else
+                {
+                    if (path == null && type != ActorData.MovementType.Teleport)
+                        Actor.MoveToBoardSquareLocal(end, ActorData.MovementType.Teleport, path,
+                            disappearAfterMovement);
+                    else
+                        Actor.MoveToBoardSquareLocal(end, type, path, disappearAfterMovement);
+//        if (respawning && end != null)
+//          this.HandleRespawnCharacterVisibility(Actor);
+                }
+
+                if (_assignedInitialBoardSquare)
+                    return;
+//      Actor.gameObject.SendMessage("OnAssignedToInitialBoardSquare", SendMessageOptions.DontRequireReceiver);
+                _assignedInitialBoardSquare = true;
+            }
+            else if (!flag5 && wait != GameEventManager.EventType.Invalid &&
+                     (Actor != null && Actor.LastDeathTurn != num) && (!Actor.method_38() || respawning))
+            {
+                BoardSquare dest = Board.GetBoardSquare(start);
+                if (dest == null || dest == Actor.CurrentBoardSquare)
+                    return;
+                Actor.AppearAtBoardSquare(dest);
+            }
+            else
+            {
+                if (Actor == null || !respawning)
+                    return;
+//      this.HandleRespawnCharacterVisibility(Actor);
+            }
+        }
+
         public void MarkAsDirty(DirtyBit bit)
         {
-            throw new NotImplementedException();
+            SetDirtyBit((uint) bit);
         }
 
         private bool IsBitDirty(uint setBits, DirtyBit bitToTest)
@@ -449,6 +535,48 @@ namespace EvoS.Framework.Network.NetworkBehaviours
                 if (_abilityToggledOn[index] != flag2)
                     _abilityToggledOn[index] = flag2;
             }
+        }
+
+        public void CallRpcMovement(
+            GameEventManager.EventType wait,
+            GridPosProp start,
+            GridPosProp end_grid,
+            byte[] pathBytes,
+            ActorData.MovementType type,
+            bool disappearAfterMovement,
+            bool respawning)
+        {
+            if (!EvoSGameConfig.NetworkIsServer)
+            {
+                Log.Print(LogType.Error, "RPC Function RpcMovement called on client.");
+            }
+            else
+            {
+                var writer = new NetworkWriter();
+                writer.Write((short) 0);
+                writer.Write((short) 2);
+                writer.WritePackedUInt32((uint) kRpcRpcMovement);
+                writer.Write(GetComponent<NetworkIdentity>().netId);
+                writer.Write((int) wait);
+                GeneratedNetworkCode._WriteGridPosProp_None(writer, start);
+                GeneratedNetworkCode._WriteGridPosProp_None(writer, end_grid);
+                writer.WriteBytesFull(pathBytes);
+                writer.Write((int) type);
+                writer.Write(disappearAfterMovement);
+                writer.Write(respawning);
+                SendRPCInternal(writer, 0, "RpcMovement");
+            }
+        }
+
+        protected static void InvokeRpcRpcMovement(NetworkBehaviour obj, NetworkReader reader)
+        {
+            if (!EvoSGameConfig.NetworkIsClient)
+                Log.Print(LogType.Error, "RPC RpcMovement called on server.");
+            else
+                ((ActorTeamSensitiveData) obj).RpcMovement((GameEventManager.EventType) reader.ReadInt32(),
+                    GeneratedNetworkCode._ReadGridPosProp_None(reader),
+                    GeneratedNetworkCode._ReadGridPosProp_None(reader), reader.ReadBytesAndSize(),
+                    (ActorData.MovementType) reader.ReadInt32(), reader.ReadBoolean(), reader.ReadBoolean());
         }
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)

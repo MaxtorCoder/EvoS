@@ -9,9 +9,9 @@ namespace EvoS.Framework.Network.Unity
 {
     public class Transform : Component, IEnumerable<Transform>
     {
-        [JsonIgnore] public Vector3 position = Vector3.Zero;
+        [JsonIgnore] public Vector3 position => localPosition; // TODO
         public Vector3 localPosition = Vector3.Zero;
-        [JsonIgnore] public Quaternion rotation = Quaternion.Identity;
+        [JsonIgnore] public Quaternion rotation => localRotation; // TODO
         [JsonIgnore] public Quaternion localRotation { get; set; } = Quaternion.Identity;
         [JsonIgnore] public Vector3 localScale { get; set; } = Vector3.One;
         [JsonIgnore] public SerializedVector<Transform> children { get; } = new SerializedVector<Transform>();

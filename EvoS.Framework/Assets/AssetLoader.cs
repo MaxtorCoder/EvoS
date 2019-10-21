@@ -15,7 +15,7 @@ namespace EvoS.Framework.Assets
 {
     public class AssetLoader
     {
-        private string _basePath;
+        public static string BasePath;
         private Dictionary<string, AssetFile> _assetFiles = new Dictionary<string, AssetFile>();
 
         private Dictionary<string, UnityFs> _assetBundles =
@@ -38,9 +38,12 @@ namespace EvoS.Framework.Assets
         public Dictionary<string, SerializedGameObject>.ValueCollection NetworkedObjects => NetObjsByName.Values;
         public Dictionary<string, UnityFs> AssetBundles => _assetBundles;
 
-        public AssetLoader(string basePath)
+        public AssetLoader()
         {
-            _basePath = basePath;
+            if (BasePath == null && !FindAssetRoot())
+            {
+                throw new FileNotFoundException("Failed to find resources.assets");
+            }
         }
 
         public SerializedGameObject GetNetObj(string assetId)
@@ -94,7 +97,7 @@ namespace EvoS.Framework.Assets
             }
             else
             {
-                assetFile = new AssetFile(this, name, new StreamReader(Path.Join(_basePath, name)));
+                assetFile = new AssetFile(this, name, new StreamReader(Path.Join(BasePath, name)));
             }
 
             _assetFiles[assetFile.Name] = assetFile;
@@ -107,7 +110,7 @@ namespace EvoS.Framework.Assets
 
         public void LoadAssetBundle(string fileName)
         {
-            var unityFs = new UnityFs(this, Path.Join(_basePath, fileName));
+            var unityFs = new UnityFs(this, Path.Join(BasePath, fileName));
 
             _assetBundles.Add(unityFs.Name, unityFs);
         }
@@ -259,7 +262,7 @@ namespace EvoS.Framework.Assets
                 var netIdent = obj.GetComponent<NetworkIdentity>();
                 if (netIdent != null)
                 {
-                    var netHash = new NetworkHash128(netIdent.AssetId.Bytes);
+                    var netHash = netIdent.assetId;
                     if (!netHash.IsZero())
                     {
                         if (!NetObjsByName.TryAdd(obj.Name, obj))
@@ -276,7 +279,7 @@ namespace EvoS.Framework.Assets
                     }
                     else
                     {
-                        NetworkScenes.Add(netIdent.SceneId.Value, obj);
+                        NetworkScenes.Add(netIdent.sceneId.Value, obj);
                     }
                 }
             }
@@ -288,7 +291,7 @@ namespace EvoS.Framework.Assets
             {
                 var netIdent = obj.GetComponent<NetworkIdentity>();
 
-                Log.Print(LogType.Misc, $"{netIdent.AssetId.ToHex()} {obj.Name}");
+                Log.Print(LogType.Misc, $"{netIdent.assetId} {obj.Name}");
                 Log.Print(LogType.Misc, $"  {string.Join(", ", obj.ComponentNames())}");
             }
         }
@@ -345,6 +348,22 @@ namespace EvoS.Framework.Assets
             {
                 DumpTree(assetFile);
             }
+        }
+
+        public static bool FindAssetRoot(string hint = null)
+        {
+            bool CheckValid(string path)
+            {
+                if (!File.Exists(Path.Join(path, "resources.assets"))) return false;
+
+                Log.Print(LogType.Misc, $"Assets root = {path}");
+                BasePath = path;
+                return true;
+            }
+
+            return hint != null && CheckValid(hint) ||
+                   CheckValid("Win64\\AtlasReactor_Data") ||
+                   CheckValid("AtlasReactor_Data");
         }
     }
 }

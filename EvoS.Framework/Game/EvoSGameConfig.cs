@@ -2,10 +2,11 @@ namespace EvoS.Framework.Game
 {
     public class EvoSGameConfig
     {
-        public static readonly bool AllowDebugCommands = true;
-        public static readonly bool NetworkIsServer = true;
-        public static readonly bool NetworkIsClient = true;
-        public static readonly bool DebugNetworkBehaviour = false;
-        public static readonly bool DebugSyncVars = false;
+        public static bool AllowDebugCommands = true;
+        public static bool NetworkIsServer = true;
+        public static bool NetworkIsClient = false;
+        public static bool DebugNetworkBehaviour = false;
+        public static bool DebugSyncVars = false;
+        public static bool DebugNetSerialize = false;
     }
 }

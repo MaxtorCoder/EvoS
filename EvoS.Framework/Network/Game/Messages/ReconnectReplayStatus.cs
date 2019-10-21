@@ -16,5 +16,12 @@ namespace EvoS.Framework.Network.Game.Messages
         {
             WithinReconnectReplay = reader.ReadBoolean();
         }
+
+        public override string ToString()
+        {
+            return $"{nameof(ReconnectReplayStatus)}(" +
+                   $"{nameof(WithinReconnectReplay)}: {WithinReconnectReplay}" +
+                   ")";
+        }
     }
 }

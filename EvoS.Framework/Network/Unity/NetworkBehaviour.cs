@@ -503,6 +503,20 @@ namespace EvoS.Framework.Network.Unity
             return -1;
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected void SendRPCInternal(NetworkWriter writer, int channelId, string rpcName)
+        {
+//            if (!this.isServer)
+//            {
+//                Log.Print(LogType.Warning, "ClientRpc call on un-spawned object");
+//            }
+//            else
+//            {
+            writer.FinishMessage();
+            NetworkServer.SendWriterToReady(gameObject, writer, channelId);
+//            }
+        }
+
         public virtual bool OnSerialize(NetworkWriter writer, bool initialState)
         {
             if (!initialState)
@@ -562,7 +576,8 @@ namespace EvoS.Framework.Network.Unity
 
         public virtual float GetNetworkSendInterval()
         {
-            return 0.1f;
+//            return 0.1f; // TODO - default
+            return -1f;
         }
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)

@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.NetworkBehaviours;
+using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Misc
 {
@@ -387,6 +387,31 @@ namespace EvoS.Framework.Misc
                     boardSquarePathInfo.m_moverClashesHere = false;
                 if (boardSquarePathInfo.m_moverBumpedFromClash)
                     boardSquarePathInfo.m_moverBumpedFromClash = false;
+            }
+        }
+
+        public void CalcAndSetMoveCostToEnd(Component context)
+        {
+            float moveCost = this.moveCost;
+            for (BoardSquarePathInfo next = this.next; next != null; next = next.next)
+            {
+                bool flag1 = context.Board.method_19(next.square, next.prev.square);
+                bool flag2 = context.Board.method_18(next.square, next.prev.square);
+                bool flag3 = next.square == next.prev.square;
+                if (flag1)
+                    moveCost += 1.5f;
+                else if (flag2)
+                    ++moveCost;
+                else if (flag3)
+                {
+                    if (next.next != null)
+                        Log.Print(LogType.Warning, "Calculating move costs on a path, but it has the same square twice in a row.");
+                }
+                else if (next.connectionType != ConnectionType.Run && next.connectionType != ConnectionType.Vault)
+                    moveCost += next.square.HorizontalDistanceOnBoardTo(next.prev.square);
+                else
+                    Log.Print(LogType.Warning, "Calculating move costs on a path, but it has two non-adjacent consecutive squares.");
+                next.moveCost = moveCost;
             }
         }
 
