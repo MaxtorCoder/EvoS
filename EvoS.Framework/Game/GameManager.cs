@@ -344,6 +344,37 @@ namespace EvoS.Framework.Game
                     new GridPosProp(5, 5, 6), new GridPosProp(5, 5, 5),
                     null, ActorData.MovementType.Teleport, false, false);
             }
+
+            GameFlowData.gameState = GameState.StartingGame;
+            UpdateAllNetObjs();
+            
+            GameFlowData.gameState = GameState.Deployment;
+            UpdateAllNetObjs();
+            
+            GameFlowData.gameState = GameState.BothTeams_Decision;
+            GameFlowData.Networkm_currentTurn = 1;
+            GameFlowData.Networkm_willEnterTimebankMode = true;
+            GameFlowData.Networkm_timeRemainingInDecisionOverflow = 5;
+            UpdateAllNetObjs();
+
+            GameFlow.CallRpcSetMatchTime(0);
+            // kRpcRpcApplyAbilityModById
+            foreach (var actor in GameFlowData.GetActors())
+            {
+                var turnSm = actor.gameObject.GetComponent<ActorTurnSM>();
+                turnSm.CallRpcTurnMessage(TurnMessage.TURN_START, 0);
+            }
+            BarrierManager.CallRpcUpdateBarriers();
+            GameFlowData.CallRpcUpdateTimeRemaining(21);
+        }
+
+        public void UpdateAllNetObjs()
+        {
+            foreach (var netObj in _netObjects.Values)
+            {
+                var netIdent = netObj.GetComponent<NetworkIdentity>();
+                netIdent.UNetUpdate();
+            }
         }
 
 //        public class ObserverMessage : MessageBase

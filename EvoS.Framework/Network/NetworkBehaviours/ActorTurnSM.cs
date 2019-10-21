@@ -53,6 +53,11 @@ namespace EvoS.Framework.Network.NetworkBehaviours
                 ((ActorTurnSM) obj).RpcStoreAutoQueuedAbilityRequest((int) reader.ReadPackedUInt32());
         }
 
+        public void CallRpcTurnMessage(TurnMessage msg, int extraData)
+        {
+            CallRpcTurnMessage((int) msg, extraData);
+        }
+
         public void CallRpcTurnMessage(int msgEnum, int extraData)
         {
             if (!EvoSGameConfig.NetworkIsServer)
