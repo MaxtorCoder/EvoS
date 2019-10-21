@@ -361,19 +361,19 @@ namespace EvoS.Framework.Game
 //            }
 //        }
 
-        public void LaunchGame(string resourceFolder)
+        public void LaunchGame()
         {
-            MapLoader = new AssetLoader(resourceFolder);
+            MapLoader = new AssetLoader();
             MapLoader.LoadAssetBundle("Bundles/scenes/maps.bundle");
             MapLoader.LoadAsset(
                 $"archive:/buildplayer-robotfactory_opu_gamemode/buildplayer-{GameConfig.Map.ToLower()}");
             MapLoader.ConstructCaches();
 
-            AssetsLoader = new AssetLoader(resourceFolder);
+            AssetsLoader = new AssetLoader();
             AssetsLoader.LoadAsset("resources.assets");
             AssetsLoader.ConstructCaches();
 
-            MiscLoader = new AssetLoader(resourceFolder);
+            MiscLoader = new AssetLoader();
             MiscLoader.LoadAssetBundle("Bundles/scenes/frontend.bundle");
             MiscLoader.LoadAsset("archive:/buildplayer-options_ui/buildplayer-clientenvironmentsingletons");
             MiscLoader.ConstructCaches();
