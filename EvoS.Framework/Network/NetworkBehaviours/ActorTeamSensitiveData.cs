@@ -275,7 +275,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         public void MarkAsDirty(DirtyBit bit)
         {
-            throw new NotImplementedException();
+            SetDirtyBit((uint) bit);
         }
 
         private bool IsBitDirty(uint setBits, DirtyBit bitToTest)
