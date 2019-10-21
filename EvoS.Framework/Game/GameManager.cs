@@ -475,6 +475,12 @@ namespace EvoS.Framework.Game
 
         public void SpawnScene(AssetLoader loader, uint sceneId, out GameObject scene, bool register = true)
         {
+            foreach (var o in _netObjects.Where(o => o.Value.GetComponent<NetworkIdentity>().sceneId.Value == sceneId))
+            {
+                scene = o.Value;
+                return;
+            }
+            
             loader.ClearCache();
             scene = loader.NetworkScenes[sceneId].Instantiate();
             if (register) RegisterObject(scene);
@@ -482,6 +488,12 @@ namespace EvoS.Framework.Game
 
         public void SpawnScene<T>(AssetLoader loader, uint sceneId, out T component) where T : Component
         {
+            foreach (var o in _netObjects.Where(o => o.Value.GetComponent<NetworkIdentity>().sceneId.Value == sceneId))
+            {
+                component = o.Value.GetComponent<T>();
+                return;
+            }
+
             SpawnScene(loader, sceneId, out var scene, false);
             component = scene.GetComponent<T>();
             RegisterObject(scene);
