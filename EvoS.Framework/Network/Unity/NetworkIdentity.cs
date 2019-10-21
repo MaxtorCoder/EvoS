@@ -284,6 +284,52 @@ namespace EvoS.Framework.Network.Unity
                 cmdDelegate(obj, reader);
             }
         }
+        
+        public void UNetUpdate()
+        {
+            uint num = 0;
+            foreach (var netBehav in m_NetworkBehaviours)
+            {
+                var dirtyChannel = netBehav.GetDirtyChannel();
+                if (dirtyChannel != -1)
+                    num |= (uint) (1 << dirtyChannel);
+            }
+            if (num == 0U)
+                return;
+            for (var channelId = 0; channelId < NetworkServer.numChannels; ++channelId)
+            {
+                if (((int) num & 1 << channelId) == 0) continue;
+                
+                s_UpdateWriter.StartMessage(8);
+                s_UpdateWriter.Write(netId);
+                var flag = false;
+                foreach (var netBehav in m_NetworkBehaviours)
+                {
+                    var position = s_UpdateWriter.Position;
+                    var networkBehaviour = netBehav;
+                    if (networkBehaviour.GetDirtyChannel() != channelId)
+                    {
+                        networkBehaviour.OnSerialize(s_UpdateWriter, false);
+                    }
+                    else
+                    {
+                        if (networkBehaviour.OnSerialize(s_UpdateWriter, false))
+                        {
+                            networkBehaviour.ClearAllDirtyBits();
+                            flag = true;
+                        }
+                        if (s_UpdateWriter.Position - position > NetworkServer.maxPacketSize)
+                            Log.Print(LogType.Warning,
+                                $"Large state update of {(s_UpdateWriter.Position - position)} bytes for netId:{netId} from script:{networkBehaviour}");
+                    }
+                }
+                if (flag)
+                {
+                    s_UpdateWriter.FinishMessage();
+                    NetworkServer.SendWriterToReady(gameObject, s_UpdateWriter, channelId);
+                }
+            }
+        }
 
         public void OnUpdateVars(NetworkReader reader, bool initialState)
         {

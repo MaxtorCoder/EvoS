@@ -308,6 +308,42 @@ namespace EvoS.Framework.Game
 
             player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = false});
             player.Connection.Send(12, new ObjectSpawnFinishedMessage {state = 1});
+            
+            // Should wait for all players to have reached this point
+
+            GameFlowData.gameState = GameState.SpawningPlayers;
+            foreach (var netObj in _netObjects.Values)
+            {
+                var netIdent = netObj.GetComponent<NetworkIdentity>();
+                netIdent.UNetUpdate();
+            }
+            foreach (var playerInfo in TeamPlayerInfo)
+            {
+                SpawnPlayerCharacter(playerInfo);
+                // actors get synclist updates for currentCardIds and modifiedStats
+            }
+
+            // check for owning player
+            foreach (var actor in GameFlowData.GetAllActorsForPlayer(0))
+            {
+                player.Connection.Send(4, new OwnerMessage
+                {
+                    netId = actor.netId,
+                    playerControllerId = 0 // ?
+                });
+            }
+
+            // The following should be sent after all players have loaded
+            foreach (var netObj in _netObjects.Values)
+            {
+                var atsd = netObj.GetComponent<ActorTeamSensitiveData>();
+                if (atsd == null) continue;
+
+                // Just send the play to an arbitrary location for now
+                atsd.CallRpcMovement(GameEventManager.EventType.Invalid,
+                    new GridPosProp(5, 5, 6), new GridPosProp(5, 5, 5),
+                    null, ActorData.MovementType.Teleport, false, false);
+            }
         }
 
 //        public class ObserverMessage : MessageBase
@@ -371,11 +407,6 @@ namespace EvoS.Framework.Game
             ObjectivePoints = sceneGameLogic.GetComponent<ObjectivePoints>();
             SpawnPointManager = sceneGameLogic.GetComponent<SpawnPointManager>();
             MatchObjectiveKill = sceneGameLogic.GetComponent<MatchObjectiveKill>();
-
-            foreach (var playerInfo in TeamPlayerInfo)
-            {
-                SpawnPlayerCharacter(playerInfo);
-            }
 
             DumpNetObjects();
         }
