@@ -576,7 +576,8 @@ namespace EvoS.Framework.Network.Unity
 
         public virtual float GetNetworkSendInterval()
         {
-            return 0.1f;
+//            return 0.1f; // TODO - default
+            return -1f;
         }
 
         public override void DeserializeAsset(AssetFile assetFile, StreamReader stream)
