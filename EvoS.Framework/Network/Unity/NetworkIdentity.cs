@@ -549,7 +549,7 @@ namespace EvoS.Framework.Network.Unity
 
         private bool m_Reset;
 
-        private static NetworkWriter s_UpdateWriter = new NetworkWriter();
+        private NetworkWriter s_UpdateWriter = new NetworkWriter(); // TODO could be shared per NetworkServer
 
         public void OnStartServer()
         {
