@@ -7,6 +7,11 @@ namespace EvoS.Framework.Network.Game
 {
     public class FakeClientConnection : ClientConnection
     {
+        public FakeClientConnection()
+        {
+            isReady = true;
+        }
+
         public override void SendByChannel(short msgType, MessageBase msg, int channelId)
         {
             Log.Print(LogType.Packet, $"SendByChannel(channel={channelId}, {msgType}, {msg})");

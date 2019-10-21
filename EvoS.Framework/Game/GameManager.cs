@@ -234,6 +234,7 @@ namespace EvoS.Framework.Game
         public void AddPlayer(ClientConnection connection, LoginRequest loginReq, AddPlayerMessage msg)
         {
             _players.Add(loginReq.PlayerId, new GamePlayer(connection, loginReq, msg));
+            connection.ActiveGame = this;
 
             // This isn't actually correct, but the client logs a warning with what it expected and continues
             connection.Send(14, new CRCMessage
@@ -286,38 +287,10 @@ namespace EvoS.Framework.Game
             });
             player.Connection.Send(12, new ObjectSpawnFinishedMessage {state = 0});
 
-            var updateWriter = new NetworkWriter();
             foreach (var netObj in _netObjects.Values)
             {
                 var netIdent = netObj.GetComponent<NetworkIdentity>();
-                updateWriter.SeekZero();
-                netIdent.UNetSerializeAllVars(updateWriter);
-
-                if (netIdent.sceneId.Value != 0)
-                {
-                    var spawnMsg = new ObjectSpawnSceneMessage
-                    {
-                        position = netObj.transform.position,
-                        netId = netIdent.netId,
-                        sceneId = netIdent.sceneId,
-                        payload = updateWriter.ToArray()
-                    };
-
-                    player.Connection.Send(10, spawnMsg);
-                }
-                else
-                {
-                    var spawnMsg = new ObjectSpawnMessage
-                    {
-                        position = netObj.transform.position,
-                        netId = netIdent.netId,
-                        rotation = netObj.transform.rotation,
-                        assetId = netIdent.assetId,
-                        payload = updateWriter.ToArray()
-                    };
-
-                    player.Connection.Send(3, spawnMsg);
-                }
+                player.Connection.AddToVisList(netIdent);
             }
 
             player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = false});
@@ -356,8 +329,6 @@ namespace EvoS.Framework.Game
             MiscLoader.LoadAsset("archive:/buildplayer-options_ui/buildplayer-clientenvironmentsingletons");
             MiscLoader.ConstructCaches();
 
-            SpawnObject<Board, Board>(MapLoader, out Board);
-
             SpawnObject(MiscLoader, "ApplicationSingletonsNetId", out _);
             SpawnObject(MiscLoader, "GameSceneSingletons", out var gameSceneSingletons);
             TheatricsManager = gameSceneSingletons.GetComponent<TheatricsManager>();
@@ -376,6 +347,9 @@ namespace EvoS.Framework.Game
             ServerActionBuffer = commonGameLogic.GetComponent<ServerActionBuffer>();
             TeamSelectData = commonGameLogic.GetComponent<TeamSelectData>();
             BarrierManager = commonGameLogic.GetComponent<BarrierManager>();
+            
+            SpawnObject<Board, Board>(MapLoader, out Board);
+            
             SpawnScene(MapLoader, 2, out BrushCoordinator);
             SpawnScene(MapLoader, 3, out var sceneGameLogic);
             GameFlowData = sceneGameLogic.GetComponent<GameFlowData>();
