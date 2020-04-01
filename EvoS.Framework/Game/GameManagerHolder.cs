@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using EvoS.Framework.Network.Game.Messages;
+using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
 
 namespace EvoS.Framework.Game
@@ -7,6 +8,17 @@ namespace EvoS.Framework.Game
     public class GameManagerHolder
     {
         private static Dictionary<string, GameManager> _gameManagers = new Dictionary<string, GameManager>();
+
+        class GameManagerHolderEmptyRoomNameException : System.Exception { }
+
+        public static void CreateGameManager(LobbyGameConfig gameConfig)
+        {
+            if (string.IsNullOrEmpty(gameConfig.RoomName)) {
+                throw new GameManagerHolderEmptyRoomNameException();
+            }
+
+            _gameManagers.Add(gameConfig.RoomName, new GameManager());
+        }
 
         public static GameManager? FindGameManager(LoginRequest loginRequest)
         {

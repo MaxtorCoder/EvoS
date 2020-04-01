@@ -454,9 +454,11 @@ namespace EvoS.Framework.Game
         {
             // TODO would normally check playerInfo.CharacterInfo.CharacterType
 
+            Log.Print(LogType.Error, playerInfo.CharacterInfo.CharacterType.ToString());
+
             SpawnObject<ActorTeamSensitiveData>(MiscLoader, "ActorTeamSensitiveData_Friendly",
                 out var scoundrelFriendly);
-            SpawnObject(AssetsLoader, "Scoundrel", out var scoundrel);
+            SpawnObject(AssetsLoader, playerInfo.CharacterInfo.CharacterType.ToString(), out var scoundrel);
             var scoundrelActor = scoundrel.GetComponent<ActorData>();
             var scoundrelPlayerData = scoundrel.GetComponent<PlayerData>();
             scoundrelActor.SetClientFriendlyTeamSensitiveData(scoundrelFriendly);
