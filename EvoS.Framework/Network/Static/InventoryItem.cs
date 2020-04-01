@@ -15,7 +15,7 @@ namespace EvoS.Framework.Network.Static
 
         public InventoryItem(int templateId, int count = 1, int id = 0)
         {
-            Id = id;
+            Id = id ;
             TemplateId = templateId;
             Count = count;
         }

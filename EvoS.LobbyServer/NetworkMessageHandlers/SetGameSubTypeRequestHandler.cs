@@ -12,6 +12,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         {
             SetGameSubTypeRequest request = (SetGameSubTypeRequest)requestData;
             connection.SelectedGameType = request.gameType;
+            connection.SelectedSubTypeMask = request.SubTypeMask;
             await connection.SendMessage(new SetGameSubTypeResponse() { ResponseId = request.RequestId });
         }
     }

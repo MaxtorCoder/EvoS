@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EvoS.Framework.Logging;
 using Newtonsoft.Json;
 
 namespace EvoS.Framework.Network.Static
@@ -8,6 +9,35 @@ namespace EvoS.Framework.Network.Static
     [EvosMessage(491)]
     public class InventoryComponent
     {
+        public InventoryComponent(bool testConstructorMadeByMts508)
+        {
+            Log.Print(LogType.Error, "CREATING INVENTORY COMPONENT");
+            NextItemId = 1;
+            Items = new List<InventoryItem>();
+            Karmas = new Dictionary<int, Karma>();
+            Loots = new Dictionary<int, Loot>();
+            CharacterItemDropBalanceValues = new Dictionary<CharacterType, int>();
+            LastLockboxOpenTime = DateTime.MinValue;
+
+            m_itemByIdCache = null;
+            m_itemsByTemplateIdCache = null;
+
+            Items.Add(new InventoryItem(11));
+            for (int i = 35; i <= 45; i++)
+            {
+                Items.Add(new InventoryItem(i));
+            }
+            Items.Add(new InventoryItem(248));
+            Items.Add(new InventoryItem(249));
+            Items.Add(new InventoryItem(251));
+            Items.Add(new InventoryItem(252));
+            Items.Add(new InventoryItem(254));
+            Items.Add(new InventoryItem(256));
+            Items.Add(new InventoryItem(257));
+            Items.Add(new InventoryItem(907));
+            Items.Add(new InventoryItem(908));
+            Items.Add(new InventoryItem(909));
+        }
         public InventoryComponent()
         {
             NextItemId = 1;

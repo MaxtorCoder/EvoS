@@ -14,7 +14,7 @@ namespace EvoS.Framework.Network.Static
         public ExperienceComponent()
         {
             this.Level = 1;
-            this.TutorialProgress = TutorialVersion.None;
+            this.TutorialProgress = TutorialVersion.Latest;
             this.EloValues = new EloValues();
             this.PersistedStatsDictionary = new Dictionary<PersistedStatBucket, PersistedStats>();
             this.PersistedStatsDictionaryBySeason =

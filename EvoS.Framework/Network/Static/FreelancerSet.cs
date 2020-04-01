@@ -13,5 +13,8 @@ namespace EvoS.Framework.Network.Static
         public List<CharacterRole> Roles;
         [EvosMessage(10)]
         public List<int> FactionGroups;
+
+        public static FreelancerSet None = new FreelancerSet() { Types = new List<CharacterType> { CharacterType.None } };
+        public static FreelancerSet AllRoles = new FreelancerSet() { Roles = new List<CharacterRole> { CharacterRole.Assassin, CharacterRole.Tank, CharacterRole.Support} };
     }
 }

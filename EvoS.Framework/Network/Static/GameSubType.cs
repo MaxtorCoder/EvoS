@@ -21,6 +21,10 @@ namespace EvoS.Framework.Network.Static
             return gameSubType;
         }
 
+        public GameSubType() {
+            
+        }
+
         public static TimeSpan ConformTurnTimeSpanFromSeconds(double totalSeconds)
         {
             double value = Math.Max(1.0, Math.Min(99.9, totalSeconds));

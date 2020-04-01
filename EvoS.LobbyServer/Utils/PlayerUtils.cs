@@ -17,12 +17,14 @@ namespace EvoS.LobbyServer.Utils
                 AccountId = connection.AccountId,
                 AccountComponent = GetAccountComponent(connection),
                 BankComponent = GetBankData(connection.AccountId),
+                CharacterData = GetCharacterData(),
                 CreateDate = DateTime.Now.AddHours(-1),
                 Handle = connection.UserName,
                 QuestComponent = new QuestComponent() { ActiveSeason = 9 }, // Provide a SeasonExperience to set Season Level on client
                 SchemaVersion = new SchemaVersion<AccountSchemaChange>(0x1FFFF),
                 UpdateDate = DateTime.Now,
                 UserName = connection.UserName,
+                InventoryComponent = new InventoryComponent(true)
             };
             return accountData;
         }
@@ -53,6 +55,15 @@ namespace EvoS.LobbyServer.Utils
                 new CurrencyData() { m_Type = CurrencyType.RankedCurrency, Amount = 300 }
             };
             return new BankComponent(currentBalances);
+        }
+
+        public static Dictionary<CharacterType, PersistedCharacterData> GetCharacterData()
+        {
+            Dictionary<CharacterType, PersistedCharacterData> characterData = new Dictionary<CharacterType, PersistedCharacterData>();
+
+            characterData.Add(CharacterType.Scoundrel, new PersistedCharacterData(CharacterType.Scoundrel) { });
+
+            return characterData;
         }
 
         public static CharacterLoadout GetLoadout(long accountID, CharacterType characterType)
