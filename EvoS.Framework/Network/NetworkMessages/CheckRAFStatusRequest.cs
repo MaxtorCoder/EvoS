@@ -7,6 +7,9 @@ namespace EvoS.Framework.Network.NetworkMessages
     [EvosMessage(262)]
     public class CheckRAFStatusRequest : WebSocketMessage
     {
+        [NonSerialized]
+        public new static bool LogData = false;
+
         public bool GetReferralCode;
     }
 }

@@ -62,11 +62,20 @@ namespace EvoS.LobbyServer
 
         public static ServerQueueConfigurationUpdateNotification CreateServerQueueConfiguration()
         {
+            Console.WriteLine("HakunaMatata\n");
             return new ServerQueueConfigurationUpdateNotification
             {
                 FreeRotationAdditions = new Dictionary<CharacterType, RequirementCollection>(),
-                GameTypeAvailabilies = new Dictionary<GameType, GameTypeAvailability>
+                GameTypeAvailabilies = GameTypesUtils.GetAvailableGameTypes()/*new Dictionary<GameType, GameTypeAvailability>
                 {
+                    {
+                        GameType.None, new GameTypeAvailability
+                        {
+                            IsActive = true,
+                            MaxWillFillPerTeam = 4
+                        }
+                    },
+
                     {
                         GameType.Practice, new GameTypeAvailability
                         {
@@ -88,7 +97,7 @@ namespace EvoS.LobbyServer
                         {
                             IsActive = false
                         }
-                    },*/
+                    },* /
                     {
                         GameType.PvP, new GameTypeAvailability
                         {
@@ -134,14 +143,8 @@ namespace EvoS.LobbyServer
                                 }
                             }
                         }
-                    },
-                    /*{
-                        GameType.Custom, new GameTypeAvailability
-                        {
-                            IsActive = false
-                        }
-                    }*/
-                },
+                    }
+                }*/,
                 TierInstanceNames = new List<LocalizationPayload>(),
                 AllowBadges = true,
                 NewPlayerPvPQueueDuration = 0
@@ -274,7 +277,7 @@ namespace EvoS.LobbyServer
             {
                 CharacterConfigs = CreateCharacterConfigs(),
                 EnableHiddenCharacters = true,
-                EnableAllMods = true,
+                EnableAllMods = true ,
                 EnableQuests = false,
                 EnableSeasons = false,
             };
@@ -302,6 +305,7 @@ namespace EvoS.LobbyServer
 
         public static LobbyGameConfig CreatePracticeGameConfig()
         {
+            Console.WriteLine("Hakuna Matatata\n");
             return new LobbyGameConfig
             {
                 GameOptionFlags = GameOptionFlag.AutoLaunch | GameOptionFlag.NoInputIdleDisconnect |
@@ -321,7 +325,7 @@ namespace EvoS.LobbyServer
             return new LobbyPlayerInfo
             {
                 PlayerId = 0, // TODO
-                CharacterInfo = CreateLobbyCharacterInfo(CharacterType.Scoundrel),
+                CharacterInfo = CreateLobbyCharacterInfo(connection.SelectedCharacter),
                 Handle = connection.UserName,
                 AccountId = connection.AccountId,
                 IsGameOwner = true,

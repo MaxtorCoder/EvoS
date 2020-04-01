@@ -10,6 +10,8 @@ namespace EvoS.Framework.Network.NetworkMessages
     public class RegisterGameClientRequest : WebSocketMessage
     {
         public new static int MessageTypeID = 783;
+        [NonSerialized]
+        public new static bool LogData = false;
 
         public AuthInfo AuthInfo;
         public LobbySessionInfo SessionInfo;

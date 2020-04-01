@@ -10,7 +10,7 @@ namespace EvoS.Framework.Network.NetworkMessages
     public class ServerQueueConfigurationUpdateNotification : WebSocketMessage
     {
         [EvosMessage(123)]
-        public Dictionary<GameType, GameTypeAvailability> GameTypeAvailabilies;
+        public Dictionary<GameType, GameTypeAvailability> GameTypeAvailabilies; // Available game types (practice, vs bots, pvp, ranked, custom)
         [EvosMessage(177)]
         public Dictionary<CharacterType, RequirementCollection> FreeRotationAdditions;
         [EvosMessage(121)]

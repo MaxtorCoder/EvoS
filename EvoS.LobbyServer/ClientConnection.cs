@@ -15,22 +15,31 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using EvoS.Framework.Misc;
+using EvoS.Framework.Constants.Enums;
 
 namespace EvoS.LobbyServer
 {
-    public class ClientConnection
+    public class ClientConnection : IComparable
     {
         private WebSocket Socket;
         public long AccountId;
         public string UserName;
         public string StatusString;
         public CharacterType SelectedCharacter;
+
         public GameType SelectedGameType;
+        public ushort SelectedSubTypeMask;
+        public BotDifficulty AllyBotDifficulty;
+        public BotDifficulty EnemyBotDifficulty;
+
         public PlayerLoadout Loadout;
         public int SelectedTitleID;
         public int SelectedForegroundBannerID;
         public int SelectedBackgroundBannerID;
         public int SelectedRibbonID = -1;
+        public long SessionToken;
+
+        public static Dictionary<Type, MethodBase> LobbyManagerHandlers = new Dictionary<Type, MethodBase>();
         
 
         public ClientConnection(WebSocket socket)
@@ -38,6 +47,9 @@ namespace EvoS.LobbyServer
             Socket = socket;
             SelectedCharacter = CharacterType.Scoundrel;
             Loadout = new PlayerLoadout();
+            SelectedSubTypeMask = 0;
+            AllyBotDifficulty = BotDifficulty.Easy;
+            EnemyBotDifficulty = BotDifficulty.Easy;
         }
 
         public void Disconnect()
@@ -53,7 +65,7 @@ namespace EvoS.LobbyServer
         {
             var responseStream = new MemoryStream();
             EvosSerializer.Instance.Serialize(responseStream, message);
-            
+            Console.WriteLine("SendMessage: " + message.ToString());
             using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
             {
                 await writer.WriteAsync(responseStream.ToArray());
@@ -113,26 +125,101 @@ namespace EvoS.LobbyServer
                         String packetDataToLog = (bool)requestType.GetField("LogData", bindingFlags).GetValue(null) ? JsonConvert.SerializeObject(requestData) :"{...}";
 
                         Log.Print(LogType.Network, $"Received {requestType.Name} : {packetDataToLog}");
+
+
 #endif
                         // Handle Response
-                        Type responseHandlerType = Type.GetType($"EvoS.LobbyServer.NetworkMessageHandlers.{requestType.Name}Handler");
-                        if (responseHandlerType == null)
-                        {
-#if DEBUG
-                            Log.Print(LogType.Warning, $"No Handler for {requestType.Name}");
-#endif
-                            continue;
-                        }
+                        MethodBase method = GetHandler(requestType);
 
-                        object responseHandler = responseHandlerType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-                        var task = (Task) responseHandlerType.GetMethod("OnMessage").Invoke(responseHandler, new[] { this, requestData });
-                        await task.ConfigureAwait(false);
-                        await task;
+                        if (method == null) {
+                            Log.Print(LogType.Error, $"Unhandled type: {requestType.Name}");
+                        } else {
+                            Task task = (Task)method.Invoke(null, new object[] { this, requestData });
+                            await task.ConfigureAwait(false);
+                            await task;
+                        }
                     }
                 }
                 //Console.WriteLine($"RECV {message.MessageType} {(message.MessageType == WebSocketMessageType.Text ? message.ReadText() : message.ReadBinary())}");
                 message.Dispose();
             }
+        }
+
+        public LobbyPlayerInfo CreateLobbyPlayerInfo()
+        {
+            LobbyPlayerInfo info = new LobbyPlayerInfo();
+
+            info.AccountId = this.AccountId;
+            info.Handle = this.UserName;
+            info.TitleID = this.SelectedTitleID;
+            info.TitleLevel = 0;
+
+            info.BannerID = this.SelectedBackgroundBannerID;
+            info.EmblemID = this.SelectedForegroundBannerID;
+            info.RibbonID = this.SelectedRibbonID;
+            info.IsGameOwner = true;
+            info.IsLoadTestBot = false;
+            info.IsNPCBot = false;
+            info.BotsMasqueradeAsHumans = false;
+            info.CharacterInfo = GetLobbyCharacterInfo();
+            //public List<LobbyCharacterInfo> RemoteCharacterInfos = new List<LobbyCharacterInfo>();
+            info.EffectiveClientAccessLevel = ClientAccessLevel.Full;
+
+            return info;
+        }
+
+        public LobbyCharacterInfo GetLobbyCharacterInfo()
+        {
+            return new LobbyCharacterInfo()
+            {
+                CharacterType = this.SelectedCharacter,
+                CharacterSkin = this.Loadout.Skin,
+                CharacterCards = this.Loadout.Cards,
+                CharacterMods = this.Loadout.Mods,
+                CharacterAbilityVfxSwaps = this.Loadout.AbilityVfxSwaps,
+                CharacterTaunts = this.Loadout.Taunts,
+                CharacterLoadouts = new List<CharacterLoadout>() { GetCharacterLoadout() },
+                CharacterMatches = 0,
+                CharacterLevel = 1
+            };
+        }
+
+        private static MethodBase GetHandler(Type type)
+        {
+            MethodBase method = null;
+
+            try
+            {
+                method = LobbyManagerHandlers[type];
+            }
+            catch(KeyNotFoundException e)
+            {
+                
+                MethodInfo[] methods = typeof(LobbyManager).GetMethods(BindingFlags.Static | BindingFlags.Public);
+                method = Type.DefaultBinder.SelectMethod(BindingFlags.Default, methods, new Type[] { typeof(ClientConnection), type }, null);
+                if(method != null) {
+                    LobbyManagerHandlers.Add(type, method);
+                    //Log.Print(LogType.Debug, $"Added method for {type.Name}: {method.ToString()}");
+                }
+                
+            }
+
+            
+
+            return method;
+        }
+
+        public CharacterLoadout GetCharacterLoadout()
+        {
+            CharacterLoadout ret = new CharacterLoadout(this.Loadout.Mods, this.Loadout.AbilityVfxSwaps, this.Loadout.Name);
+            return ret;
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (((ClientConnection)obj).SessionToken - this.SessionToken == 0) return 0;
+            else if(((ClientConnection)obj).SessionToken > this.SessionToken return -1);
+            return 1;
         }
     }
 }

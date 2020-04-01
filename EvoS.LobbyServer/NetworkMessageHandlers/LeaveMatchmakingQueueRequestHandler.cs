@@ -11,7 +11,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         public async Task OnMessage(ClientConnection connection, object requestData)
         {
             var request = (LeaveMatchmakingQueueRequest)requestData;
-            QueueManager.RemovePlayerFromQueue(connection);
+            LobbyQueueManager.RemovePlayerFromQueue(connection);
             await connection.SendMessage(new LeaveMatchmakingQueueResponse() { ResponseId = request.RequestId });
         }
     }

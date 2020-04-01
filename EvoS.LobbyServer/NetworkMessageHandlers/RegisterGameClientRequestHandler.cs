@@ -13,6 +13,9 @@ using EvoS.Framework.DataAccess;
 
 namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
+    /// <summary>
+    /// First message sent to the server when a user connects
+    /// </summary>
     class RegisterGameClientRequestHandler : IEvosNetworkMessageHandler
     {
         public async Task OnMessage(ClientConnection connection, object requestData)
@@ -26,6 +29,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             connection.SelectedForegroundBannerID = p.SelectedForegroundBannerID;
             connection.SelectedRibbonID = p.SelectedTitleID;
             connection.SelectedCharacter = p.LastSelectedCharacter;
+            connection.SessionToken = request.SessionInfo.SessionToken;
 
             // Send RegisterGameClientResponse
             await Send_RegisterGameClientResponse(connection, request);
@@ -40,6 +44,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
         private async Task Send_RegisterGameClientResponse(ClientConnection connection, RegisterGameClientRequest request)
         {
+            Log.Print(LogType.Debug, "Sending Send_RegisterGameClientResponse");
             var response = RegisterGameClient(request);
             await connection.SendMessage(response);
         }
@@ -59,6 +64,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
         private LobbyServerReadyNotification LobbyServerReady(ClientConnection connection)
         {
+            // search here
             return new LobbyServerReadyNotification
             {
                 AccountData = PlayerUtils.GetAccountData(connection),
@@ -67,12 +73,12 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 CommerceURL = "http://127.0.0.1/AtlasCommerce",
                 EnvironmentType = EnvironmentType.External,
                 FactionCompetitionStatus = new FactionCompetitionNotification(),
-                FriendStatus = new FriendStatusNotification {FriendList = FriendData.GetFriendList(connection.AccountId)},
+                FriendStatus = null,//new FriendStatusNotification {FriendList = FriendData.GetFriendList(connection.AccountId)},
                 GroupInfo = new LobbyPlayerGroupInfo
                 {
                     SelectedQueueType = GameType.Practice,
                     MemberDisplayName = connection.UserName,
-                    // ChararacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(CharacterType.Archer),
+                    //ChararacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(CharacterType.Archer),
                     Members = new List<UpdateGroupMemberData>()
                 },
                 SeasonChapterQuests =
@@ -85,7 +91,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 {
                     AllowRelogin = false,
                     ServerLockState = ServerLockState.Unlocked,
-                    ServerMessageOverrides = new ServerMessageOverrides(),
+                    ServerMessageOverrides = null,//new ServerMessageOverrides(),
                     ClientAccessLevel = ClientAccessLevel.Full,
                     HasPurchasedGame = true,
                     GameplayOverrides = DummyLobbyData.CreateLobbyGameplayOverrides(),

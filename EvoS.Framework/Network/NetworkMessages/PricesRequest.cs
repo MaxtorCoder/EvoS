@@ -7,5 +7,7 @@ namespace EvoS.Framework.Network.NetworkMessages
     [EvosMessage(343)]
     public class PricesRequest : WebSocketMessage
     {
+        [NonSerialized]
+        public new static bool LogData = false;
     }
 }

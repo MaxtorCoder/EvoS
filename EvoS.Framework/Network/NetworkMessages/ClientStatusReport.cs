@@ -7,8 +7,11 @@ namespace EvoS.Framework.Network.NetworkMessages
 {
     [Serializable]
     [EvosMessage(696, typeof(ClientStatusReport))]
-    class ClientStatusReport : WebSocketMessage
+    public class ClientStatusReport : WebSocketMessage
     {
+        [NonSerialized]
+        public new static bool LogData = false;
+
         public string DeviceIdentifier;
         public string FileDateTime;
         public ClientStatusReport.ClientStatusReportType Status;
