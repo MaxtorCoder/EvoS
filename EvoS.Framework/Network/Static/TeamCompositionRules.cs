@@ -8,7 +8,7 @@ namespace EvoS.Framework.Network.Static
     [EvosMessage(134)]
     public class TeamCompositionRules
     {
-        private bool MatchesSlotType(SlotTypes st, Team team, int slot)
+        public bool MatchesSlotType(SlotTypes st, Team team, int slot)
         {
             switch (st)
             {

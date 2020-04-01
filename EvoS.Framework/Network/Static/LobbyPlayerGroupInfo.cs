@@ -9,7 +9,7 @@ namespace EvoS.Framework.Network.Static
     {
         public LobbyPlayerGroupInfo()
         {
-            SelectedQueueType = GameType.PvP;
+            SelectedQueueType = GameType.None;
         }
 
         public LobbyPlayerGroupInfo Clone()
