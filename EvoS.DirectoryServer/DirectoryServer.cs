@@ -74,6 +74,8 @@ namespace EvoS.DirectoryServer
                     }
                 }
 
+                request.SessionInfo.SessionToken = DateTime.Now.Ticks;
+
                 response.SessionInfo = request.SessionInfo;
                 response.SessionInfo.AccountId = p.AccountId;
                 response.SessionInfo.Handle = p.UserName;
