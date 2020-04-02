@@ -297,6 +297,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         private void DeSerializeAbilityRequestData(NetworkReader reader)
         {
+            Log.Print(LogType.Debug, "DeserializeAbilityRequestData");
             _abilityRequestData.Clear();
             byte num = reader.ReadByte();
             for (int index = 0; index < (int) num; ++index)

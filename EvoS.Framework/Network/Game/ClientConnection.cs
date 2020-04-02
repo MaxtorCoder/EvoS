@@ -48,14 +48,16 @@ namespace EvoS.Framework.Network.Game
 
         protected void SetupLoginHandler()
         {
-            // The client sends AddPlayer and then LoginRequest, instead we'll use the session token to determine
-            // which Game the connection is fore
+            // The client sends AddPlayer and then LoginRequest, instead we'll use the AccountId to determine
+            // which Game the connection is for
 
             AddPlayerMessage addPlayerMessage = null;
-            Serializer.RegisterHandler(37, msg => { addPlayerMessage = (AddPlayerMessage) msg; });
-            Serializer.RegisterHandler(51, msg =>
+            Serializer.RegisterHandler(GameMessage.AddPlayerMessage, msg => { addPlayerMessage = (AddPlayerMessage) msg; });
+            Serializer.RegisterHandler(GameMessage.LoginRequest, msg =>
             {
                 var loginReq = (LoginRequest) msg;
+                long accountId = long.Parse(loginReq.AccountId);
+
                 if (addPlayerMessage == null)
                 {
                     Log.Print(LogType.Error, "Received LoginRequest before AddPlayerMessage!");
@@ -63,15 +65,18 @@ namespace EvoS.Framework.Network.Game
                     return;
                 }
 
-                var gameManager = GameManagerHolder.FindGameManager(loginReq);
+                var gameManager = GameManagerHolder.FindGameManager(accountId);
+                GameManagerHolder.PlayerConnected(accountId);
                 if (gameManager == null)
                 {
                     Log.Print(LogType.Error, $"Didn't find a GameManager for {loginReq}'");
                     Disconnect();
                     return;
                 }
+                
 
-                Send(52, new LoginResponse
+                // Send login ok response
+                Send(GameMessage.LoginReponse, new LoginResponse
                 {
                     Reconnecting = false,
                     Success = true

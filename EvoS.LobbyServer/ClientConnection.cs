@@ -52,6 +52,10 @@ namespace EvoS.LobbyServer
             EnemyBotDifficulty = BotDifficulty.Easy;
         }
 
+        public String ToString() {
+            return this.UserName;
+        }
+
         public void Disconnect()
         {
             Log.Print(LogType.Lobby, $"Client {UserName} disconnected.");
@@ -218,7 +222,7 @@ namespace EvoS.LobbyServer
         public int CompareTo(object obj)
         {
             if (((ClientConnection)obj).SessionToken - this.SessionToken == 0) return 0;
-            else if(((ClientConnection)obj).SessionToken > this.SessionToken return -1);
+            else if(((ClientConnection)obj).SessionToken > this.SessionToken) return -1;
             return 1;
         }
     }
