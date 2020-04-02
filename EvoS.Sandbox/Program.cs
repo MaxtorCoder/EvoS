@@ -42,7 +42,7 @@ namespace EvoS.Sandbox
         static void StartLobbyServer()
         {
             Thread.Sleep(1750);
-            LobbyServer.Program.Main();
+            LobbyServer.LobbyServer.Main();
         }
         
         static void StartGameServer()

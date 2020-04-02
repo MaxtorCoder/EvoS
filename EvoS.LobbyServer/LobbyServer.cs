@@ -16,7 +16,7 @@ using EvoS.Framework.DataAccess;
 
 namespace EvoS.LobbyServer
 {
-    public class Program
+    public class LobbyServer
     {
         private static List<ClientConnection> ConnectedClients = new List<ClientConnection>();
 
@@ -113,6 +113,18 @@ namespace EvoS.LobbyServer
             foreach (ClientConnection con in ConnectedClients)
             {
                 if (con.UserName == handle)
+                {
+                    return con;
+                }
+            }
+            return null;
+        }
+
+        public static ClientConnection GetPlayerByAccountId(long accountId)
+        {
+            foreach (ClientConnection con in ConnectedClients)
+            {
+                if (con.AccountId == accountId)
                 {
                     return con;
                 }

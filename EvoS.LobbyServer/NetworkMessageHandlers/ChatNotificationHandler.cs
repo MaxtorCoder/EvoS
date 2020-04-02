@@ -14,7 +14,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             notification.SenderAccountId = connection.AccountId;
             notification.SenderHandle = connection.UserName;
 
-            await LobbyServer.Program.sendChatAsync(notification, connection);
+            await LobbyServer.sendChatAsync(notification, connection);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace EvoS.LobbyServer.Utils
         }
         public async static Task AddFriend(ClientConnection connection, FriendUpdateRequest request)
         {
-            ClientConnection friend = LobbyServer.Program.GetPlayerByHandle(request.FriendHandle);
+            ClientConnection friend = LobbyServer.GetPlayerByHandle(request.FriendHandle);
             var friendRequest = new FriendUpdateRequest()
             {
                 FriendHandle = connection.UserName,

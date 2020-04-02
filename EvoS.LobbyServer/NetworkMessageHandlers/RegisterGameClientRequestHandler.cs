@@ -58,7 +58,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         private async Task Send_ChatConnectedNotification(ClientConnection connection)
         {
             ChatNotification connectedMessage = new ChatNotification() { Text = $"{connection.UserName} has connected", ConsoleMessageType = ConsoleMessageType.SystemMessage };
-            await Program.sendChatToAll(connectedMessage);
+            await LobbyServer.sendChatToAll(connectedMessage);
         }
 
 
