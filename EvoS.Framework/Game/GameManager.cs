@@ -19,18 +19,22 @@ namespace EvoS.Framework.Game
     public class GameManager
     {
         public readonly NetworkServer NetworkServer = new NetworkServer();
+
         private readonly Dictionary<uint, GameObject> _netObjects = new Dictionary<uint, GameObject>();
         private readonly List<GameObject> _gameObjects = new List<GameObject>();
+
         public AbilityModManager AbilityModManager;
         public BarrierManager BarrierManager;
         public Board Board;
         public BrushCoordinator BrushCoordinator;
         public CollectTheCoins CollectTheCoins;
         public GameEventManager GameEventManager = new GameEventManager();
+
         public GameFlowData GameFlowData;
         public GameFlow GameFlow;
         public GameplayData GameplayData;
         public GameplayMutators GameplayMutators = new GameplayMutators();
+
         public InterfaceManager InterfaceManager;
         public MatchLogger MatchLogger;
         public MatchObjectiveKill MatchObjectiveKill;
@@ -42,38 +46,36 @@ namespace EvoS.Framework.Game
         public SharedEffectBarrierManager SharedEffectBarrierManager;
         public SpawnPointManager SpawnPointManager;
         public SpoilsManager SpoilsManager;
+
         public TeamSelectData TeamSelectData;
         public TeamStatusDisplay TeamStatusDisplay;
         public TheatricsManager TheatricsManager;
 
         private bool s_quitting;
         private GameStatus m_gameStatus;
+
         private LobbyGameplayOverrides m_gameplayOverrides;
         private LobbyGameplayOverrides m_gameplayOverridesForCurrentGame;
         public Dictionary<int, ForbiddenDevKnowledge> ForbiddenDevKnowledge;
+
         private Dictionary<int, GamePlayer> _players = new Dictionary<int, GamePlayer>();
 
+
         public event Action OnGameAssembling = () => { };
-
         public event Action OnGameSelecting = () => { };
-
         public event Action OnGameLoadoutSelecting = () => { };
-
         public event Action<GameType> OnGameLaunched = delegate { };
-
         public event Action OnGameLoaded = () => { };
-
         public event Action OnGameStarted = () => { };
-
         public event Action<GameResult> OnGameStopped = delegate { };
-
         public event Action<GameStatus> OnGameStatusChanged = delegate { };
 
         public LobbyGameInfo GameInfo { get; private set; }
-
         public LobbyTeamInfo TeamInfo { get; private set; }
-
         [JsonIgnore] public LobbyGameConfig GameConfig => GameInfo.GameConfig;
+
+        private readonly object loadLock = new object();
+        private bool AllPlayersLoaded;
 
         public LobbyGameplayOverrides GameplayOverrides
         {
@@ -86,11 +88,8 @@ namespace EvoS.Framework.Game
         }
 
         public LobbyMatchmakingQueueInfo QueueInfo { get; private set; }
-
         public List<LobbyPlayerInfo> TeamPlayerInfo { get; private set; }
-
         public LobbyGameSummary GameSummary { get; private set; }
-
         public LobbyGameSummaryOverrides GameSummaryOverrides { get; private set; }
 
         public bool EnableHiddenGameItems { get; set; }
@@ -110,6 +109,7 @@ namespace EvoS.Framework.Game
             dummyObject.transform = new Transform();
             dummyObject.AddComponent(GameplayMutators);
             RegisterObject(dummyObject);
+            AllPlayersLoaded = false;
         }
 
         public void Reset()
@@ -183,6 +183,7 @@ namespace EvoS.Framework.Game
         public void SetTeamInfo(LobbyTeamInfo teamInfo)
         {
             TeamInfo = teamInfo;
+            SetTeamPlayerInfo(teamInfo.TeamPlayerInfo);
         }
 
         public void SetTeamPlayerInfo(List<LobbyPlayerInfo> teamPlayerInfo)
@@ -244,9 +245,9 @@ namespace EvoS.Framework.Game
             GameFlow.playerDetails[gfPlayer] = new PlayerDetails(PlayerGameAccountType.Human)
             {
                 m_team =  Team.TeamA,
-                m_handle = "test handle",
+                m_handle = this.TeamInfo.GetPlayer(long.Parse(loginReq.AccountId)).Handle,
                 m_accountId = gfPlayer.m_accountId,
-                m_lobbyPlayerInfoId = 0
+                m_lobbyPlayerInfoId = -1 // if this is needed we will get an error to fix it later
             };
 
             // This isn't actually correct, but the client logs a warning with what it expected and continues
@@ -279,15 +280,19 @@ namespace EvoS.Framework.Game
                 }
             });
 
-            connection.RegisterHandler<AssetsLoadingProgress>(61, _players[loginReq.PlayerId], OnAssetLoadingProgress);
+            connection.RegisterHandler<AssetsLoadingProgress>(GameMessage.OnAssetsLoadingProgressReceived, _players[loginReq.PlayerId], OnAssetLoadingProgress);
             connection.RegisterHandler<AssetsLoadedNotification>(53, _players[loginReq.PlayerId],
                 OnAssetsLoadedNotification);
         }
 
         private void OnAssetLoadingProgress(GamePlayer player, AssetsLoadingProgress msg)
         {
-            // TODO should send to all
-            player.Connection.Send(62, msg);
+            // Send a loading progress message to all players
+            foreach(int playerId in _players.Keys)
+            {
+                GamePlayer player_ = _players[playerId];
+                player_.Connection.Send(GameMessage.OnAssetsLoadingProgressSent, msg);
+            }
         }
 
         private void OnAssetsLoadedNotification(GamePlayer player, AssetsLoadedNotification msg)
@@ -308,7 +313,8 @@ namespace EvoS.Framework.Game
 
             player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = false});
             player.Connection.Send(12, new ObjectSpawnFinishedMessage {state = 1});
-            
+            player.IsLoading = false;
+
             // Should wait for all players to have reached this point
 
             GameFlowData.gameState = GameState.SpawningPlayers;
@@ -329,7 +335,7 @@ namespace EvoS.Framework.Game
                 player.Connection.Send(4, new OwnerMessage
                 {
                     netId = actor.netId,
-                    playerControllerId = 0 // ?
+                    playerControllerId = (short)player.LoginRequest.PlayerId
                 });
             }
 
@@ -394,6 +400,7 @@ namespace EvoS.Framework.Game
 
         public void LaunchGame()
         {
+            SetGameStatus(GameStatus.Launching);
             MapLoader = new AssetLoader();
             MapLoader.LoadAssetBundle("Bundles/scenes/maps.bundle");
             MapLoader.LoadAsset(
@@ -440,6 +447,8 @@ namespace EvoS.Framework.Game
             MatchObjectiveKill = sceneGameLogic.GetComponent<MatchObjectiveKill>();
 
             DumpNetObjects();
+
+            SetGameStatus(GameStatus.Launched);
         }
 
         public void DumpNetObjects()

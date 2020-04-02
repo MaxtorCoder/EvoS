@@ -11,11 +11,14 @@ namespace EvoS.Framework.Game
         public LoginRequest LoginRequest { get; }
         public AddPlayerMessage AddPlayerMessage { get; }
 
+        public bool IsLoading;
+
         public GamePlayer(ClientConnection connection, LoginRequest loginRequest, AddPlayerMessage addPlayerMessage)
         {
             Connection = connection;
             LoginRequest = loginRequest;
             AddPlayerMessage = addPlayerMessage;
+            IsLoading = true;
         }
     }
 }
