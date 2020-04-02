@@ -1,4 +1,5 @@
 ﻿using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
@@ -79,6 +80,7 @@ namespace EvoS.LobbyServer.LobbyQueue
 
         public void RemovePlayer(ClientConnection client)
         {
+            Log.Print(LogType.Debug, $"Removing player {client} from {GameType.ToString()} Queue");
             Players.Remove(client);
             QueueInfo.QueuedPlayers--;
         }
@@ -126,20 +128,67 @@ namespace EvoS.LobbyServer.LobbyQueue
                     }
                 }
 
-                Log.Print(LogType.Debug, "Match Created succesfully");
+                LobbyGameConfig gameConfig = QueueInfo.GameConfig.Clone();
+                gameConfig.RoomName = GenerateRoomName();
+                gameConfig.Map = subType.GameMapConfigs[new Random().Next(0, subType.GameMapConfigs.Count - 1)].Map;
+
+                LobbyGameInfo gameInfo = new LobbyGameInfo()
+                {
+                    GameConfig = gameConfig,
+                    AcceptedPlayers = teamInfo.TotalPlayerCount,
+                    ActiveSpectators = 0,
+                    AcceptTimeout = TimeSpan.FromSeconds(30),
+                    CreateTimestamp = DateTime.Now.Ticks,
+                    GameResult = GameResult.NoResult,
+                    GameServerAddress = "ws://127.0.0.1:6061",
+                    GameStatus = GameStatus.Launched,
+                    GameServerHost = gameConfig.RoomName,
+                    GameServerProcessCode = null,
+                    LoadoutSelectTimeout = TimeSpan.FromSeconds(30),
+                    IsActive = true,
+                    LoadoutSelectionStartTimestamp = DateTime.Now.Ticks,
+                    SelectionStartTimestamp = DateTime.Now.Ticks,
+                    SelectedBotSkillTeamA = BotDifficulty.Medium,
+                    SelectedBotSkillTeamB = BotDifficulty.Medium,
+                    SelectionSubPhase = FreelancerResolutionPhaseSubType.UNDEFINED,
+                    SelectionSubPhaseStartTimestamp = DateTime.Now.Ticks,
+                    SelectTimeout = TimeSpan.FromSeconds(20),
+                    UpdateTimestamp = DateTime.Now.Ticks
+                };
+
+                if (GameType == GameType.Practice) {
+                    gameInfo.AcceptTimeout = TimeSpan.Zero;
+                }
+                
+                Log.Print(LogType.Debug, "Removing players from queue...");
+                foreach (LobbyPlayerInfo player in teamInfo.TeamPlayerInfo)
+                {
+                    if (!player.IsNPCBot) {
+                        //Log.Print(LogType.Debug, $"found player {player.Handle}");
+                        for (int i = 0; i < Players.Count; i++) {
+                            if (Players[i].AccountId == player.AccountId)
+                            {
+                                RemovePlayer(Players[i]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                LobbyQueueManager.CreateGame(gameInfo, teamInfo);
             }
         }
 
         private bool FillTeam(Team team, TeamCompositionRules compositionRules, int maxPlayers, int maxBots, ref List<ClientConnection> availablePlayers, ref LobbyTeamInfo teamInfo)
         {
-            Log.Print(LogType.Debug, $"Fill Team {team.ToString()}");
+            Log.Print(LogType.Debug, $"Filling Team {team.ToString()}");
             int usedPlayers = 0;
             int usedBots = 0;
 
             List<LobbyPlayerInfo> playerInfo = new List<LobbyPlayerInfo>();
             
             for (int slot = 1; slot <= 5; slot++) {
-                Log.Print(LogType.Debug, "fillteam:: slot "+slot);
+                //Log.Print(LogType.Debug, "fillteam:: slot "+slot);
                 FreelancerSet botSet = new FreelancerSet() { Roles = new List<CharacterRole>(), Types = new List<CharacterType>() };
                 bool filled = false;
 
@@ -150,18 +199,18 @@ namespace EvoS.LobbyServer.LobbyQueue
                         bool matchedAny = false;
                         bool matched = true;
 
-                        Log.Print(LogType.Debug, "matching rules with " + player.UserName);
+                        //Log.Print(LogType.Debug, "matching rules with " + player.UserName);
 
                         foreach (TeamCompositionRules.SlotTypes slotType in compositionRules.Rules.Keys)
                         {
                             if (compositionRules.MatchesSlotType(slotType, team, slot))
                             {
                                 matchedAny = true;
-                                Log.Print(LogType.Debug, "Matched slotType " + slotType.ToString());
+                                //Log.Print(LogType.Debug, "Matched slotType " + slotType.ToString());
 
                                 if (!CharacterUtils.MatchesCharacter(player.SelectedCharacter, compositionRules.Rules[slotType]))
                                 {
-                                    Log.Print(LogType.Debug, "not matched rule");
+                                    //Log.Print(LogType.Debug, "not matched rule");
                                     matched = false;
 
                                     if (usedBots == maxBots)
@@ -181,7 +230,7 @@ namespace EvoS.LobbyServer.LobbyQueue
                         }
 
                         if (matchedAny && matched) {
-                            Log.Print(LogType.Debug, "Adding player");
+                            //Log.Print(LogType.Debug, "Adding player");
                             LobbyPlayerInfo info = new LobbyPlayerInfo()
                             {
                                 AccountId = player.AccountId,
@@ -217,7 +266,7 @@ namespace EvoS.LobbyServer.LobbyQueue
                     if (usedBots != maxBots) // Bots remaining to fill
                     {
                         // create bot
-                        Log.Print(LogType.Debug, "creating bot");
+                        //Log.Print(LogType.Debug, "creating bot");
                         LobbyPlayerInfo botInfo = CharacterUtils.CreateBotCharacterFromFreelancerSet(botSet);
                         botInfo.TeamId = team;
                         playerInfo.Add(botInfo);
@@ -228,21 +277,21 @@ namespace EvoS.LobbyServer.LobbyQueue
 
             }
 
-            Log.Print(LogType.Debug, "For finished");
+            //Log.Print(LogType.Debug, "For finished");
 
             if (usedPlayers != maxPlayers)
             {
-                Log.Print(LogType.Debug, "Bot overflow");
+                //Log.Print(LogType.Debug, "Bot overflow");
                 QueueInfo.QueueStatus = QueueStatus.QueueDoesntHaveEnoughHumans;
                 return false;
             }
 
-            Log.Print(LogType.Debug, "Filling team info");
+            //Log.Print(LogType.Debug, "Filling team info");
             foreach (LobbyPlayerInfo playerinfo in playerInfo)
             {
                 teamInfo.TeamPlayerInfo.Add(playerinfo);
             }
-            Log.Print(LogType.Debug, "TeamFilled!");
+            //Log.Print(LogType.Debug, "TeamFilled!");
 
             return true;
 

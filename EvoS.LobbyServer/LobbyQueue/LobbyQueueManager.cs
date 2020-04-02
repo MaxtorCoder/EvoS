@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EvoS.LobbyServer
@@ -16,10 +17,49 @@ namespace EvoS.LobbyServer
     class LobbyQueueManager
     {
         private static LobbyQueueManager Instance = null;
-
-        private Dictionary<GameType, LobbyQueue.LobbyQueue> Queues = new Dictionary<GameType, LobbyQueue.LobbyQueue>();
         
+        private Dictionary<GameType, LobbyQueue.LobbyQueue> Queues = new Dictionary<GameType, LobbyQueue.LobbyQueue>();
+        private List<PendingGame> PendingGames = new List<PendingGame>();
+        private Timer UpdateInterval;
+
         private static long currentMatchId = 0;
+
+        protected class PendingGame {
+            public LobbyGameInfo GameInfo;
+            public LobbyTeamInfo TeamInfo;
+            public String Name => GameInfo.GameConfig.RoomName;
+            public GameStatus GameStatus
+            {
+                get { return GameInfo.GameStatus; }
+                set { GameInfo.GameStatus = value; }
+            }
+            public GameType GameType => GameInfo.GameConfig.GameType;
+
+            public PendingGame(LobbyGameInfo gameInfo, LobbyTeamInfo teamInfo)
+            {
+                GameInfo = gameInfo;
+                TeamInfo = teamInfo;
+            }
+
+            public void SendNotification()
+            {
+                foreach (LobbyPlayerInfo playerInfo in TeamInfo.TeamPlayerInfo)
+                {
+                    if (!playerInfo.IsNPCBot)
+                    {
+                        ClientConnection player = LobbyServer.GetPlayerByAccountId(playerInfo.AccountId);
+                        //Log.Print(LogType.Debug, $"Sending notification to {Players[i]}");
+                        GameInfoNotification gameInfoNotification = new GameInfoNotification()
+                        {
+                            GameInfo = GameInfo,
+                            PlayerInfo = playerInfo,
+                            TeamInfo = TeamInfo
+                        };
+                        _ = player.SendMessage(gameInfoNotification);
+                    }
+                }
+            }
+        }
 
         private LobbyQueueManager() {
             CreatePracticeQueue();
@@ -27,6 +67,8 @@ namespace EvoS.LobbyServer
             CreatePvPQueue();
             CreateRankedQueue();
             CreateCustomQueue();
+
+            UpdateInterval = new Timer( new TimerCallback(Update), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         }
         
 
@@ -97,6 +139,42 @@ namespace EvoS.LobbyServer
         {
             LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.SelectedGameType);
             queue.RemovePlayer(client);
+        }
+
+        private void Update(object state)
+        {
+            foreach (PendingGame game in PendingGames)
+            {
+                switch (game.GameStatus)
+                {
+                    case GameStatus.Assembling:
+                        if (game.GameType == GameType.Practice)
+                        {
+                            // autolaunch game
+                            game.GameStatus = GameStatus.Launching; // Put in wait state until game server starts
+                            game.SendNotification();
+
+                            GameManagerHolder.CreateGameManager(game.GameInfo, game.TeamInfo); // Launch new game
+
+                            game.GameStatus = GameStatus.Launched; // Put in wait state until game server starts
+                            game.SendNotification();
+                        }
+                        else
+                        {
+                            // Send to freelancer selection
+                        }
+                        break;
+                }
+            }
+        }
+
+        // Creates a game
+        public static void CreateGame(LobbyGameInfo gameInfo, LobbyTeamInfo teamInfo)
+        {
+            Log.Print(LogType.Debug, "Creating Game...");
+
+            gameInfo.GameStatus = GameStatus.Assembling;
+            LobbyQueueManager.GetInstance().PendingGames.Add(new PendingGame(gameInfo, teamInfo));
         }
 
         private void CreatePracticeQueue()
