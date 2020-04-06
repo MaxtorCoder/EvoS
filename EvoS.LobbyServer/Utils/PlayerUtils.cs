@@ -10,36 +10,37 @@ namespace EvoS.LobbyServer.Utils
 {
     public class PlayerUtils
     {
-        public static PersistedAccountData GetAccountData(ClientConnection connection)
+        public static PersistedAccountData GetAccountData(LobbyServerConnection connection)
         {
             PersistedAccountData accountData = new PersistedAccountData()
             {
-                AccountId = connection.AccountId,
+                AccountId = connection.PlayerInfo.GetAccountId(),
                 AccountComponent = GetAccountComponent(connection),
-                BankComponent = GetBankData(connection.AccountId),
+                BankComponent = GetBankData(connection.PlayerInfo.GetAccountId()),
                 CharacterData = GetCharacterData(),
                 CreateDate = DateTime.Now.AddHours(-1),
-                Handle = connection.UserName,
+                Handle = connection.PlayerInfo.GetHandle(),
                 QuestComponent = new QuestComponent() { ActiveSeason = 9 }, // Provide a SeasonExperience to set Season Level on client
                 SchemaVersion = new SchemaVersion<AccountSchemaChange>(0x1FFFF),
                 UpdateDate = DateTime.Now,
-                UserName = connection.UserName,
+                UserName = connection.PlayerInfo.GetHandle(),
                 InventoryComponent = new InventoryComponent(true)
             };
             return accountData;
         }
 
-        public static AccountComponent GetAccountComponent(ClientConnection connection)
+        public static AccountComponent GetAccountComponent(LobbyServerConnection connection)
         {
+            //TODO this looks awful
             AccountComponent accountComponent = new AccountComponent()
             {
-                LastCharacter = connection.SelectedCharacter,
+                LastCharacter = connection.PlayerInfo.GetCharacterType(),
                 LastRemoteCharacters = new List<CharacterType>(),
                 UIStates = new Dictionary<AccountComponent.UIStateIdentifier, int> { { AccountComponent.UIStateIdentifier.HasViewedFluxHighlight, 1 },{ AccountComponent.UIStateIdentifier.HasViewedGGHighlight, 1 } },
-                UnlockedTitleIDs = GetUnlockedTitleIDs(connection.AccountId),
-                UnlockedBannerIDs = GetUnlockedTitleIDs(connection.AccountId),
-                UnlockedEmojiIDs = GetUnlockedTitleIDs(connection.AccountId),
-                UnlockedOverconIDs = GetUnlockedTitleIDs(connection.AccountId),
+                UnlockedTitleIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
+                UnlockedBannerIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
+                UnlockedEmojiIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
+                UnlockedOverconIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
             };
 
             return accountComponent;

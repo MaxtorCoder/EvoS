@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using EvoS.Framework.Logging;
 using EvoS.Framework.Network.Game.Messages;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
@@ -8,7 +9,7 @@ namespace EvoS.Framework.Game
     public class GameManagerHolder
     {
         private static Dictionary<string, GameManager> _gameManagers = new Dictionary<string, GameManager>();
-        private static Dictionary<long, GameManager> _gameManagersByPlayerAccountID = new Dictionary<long, GameManager>();
+        private static Dictionary<long, GameManager> _gameManagersBySessionToken = new Dictionary<long, GameManager>();
 
         class EmptyRoomNameGameServerException : System.Exception { }
         class InvalidPlayerAccountIDGameServerException : System.Exception { }
@@ -18,7 +19,7 @@ namespace EvoS.Framework.Game
         /// </summary>
         /// <param name="gameInfo">Match configuration</param>
         /// <param name="teamInfo">players information (players + bots)</param>
-        public static void CreateGameManager(LobbyGameInfo gameInfo, LobbyTeamInfo teamInfo)
+        public static void CreateGameManager(LobbyGameInfo gameInfo, LobbyTeamInfo teamInfo, List<long> PlayerSessionTokens)
         {
             if (string.IsNullOrEmpty(gameInfo.GameConfig.RoomName)) {
                 throw new EmptyRoomNameGameServerException();
@@ -38,12 +39,17 @@ namespace EvoS.Framework.Game
                         if (player.AccountId == 0) // Each player must have a unique AccountId
                             throw new InvalidPlayerAccountIDGameServerException();
 
-                        _gameManagersByPlayerAccountID.Add(player.AccountId, gameManager);
+                        _gameManagersBySessionToken.Add(player.AccountId, gameManager);
                     }
+                }
+
+                foreach (long sessionToken in PlayerSessionTokens) {
+                    _gameManagersBySessionToken.Add(sessionToken, gameManager);
                 }
 
                 _gameManagers.Add(gameInfo.GameConfig.RoomName, gameManager);
                 gameManager.LaunchGame();
+                Log.Print(LogType.Debug, "Game Server Launched with name " + gameInfo.GameConfig.RoomName);
             }
             catch (System.Exception e)
             {
@@ -51,50 +57,32 @@ namespace EvoS.Framework.Game
             }
         }
 
-        public static GameManager? FindGameManager(long playerAccountId)
+        public static GameManager? FindGameManager(long sessionToken)
         {
             try
             {
-                return _gameManagersByPlayerAccountID[playerAccountId];
+                return _gameManagersBySessionToken[sessionToken];
             }
             catch (KeyNotFoundException)
             {
+                Log.Print(LogType.Debug, "Available gameManagers:");
+                foreach (var a in _gameManagers)
+                {
+                    Log.Print(LogType.Debug, $"{a.Key}: {a.Value.GameConfig.RoomName}");
+                }
+
+                Log.Print(LogType.Debug, "Available gameManagers per account:");
+                foreach (var a in _gameManagersBySessionToken)
+                {
+                    Log.Print(LogType.Debug, $"{a.Key}: {a.Value.GameConfig.RoomName}");
+                }
                 return null;
             }
-            /*
-            if (!)
-            {
-                _gameManagers.Add(loginRequest.SessionToken, new GameManager());
-                var x = _gameManagers[loginRequest.SessionToken];
-                x.SetTeamPlayerInfo(new List<LobbyPlayerInfo>
-                {
-                    new LobbyPlayerInfo()
-                });
-                x.SetGameInfo(new LobbyGameInfo
-                {
-                    GameConfig = new LobbyGameConfig
-                    {
-                        Map = "VR_Practice"
-//                        Map = "CargoShip_Deathmatch"
-//                        Map = "Casino01_Deathmatch"
-//                        Map = "EvosLab_Deathmatch"
-//                        Map = "Oblivion_Deathmatch"
-//                        Map = "Reactor_Deathmatch"
-//                        Map = "RobotFactory_Deathmatch"
-//                        Map = "Skyway_Deathmatch"
-                    }
-                });
-                x.LaunchGame();
-            }
-
-            return _gameManagers[loginRequest.SessionToken];
-            */
         }
 
         public static void PlayerConnected(long accountId)
         {
-            // We don't need to store this because the has player connected successfully
-            _gameManagersByPlayerAccountID.Remove(accountId);
+            //_gameManagersByPlayerAccountID.Remove(accountId); // do not actually remove the player, if it fails on loading when it tries to reconnect it sends a LoginRequest again and we need the data
         }
     }
 }

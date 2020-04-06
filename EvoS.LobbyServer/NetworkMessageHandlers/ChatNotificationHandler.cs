@@ -8,11 +8,11 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class ChatNotificationHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             ChatNotification notification = (ChatNotification)requestData;
-            notification.SenderAccountId = connection.AccountId;
-            notification.SenderHandle = connection.UserName;
+            notification.SenderAccountId = connection.PlayerInfo.GetAccountId();
+            notification.SenderHandle = connection.PlayerInfo.GetHandle();
 
             await LobbyServer.sendChatAsync(notification, connection);
         }

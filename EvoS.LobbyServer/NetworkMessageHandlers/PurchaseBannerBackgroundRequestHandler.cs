@@ -10,7 +10,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class PurchaseBannerBackgroundRequestHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             var request = (PurchaseBannerBackgroundRequest)requestData;
             var response = new PurchaseBannerBackgroundResponse()

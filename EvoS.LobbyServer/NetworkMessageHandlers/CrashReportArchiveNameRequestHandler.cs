@@ -8,7 +8,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class CrashReportArchiveNameRequestHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             CrashReportArchiveNameResponse response = new CrashReportArchiveNameResponse()
             {

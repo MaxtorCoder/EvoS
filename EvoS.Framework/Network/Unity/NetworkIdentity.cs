@@ -41,16 +41,16 @@ namespace EvoS.Framework.Network.Unity
 
         public short playerControllerId => m_PlayerId;
 
-        public ClientConnection connectionToServer => m_ConnectionToServer;
+        public GameServerConnection connectionToServer => m_ConnectionToServer;
 
-        public ClientConnection connectionToClient => m_ConnectionToClient;
+        public GameServerConnection connectionToClient => m_ConnectionToClient;
 
-        public ReadOnlyCollection<ClientConnection> observers
+        public ReadOnlyCollection<GameServerConnection> observers
         {
             get
             {
-                ReadOnlyCollection<ClientConnection> result;
-                result = m_Observers == null ? null : new ReadOnlyCollection<ClientConnection>(m_Observers);
+                ReadOnlyCollection<GameServerConnection> result;
+                result = m_Observers == null ? null : new ReadOnlyCollection<GameServerConnection>(m_Observers);
                 return result;
             }
         }
@@ -77,7 +77,7 @@ namespace EvoS.Framework.Network.Unity
             m_SceneId = new NetworkSceneId((uint) newSceneId);
         }
 
-        public void RemoveObserverInternal(ClientConnection conn)
+        public void RemoveObserverInternal(GameServerConnection conn)
         {
             if (m_Observers != null)
             {
@@ -86,7 +86,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        public bool OnCheckObserver(ClientConnection conn)
+        public bool OnCheckObserver(GameServerConnection conn)
         {
             for (int i = 0; i < m_NetworkBehaviours.Length; i++)
             {
@@ -356,12 +356,12 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        public void SetConnectionToServer(ClientConnection conn)
+        public void SetConnectionToServer(GameServerConnection conn)
         {
             m_ConnectionToServer = conn;
         }
 
-        public void SetConnectionToClient(ClientConnection conn, short newPlayerControllerId)
+        public void SetConnectionToClient(GameServerConnection conn, short newPlayerControllerId)
         {
             m_PlayerId = newPlayerControllerId;
             m_ConnectionToClient = conn;
@@ -396,7 +396,7 @@ namespace EvoS.Framework.Network.Unity
             m_ObserverConnections.Clear();
         }
 
-        public void AddObserver(ClientConnection conn)
+        public void AddObserver(GameServerConnection conn)
         {
             if (m_Observers == null)
             {
@@ -416,7 +416,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        public void RemoveObserver(ClientConnection conn)
+        public void RemoveObserver(GameServerConnection conn)
         {
             if (m_Observers != null)
             {
@@ -432,8 +432,8 @@ namespace EvoS.Framework.Network.Unity
             {
                 var flag = false;
                 var flag2 = false;
-                var hashSet = new HashSet<ClientConnection>();
-                var hashSet2 = new HashSet<ClientConnection>(m_Observers);
+                var hashSet = new HashSet<GameServerConnection>();
+                var hashSet2 = new HashSet<GameServerConnection>(m_Observers);
                 foreach (var networkBehaviour in m_NetworkBehaviours)
                 {
                     flag2 |= networkBehaviour.OnRebuildObservers(hashSet, initialize);
@@ -497,7 +497,7 @@ namespace EvoS.Framework.Network.Unity
 
                     if (flag)
                     {
-                        m_Observers = new List<ClientConnection>(hashSet);
+                        m_Observers = new List<GameServerConnection>(hashSet);
                         m_ObserverConnections.Clear();
                         foreach (var observer in m_Observers)
                         {
@@ -535,9 +535,9 @@ namespace EvoS.Framework.Network.Unity
 
         private NetworkInstanceId m_NetId;
 
-        private ClientConnection m_ConnectionToServer;
+        private GameServerConnection m_ConnectionToServer;
 
-        private ClientConnection m_ConnectionToClient;
+        private GameServerConnection m_ConnectionToClient;
 
         private short m_PlayerId = -1;
 
@@ -545,7 +545,7 @@ namespace EvoS.Framework.Network.Unity
 
         private HashSet<int> m_ObserverConnections = new HashSet<int>();
 
-        private List<ClientConnection> m_Observers = new List<ClientConnection>();
+        private List<GameServerConnection> m_Observers = new List<GameServerConnection>();
 
         private bool m_Reset;
 

@@ -21,17 +21,17 @@ namespace EvoS.LobbyServer.Utils
             };
         }
 
-        public static void AcceptFriend(ClientConnection connection, FriendUpdateRequest request)
+        public static void AcceptFriend(LobbyServerConnection connection, FriendUpdateRequest request)
         {
 
         }
-        public async static Task AddFriend(ClientConnection connection, FriendUpdateRequest request)
+        public async static Task AddFriend(LobbyServerConnection connection, FriendUpdateRequest request)
         {
-            ClientConnection friend = LobbyServer.GetPlayerByHandle(request.FriendHandle);
+            LobbyServerConnection friend = LobbyServer.GetPlayerByHandle(request.FriendHandle);
             var friendRequest = new FriendUpdateRequest()
             {
-                FriendHandle = connection.UserName,
-                FriendAccountId = connection.AccountId,
+                FriendHandle = connection.PlayerInfo.GetHandle(),
+                FriendAccountId = connection.PlayerInfo.GetAccountId(),
                 FriendOperation = FriendOperation.Add,
                 RequestId = 0,
                 ResponseId = 0
@@ -67,8 +67,8 @@ namespace EvoS.LobbyServer.Utils
                     0,
                     new Framework.Network.Static.FriendInfo()
                     {
-                        FriendHandle = connection.UserName,
-                        FriendAccountId = connection.AccountId,
+                        FriendHandle = connection.PlayerInfo.GetHandle(),
+                        FriendAccountId = connection.PlayerInfo.GetAccountId(),
                         FriendStatus = Framework.Constants.Enums.FriendStatus.RequestReceived,
                     }
                 }},
@@ -79,27 +79,27 @@ namespace EvoS.LobbyServer.Utils
             // TODO: SEND FRIENDSTATUSNOTIFICATION WITH STATUS REQUESTSENT
         }
 
-        public static void BlockFriend(ClientConnection connection, FriendUpdateRequest request)
+        public static void BlockFriend(LobbyServerConnection connection, FriendUpdateRequest request)
         {
 
         }
 
-        public static void NoteFriend(ClientConnection connection, FriendUpdateRequest request)
+        public static void NoteFriend(LobbyServerConnection connection, FriendUpdateRequest request)
         {
 
         }
 
-        public static void RejectFriend(ClientConnection connection, FriendUpdateRequest request)
+        public static void RejectFriend(LobbyServerConnection connection, FriendUpdateRequest request)
         {
 
         }
 
-        public static void RemoveFriend(ClientConnection connection, FriendUpdateRequest request)
+        public static void RemoveFriend(LobbyServerConnection connection, FriendUpdateRequest request)
         {
 
         }
 
-        public static void UnblockFriend(ClientConnection connection, FriendUpdateRequest request)
+        public static void UnblockFriend(LobbyServerConnection connection, FriendUpdateRequest request)
         {
 
         }

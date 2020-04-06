@@ -9,7 +9,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class PlayerMatchDataRequestHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             var response = new PlayerMatchDataResponse()
             {

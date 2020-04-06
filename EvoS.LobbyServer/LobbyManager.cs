@@ -16,10 +16,10 @@ namespace EvoS.LobbyServer
         /// <param name="client"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async static Task OnPlayerConnectToLobby(ClientConnection client, RegisterGameClientRequest request)
+        public async static Task OnPlayerConnectToLobby(LobbyServerConnection client, RegisterGameClientRequest request)
         {
             await new RegisterGameClientRequestHandler().OnMessage(client, request);
-            Log.Print(LogType.Lobby, $"{client.UserName} ID {client.AccountId}, Token {client.SessionToken} connected to the server");
+            Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} ID {client.PlayerInfo.GetAccountId()}, Token {client.SessionToken} connected to the server");
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace EvoS.LobbyServer
         /// <param name="client"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async static Task OnPlayerSelectGameType(ClientConnection client, SetGameSubTypeRequest request)
+        public async static Task OnPlayerSelectGameType(LobbyServerConnection client, SetGameSubTypeRequest request)
         {
             await new SetGameSubTypeRequestHandler().OnMessage(client, request);
         }
@@ -38,50 +38,50 @@ namespace EvoS.LobbyServer
         /// </summary>
         /// <param name="notification"></param>
         /// <returns></returns>
-        public async static Task OnChat(ClientConnection client, ChatNotification notification)
+        public async static Task OnChat(LobbyServerConnection client, ChatNotification notification)
         {
             await new ChatNotificationHandler().OnMessage(client, notification);
         }
 
-        public async static Task OnJoinMatchmakingQueue(ClientConnection client, JoinMatchmakingQueueRequest request)
+        public async static Task OnJoinMatchmakingQueue(LobbyServerConnection client, JoinMatchmakingQueueRequest request)
         {
             await client.SendMessage(new JoinMatchmakingQueueResponse() { ResponseId = request.RequestId });
-            Log.Print(LogType.Lobby, $"{client.UserName} joined Matchmaking queue");
+            Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} joined Matchmaking queue");
 
-            client.SelectedGameType = request.GameType;
+            client.PlayerInfo.SetGameType(request.GameType);
             client.AllyBotDifficulty = request.AllyBotDifficulty;
             client.EnemyBotDifficulty = request.EnemyBotDifficulty;
 
             LobbyQueueManager.AddPlayerToQueue(client);
         }
 
-        public async static Task OnLeaveMatchmakingQueue(ClientConnection client, LeaveMatchmakingQueueRequest request)
+        public async static Task OnLeaveMatchmakingQueue(LobbyServerConnection client, LeaveMatchmakingQueueRequest request)
         {
-            Log.Print(LogType.Lobby, $"{client.UserName} left Matchmaking queue");
+            Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} left Matchmaking queue");
             await new LeaveMatchmakingQueueRequestHandler().OnMessage(client, request);
         }
 
-        public async static Task OnPricesRequest(ClientConnection client, PricesRequest request)
+        public async static Task OnPricesRequest(LobbyServerConnection client, PricesRequest request)
         {
             await new PricesRequestHandler().OnMessage(client, request);
         }
 
-        public async static Task OnCustomKeyBindNotification(ClientConnection client, CustomKeyBindNotification notification)
+        public async static Task OnCustomKeyBindNotification(LobbyServerConnection client, CustomKeyBindNotification notification)
         {
             await Task.CompletedTask;
         }
 
-        public async static Task OnClientStatusReport(ClientConnection client, ClientStatusReport request)
+        public async static Task OnClientStatusReport(LobbyServerConnection client, ClientStatusReport request)
         {
             await Task.CompletedTask;
         }
 
-        public async static Task OnPlayerUpdateStatus(ClientConnection client, PlayerUpdateStatusRequest request)
+        public async static Task OnPlayerUpdateStatus(LobbyServerConnection client, PlayerUpdateStatusRequest request)
         {
             await new PlayerUpdateStatusRequestHandler().OnMessage(client, request);
         }
 
-        public async static Task OnOptionsNotification(ClientConnection client, OptionsNotification notification)
+        public async static Task OnOptionsNotification(LobbyServerConnection client, OptionsNotification notification)
         {
             await new OptionsNotificationHandler().OnMessage(client, notification);
         }
@@ -92,41 +92,41 @@ namespace EvoS.LobbyServer
         /// <param name="client"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async static Task OnPlayerInfoUpdate(ClientConnection client, PlayerInfoUpdateRequest request)
+        public async static Task OnPlayerInfoUpdate(LobbyServerConnection client, PlayerInfoUpdateRequest request)
         {
             await new PlayerInfoUpdateRequestHandler().OnMessage(client, request);
         }
 
-        public async static Task OnPreviousGameInfo(ClientConnection client, PreviousGameInfoRequest request)
+        public async static Task OnPreviousGameInfo(LobbyServerConnection client, PreviousGameInfoRequest request)
         {
             // Ask for last game played, it probably has the information needed to reconnect to an active match
             //TODO
             await Task.CompletedTask;
         }
 
-        public async static Task OnCheckAccountStatus(ClientConnection client, CheckAccountStatusRequest request)
+        public async static Task OnCheckAccountStatus(LobbyServerConnection client, CheckAccountStatusRequest request)
         {
             // Offers quest to the player to complete
             //TODO
             await Task.CompletedTask;
         }
 
-        public async static Task OnCheckRAFStatus(ClientConnection client, CheckRAFStatusRequest request)
+        public async static Task OnCheckRAFStatus(LobbyServerConnection client, CheckRAFStatusRequest request)
         {
             await Task.CompletedTask;
         }
 
-        public async static Task OnPlayerMatchData(ClientConnection client, PlayerMatchDataRequest request)
+        public async static Task OnPlayerMatchData(LobbyServerConnection client, PlayerMatchDataRequest request)
         {
             await new PlayerMatchDataRequestHandler().OnMessage(client, request);
         }
 
-        public async static Task OnCrashReportArchiveNameRequest(ClientConnection client, CrashReportArchiveNameRequest request)
+        public async static Task OnCrashReportArchiveNameRequest(LobbyServerConnection client, CrashReportArchiveNameRequest request)
         {
             await new CrashReportArchiveNameRequestHandler().OnMessage(client, request);
         }
 
-        public async static Task OnClientErrorSummary(ClientConnection client, ClientErrorSummary request)
+        public async static Task OnClientErrorSummary(LobbyServerConnection client, ClientErrorSummary request)
         {
             await Task.CompletedTask;
         }

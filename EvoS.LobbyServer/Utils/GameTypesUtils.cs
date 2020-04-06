@@ -1,4 +1,5 @@
 ﻿using EvoS.Framework.Constants.Enums;
+using EvoS.Framework.Game;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
 using System;
@@ -29,7 +30,7 @@ namespace EvoS.LobbyServer.Utils
         public static GameTypeAvailability GetPracticeGameTypeAvailability() {
             GameTypeAvailability type = new GameTypeAvailability();
             type.MaxWillFillPerTeam = 4;
-            type.IsActive = true;
+            type.IsActive = EvoSGameConfig.GameTypeAvailability_Practice;
             type.QueueableGroupSizes = new Dictionary<int, RequirementCollection> { { 1, null } };
             type.TeamAPlayers = 1;
             type.TeamBBots = 2;
@@ -81,7 +82,7 @@ namespace EvoS.LobbyServer.Utils
         public static GameTypeAvailability GetCoopGameTypeAvailability()
         {
             GameTypeAvailability type = new GameTypeAvailability();
-            type.IsActive = true;
+            type.IsActive = EvoSGameConfig.GameTypeAvailability_Coop;
             type.MaxWillFillPerTeam = 0;
             type.SubTypes = new List<GameSubType>() {
                 new GameSubType() {
@@ -101,16 +102,56 @@ namespace EvoS.LobbyServer.Utils
 
         public static GameTypeAvailability GetPvPGameTypeAvailability() {
             GameTypeAvailability type = new GameTypeAvailability();
-            type.IsActive = false;
+            type.IsActive = EvoSGameConfig.GameTypeAvailability_PvP;
             type.MaxWillFillPerTeam = 0;
-            type.SubTypes = new List<GameSubType>();
+            type.SubTypes = new List<GameSubType>()
+            {
+                new GameSubType
+                {
+                    LocalizedName = "GenericPvP@SubTypes",
+                    GameMapConfigs = new List<GameMapConfig>{ new GameMapConfig(Maps.VR_Practice, true) },
+                    RewardBucket = GameBalanceVars.GameRewardBucketType.NoRewards,
+                    PersistedStatBucket = PersistedStatBucket.DoNotPersist,
+                    TeamBBots = 2,
+                    Mods = new List<GameSubType.SubTypeMods>
+                    {
+                        GameSubType.SubTypeMods.AllowPlayingLockedCharacters,
+                        GameSubType.SubTypeMods.HumansHaveFirstSlots
+                    },
+                    TeamComposition = new TeamCompositionRules
+                    {
+                        Rules = new Dictionary<TeamCompositionRules.SlotTypes, FreelancerSet>
+                        {
+                            {
+                                TeamCompositionRules.SlotTypes.A1, new FreelancerSet
+                                {
+                                    Roles = new List<CharacterRole>
+                                    {
+                                        CharacterRole.Tank,
+                                        CharacterRole.Assassin,
+                                        CharacterRole.Support
+                                    }
+                                }
+                            }, {
+                                TeamCompositionRules.SlotTypes.A2, new FreelancerSet{Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            }, {
+                                TeamCompositionRules.SlotTypes.A4, new FreelancerSet{Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            }, {
+                                TeamCompositionRules.SlotTypes.A3, new FreelancerSet{Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            }, {
+                                TeamCompositionRules.SlotTypes.TeamB, new FreelancerSet{Types = new List<CharacterType> {CharacterType.PunchingDummy}}
+                            }
+                        }
+                    }
+                }
+            };
             return type;
         }
 
         public static GameTypeAvailability GetRankedGameTypeAvailability()
         {
             GameTypeAvailability type = new GameTypeAvailability();
-            type.IsActive = false;
+            type.IsActive = EvoSGameConfig.GameTypeAvailability_Ranked;
             type.MaxWillFillPerTeam = 0;
             type.SubTypes = new List<GameSubType>();
             return type;
@@ -119,7 +160,7 @@ namespace EvoS.LobbyServer.Utils
         public static GameTypeAvailability GetCustomGameTypeAvailability()
         {
             GameTypeAvailability type = new GameTypeAvailability();
-            type.IsActive = false;
+            type.IsActive = EvoSGameConfig.GameTypeAvailability_Custom;
             type.MaxWillFillPerTeam = 0;
             type.SubTypes = new List<GameSubType>();
             return type;

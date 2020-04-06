@@ -7,18 +7,20 @@ namespace EvoS.Framework.Game
 {
     public class GamePlayer
     {
-        public ClientConnection Connection { get; }
-        public LoginRequest LoginRequest { get; }
+        public GameServerConnection Connection { get; }
+        public int PlayerId;
+        public long AccountId;
+        public SessionPlayerInfo PlayerInfo;
         public AddPlayerMessage AddPlayerMessage { get; }
 
         public bool IsLoading;
 
-        public GamePlayer(ClientConnection connection, LoginRequest loginRequest, AddPlayerMessage addPlayerMessage)
+        public GamePlayer(GameServerConnection connection, int playerId, long accountID)
         {
             Connection = connection;
-            LoginRequest = loginRequest;
-            AddPlayerMessage = addPlayerMessage;
             IsLoading = true;
+            PlayerId = playerId;
+            AccountId = accountID;
         }
     }
 }

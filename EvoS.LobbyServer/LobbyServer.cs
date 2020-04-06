@@ -18,7 +18,7 @@ namespace EvoS.LobbyServer
 {
     public class LobbyServer
     {
-        private static List<ClientConnection> ConnectedClients = new List<ClientConnection>();
+        private static List<LobbyServerConnection> ConnectedClients = new List<LobbyServerConnection>();
 
         public static void Main(string[] args = null)
         {
@@ -45,7 +45,7 @@ namespace EvoS.LobbyServer
                 Log.Print(LogType.Lobby, "Waiting for clients to connect...");
                 WebSocket socket = await server.AcceptWebSocketAsync(CancellationToken.None);
                 Log.Print(LogType.Lobby, "Client connected");
-                ClientConnection newClient = new ClientConnection(socket);
+                LobbyServerConnection newClient = new LobbyServerConnection(socket);
                 newClient.OnDisconnect += NewClient_OnDisconnect;
                 ConnectedClients.Add(newClient);
                 new Thread(newClient.HandleConnection).Start();
@@ -54,7 +54,7 @@ namespace EvoS.LobbyServer
 
         private static void NewClient_OnDisconnect(object sender, EventArgs e)
         {
-            ConnectedClients.Remove((ClientConnection)sender);
+            ConnectedClients.Remove((LobbyServerConnection)sender);
         }
 
         private static async void HandleClient(object arg)
@@ -75,7 +75,7 @@ namespace EvoS.LobbyServer
 
         }
 
-        public static async Task sendChatAsync(ChatNotification chat, ClientConnection sender)
+        public static async Task sendChatAsync(ChatNotification chat, LobbyServerConnection sender)
         {
             switch (chat.ConsoleMessageType)
             {
@@ -85,7 +85,7 @@ namespace EvoS.LobbyServer
                 
                 case ConsoleMessageType.WhisperChat:
                     await sender.SendMessage(chat);
-                    ClientConnection recipient = GetPlayerByHandle(chat.RecipientHandle);
+                    LobbyServerConnection recipient = GetPlayerByHandle(chat.RecipientHandle);
                     if (recipient != null)
                         await recipient.SendMessage(chat);
                     break;
@@ -99,20 +99,20 @@ namespace EvoS.LobbyServer
 
         public static async Task sendChatToAll(ChatNotification chat)
         {
-            foreach (ClientConnection con in ConnectedClients)
+            foreach (LobbyServerConnection con in ConnectedClients)
                 await con.SendMessage(chat);
         }
 
-        public static ClientConnection GetPlayerByHandle(string handle)
+        public static LobbyServerConnection GetPlayerByHandle(string handle)
         {
             string DEV_TAG = "";
             if (handle.StartsWith(DEV_TAG)) {
                 handle = handle.Substring(DEV_TAG.Length);
             }
 
-            foreach (ClientConnection con in ConnectedClients)
+            foreach (LobbyServerConnection con in ConnectedClients)
             {
-                if (con.UserName == handle)
+                if (con.PlayerInfo.GetHandle() == handle)
                 {
                     return con;
                 }
@@ -120,11 +120,11 @@ namespace EvoS.LobbyServer
             return null;
         }
 
-        public static ClientConnection GetPlayerByAccountId(long accountId)
+        public static LobbyServerConnection GetPlayerByAccountId(long accountId)
         {
-            foreach (ClientConnection con in ConnectedClients)
+            foreach (LobbyServerConnection con in ConnectedClients)
             {
-                if (con.AccountId == accountId)
+                if (con.PlayerInfo.GetAccountId() == accountId)
                 {
                     return con;
                 }

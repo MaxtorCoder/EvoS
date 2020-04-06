@@ -1,4 +1,5 @@
-﻿using EvoS.Framework.Logging;
+﻿using EvoS.Framework.Game;
+using EvoS.Framework.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,6 +21,18 @@ namespace EvoS.Framework.DataAccess
 
         public static Player GetPlayer(string UserName)
         {
+            if (!EvoSGameConfig.UseDatabase) {
+                return new Player()
+                {
+                    AccountId = DateTime.Now.Ticks,
+                    UserName = UserName,
+                    LastSelectedCharacter = CharacterType.BazookaGirl,
+                    SelectedTitleID = -1,
+                    SelectedForegroundBannerID = -1,
+                    SelectedBackgroundBannerID = -1,
+                    SelectedRibbonID = -1
+                };
+            }
             foreach(var reader in MySQLDB.GetInstance().Query("SELECT AccountId, UserName, LastSelectedCharacter, SelectedTitleId, BannerForegroundId, BannerBackgroundId, RibbonId FROM Users WHERE UserName = ? LIMIT 1", new object[] {UserName}))
             {
                 var player = new Player();

@@ -9,6 +9,6 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     interface IEvosNetworkMessageHandler
     {
-        Task OnMessage(ClientConnection connection, object requestData);
+        Task OnMessage(LobbyServerConnection connection, object requestData);
     }
 }

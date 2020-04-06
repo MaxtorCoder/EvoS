@@ -12,6 +12,7 @@ using System.Net;
 using Newtonsoft.Json;
 using EvoS.Framework.Logging;
 using EvoS.Framework.DataAccess;
+using EvoS.Framework.Network;
 
 namespace EvoS.DirectoryServer
 {
@@ -74,7 +75,7 @@ namespace EvoS.DirectoryServer
                     }
                 }
 
-                request.SessionInfo.SessionToken = DateTime.Now.Ticks;
+                request.SessionInfo.SessionToken = SessionManager.CreateSessionToken();
 
                 response.SessionInfo = request.SessionInfo;
                 response.SessionInfo.AccountId = p.AccountId;

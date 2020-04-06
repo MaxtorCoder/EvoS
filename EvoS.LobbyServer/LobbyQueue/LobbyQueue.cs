@@ -14,7 +14,7 @@ namespace EvoS.LobbyServer.LobbyQueue
     {
         GameType GameType;
         public List<GameSubType> SubTypes;
-        private List<ClientConnection> Players;
+        private List<LobbyServerConnection> Players;
         private LobbyMatchmakingQueueInfo QueueInfo;
         private int MatchId;
 
@@ -22,7 +22,7 @@ namespace EvoS.LobbyServer.LobbyQueue
 
             public bool Empty;
             public bool IsBot;
-            public ClientConnection Client;
+            public LobbyServerConnection Client;
 
             public QueueSlot() {
                 Empty = true;
@@ -36,7 +36,7 @@ namespace EvoS.LobbyServer.LobbyQueue
         {
             GameType = gameType;
             SubTypes = gameConfig.SubTypes;
-            Players = new List<ClientConnection>();
+            Players = new List<LobbyServerConnection>();
             QueueInfo = new LobbyMatchmakingQueueInfo()
             {
                 QueuedPlayers = 0,
@@ -56,9 +56,9 @@ namespace EvoS.LobbyServer.LobbyQueue
             throw new LobbyQueueExceptions.MissingDefaultSubType();
         }
 
-        public void AddPlayer(ClientConnection client)
+        public void AddPlayer(LobbyServerConnection client)
         {
-            Log.Print(LogType.Lobby, $"Player {client.UserName} joined {GameType.ToString()} Queue");
+            Log.Print(LogType.Lobby, $"Player {client.PlayerInfo.GetHandle()} joined {GameType.ToString()} Queue");
 
             Players.Add(client);
             QueueInfo.QueuedPlayers++;
@@ -78,14 +78,14 @@ namespace EvoS.LobbyServer.LobbyQueue
             Update();
         }
 
-        public void RemovePlayer(ClientConnection client)
+        public void RemovePlayer(LobbyServerConnection client)
         {
             Log.Print(LogType.Debug, $"Removing player {client} from {GameType.ToString()} Queue");
             Players.Remove(client);
             QueueInfo.QueuedPlayers--;
         }
 
-        public void Notify(ClientConnection client)
+        public void Notify(LobbyServerConnection client)
         {
             MatchmakingQueueStatusNotification notification = new MatchmakingQueueStatusNotification()
             {
@@ -97,7 +97,7 @@ namespace EvoS.LobbyServer.LobbyQueue
 
         public void Update()
         {
-            foreach(ClientConnection client in Players)
+            foreach(LobbyServerConnection client in Players)
             {
                 Notify(client);
             }
@@ -111,7 +111,7 @@ namespace EvoS.LobbyServer.LobbyQueue
         private void MakeMatchSubType(GameSubType subType) {
 
             TeamCompositionRules composition = subType.TeamComposition;
-            List<ClientConnection> availablePlayers = new List<ClientConnection>(Players);
+            List<LobbyServerConnection> availablePlayers = new List<LobbyServerConnection>(Players);
             LobbyTeamInfo teamInfo = new LobbyTeamInfo() { TeamPlayerInfo = new List<LobbyPlayerInfo>() };
 
             if (
@@ -144,7 +144,7 @@ namespace EvoS.LobbyServer.LobbyQueue
                     GameStatus = GameStatus.Launched,
                     GameServerHost = gameConfig.RoomName,
                     GameServerProcessCode = null,
-                    LoadoutSelectTimeout = TimeSpan.FromSeconds(30),
+                    LoadoutSelectTimeout = EvoSGameConfig.LoadoutSelectTimeout,
                     IsActive = true,
                     LoadoutSelectionStartTimestamp = DateTime.Now.Ticks,
                     SelectionStartTimestamp = DateTime.Now.Ticks,
@@ -166,7 +166,7 @@ namespace EvoS.LobbyServer.LobbyQueue
                     if (!player.IsNPCBot) {
                         //Log.Print(LogType.Debug, $"found player {player.Handle}");
                         for (int i = 0; i < Players.Count; i++) {
-                            if (Players[i].AccountId == player.AccountId)
+                            if (Players[i].PlayerInfo.GetAccountId() == player.AccountId)
                             {
                                 RemovePlayer(Players[i]);
                                 break;
@@ -179,7 +179,7 @@ namespace EvoS.LobbyServer.LobbyQueue
             }
         }
 
-        private bool FillTeam(Team team, TeamCompositionRules compositionRules, int maxPlayers, int maxBots, ref List<ClientConnection> availablePlayers, ref LobbyTeamInfo teamInfo)
+        private bool FillTeam(Team team, TeamCompositionRules compositionRules, int maxPlayers, int maxBots, ref List<LobbyServerConnection> availablePlayers, ref LobbyTeamInfo teamInfo)
         {
             Log.Print(LogType.Debug, $"Filling Team {team.ToString()}");
             int usedPlayers = 0;
@@ -194,7 +194,7 @@ namespace EvoS.LobbyServer.LobbyQueue
 
                 if (usedPlayers != maxPlayers)
                 {
-                    foreach (ClientConnection player in availablePlayers)
+                    foreach (LobbyServerConnection player in availablePlayers)
                     {
                         bool matchedAny = false;
                         bool matched = true;
@@ -208,7 +208,7 @@ namespace EvoS.LobbyServer.LobbyQueue
                                 matchedAny = true;
                                 //Log.Print(LogType.Debug, "Matched slotType " + slotType.ToString());
 
-                                if (!CharacterUtils.MatchesCharacter(player.SelectedCharacter, compositionRules.Rules[slotType]))
+                                if (!CharacterUtils.MatchesCharacter(player.PlayerInfo.GetCharacterType(), compositionRules.Rules[slotType]))
                                 {
                                     //Log.Print(LogType.Debug, "not matched rule");
                                     matched = false;
@@ -231,26 +231,8 @@ namespace EvoS.LobbyServer.LobbyQueue
 
                         if (matchedAny && matched) {
                             //Log.Print(LogType.Debug, "Adding player");
-                            LobbyPlayerInfo info = new LobbyPlayerInfo()
-                            {
-                                AccountId = player.AccountId,
-                                BannerID = player.SelectedBackgroundBannerID,
-                                BotCanTaunt = true,
-                                BotsMasqueradeAsHumans = false,
-                                CharacterInfo = player.GetLobbyCharacterInfo(),
-                                Difficulty = BotDifficulty.Medium,
-                                EffectiveClientAccessLevel = ClientAccessLevel.Full,
-                                EmblemID = player.SelectedForegroundBannerID,
-                                Handle = player.UserName,
-                                IsGameOwner = true,
-                                IsNPCBot = false,
-                                IsLoadTestBot = false,
-                                ReadyState = ReadyState.Ready,
-                                RibbonID = player.SelectedRibbonID,
-                                TeamId = team,
-                                TitleID = player.SelectedTitleID,
-                                TitleLevel = 1,
-                            };
+                            LobbyPlayerInfo info = player.GetLobbyPlayerInfo().Clone();
+                            info.TeamId = team;
                             playerInfo.Add(info);
 
                             filled = true;

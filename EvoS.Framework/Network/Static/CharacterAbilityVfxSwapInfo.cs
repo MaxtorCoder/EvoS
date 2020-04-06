@@ -8,13 +8,15 @@ namespace EvoS.Framework.Network.Static
     [EvosMessage(543)]
     public struct CharacterAbilityVfxSwapInfo : ISerializedItem
     {
-        public void Reset()
+        public CharacterAbilityVfxSwapInfo Reset()
         {
             VfxSwapForAbility0 = 0;
             VfxSwapForAbility1 = 0;
             VfxSwapForAbility2 = 0;
             VfxSwapForAbility3 = 0;
             VfxSwapForAbility4 = 0;
+
+            return this;
         }
 
         public int GetAbilityVfxSwapIdForAbility(int abilityIndex)

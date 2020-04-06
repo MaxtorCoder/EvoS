@@ -9,7 +9,7 @@ namespace EvoS.Framework.DataAccess
     {
         private MySqlConnection connection = null;
         private static MySQLDB Instance;
-        private String SERVER_ADDRESS = "mathyas";
+        private String SERVER_ADDRESS = "192.168.1.6";
         private int SERVER_PORT = 3306;
         private String USERNAME = "root";
         private String PASSWORD = "root";

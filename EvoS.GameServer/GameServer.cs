@@ -11,7 +11,7 @@ namespace EvoS.GameServer
 {
     public class GameServer
     {
-        private static List<ClientConnection> ConnectedClients = new List<ClientConnection>();
+        private static List<GameServerConnection> ConnectedClients = new List<GameServerConnection>();
 
         public static void Main()
         {
@@ -38,7 +38,7 @@ namespace EvoS.GameServer
                 Log.Print(LogType.Game, "Waiting for clients to connect...");
                 WebSocket socket = await server.AcceptWebSocketAsync(CancellationToken.None);
                 Log.Print(LogType.Game, "Client connected");
-                ClientConnection newClient = new ClientConnection(socket);
+                GameServerConnection newClient = new GameServerConnection(socket);
                 ConnectedClients.Add(newClient);
 
                 new Thread(newClient.HandleConnection).Start();

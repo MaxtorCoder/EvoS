@@ -19,46 +19,33 @@ using EvoS.Framework.Constants.Enums;
 
 namespace EvoS.LobbyServer
 {
-    public class ClientConnection : IComparable
+    public class LobbyServerConnection : IComparable
     {
         private WebSocket Socket;
-        public long AccountId;
-        public string UserName;
         public string StatusString;
-        public CharacterType SelectedCharacter;
 
-        public GameType SelectedGameType;
-        public ushort SelectedSubTypeMask;
         public BotDifficulty AllyBotDifficulty;
         public BotDifficulty EnemyBotDifficulty;
 
-        public PlayerLoadout Loadout;
-        public int SelectedTitleID;
-        public int SelectedForegroundBannerID;
-        public int SelectedBackgroundBannerID;
-        public int SelectedRibbonID = -1;
+        public SessionPlayerInfo PlayerInfo;
+
         public long SessionToken;
 
         public static Dictionary<Type, MethodBase> LobbyManagerHandlers = new Dictionary<Type, MethodBase>();
         
 
-        public ClientConnection(WebSocket socket)
+        public LobbyServerConnection(WebSocket socket)
         {
             Socket = socket;
-            SelectedCharacter = CharacterType.Scoundrel;
-            Loadout = new PlayerLoadout();
-            SelectedSubTypeMask = 0;
-            AllyBotDifficulty = BotDifficulty.Easy;
-            EnemyBotDifficulty = BotDifficulty.Easy;
         }
 
         public String ToString() {
-            return this.UserName;
+            return PlayerInfo.GetHandle();
         }
 
         public void Disconnect()
         {
-            Log.Print(LogType.Lobby, $"Client {UserName} disconnected.");
+            Log.Print(LogType.Lobby, $"Client {PlayerInfo.GetHandle()} disconnected.");
             OnDisconnect.Invoke(this, new EventArgs());
             if (Socket.IsConnected)
                 Socket.Close();
@@ -69,12 +56,15 @@ namespace EvoS.LobbyServer
         {
             var responseStream = new MemoryStream();
             EvosSerializer.Instance.Serialize(responseStream, message);
-            Console.WriteLine("SendMessage: " + message.ToString());
-            using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
-            {
-                await writer.WriteAsync(responseStream.ToArray());
-                await writer.FlushAsync();
-            }    
+            Console.WriteLine("SendMessage("+ PlayerInfo.GetHandle() + "): " + message.ToString());
+            lock (Socket){
+                using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
+                {
+                    writer.WriteAsync(responseStream.ToArray());
+                    writer.FlushAsync();
+                }
+            }
+            
         }
 
         public event EventHandler OnDisconnect;
@@ -139,8 +129,16 @@ namespace EvoS.LobbyServer
                             Log.Print(LogType.Error, $"Unhandled type: {requestType.Name}");
                         } else {
                             Task task = (Task)method.Invoke(null, new object[] { this, requestData });
-                            await task.ConfigureAwait(false);
-                            await task;
+                            try
+                            {
+                                await task.ConfigureAwait(false);
+                                await task;
+                            }
+                            catch (vtortola.WebSockets.WebSocketException e) {
+                                Log.Print(LogType.Error, PlayerInfo.GetHandle() + "::" + e.Message);
+                                Disconnect();
+                            }
+                            
                         }
                     }
                 }
@@ -149,80 +147,43 @@ namespace EvoS.LobbyServer
             }
         }
 
-        public LobbyPlayerInfo CreateLobbyPlayerInfo()
+        public LobbyPlayerInfo GetLobbyPlayerInfo()
         {
-            LobbyPlayerInfo info = new LobbyPlayerInfo();
-
-            info.AccountId = this.AccountId;
-            info.Handle = this.UserName;
-            info.TitleID = this.SelectedTitleID;
-            info.TitleLevel = 0;
-
-            info.BannerID = this.SelectedBackgroundBannerID;
-            info.EmblemID = this.SelectedForegroundBannerID;
-            info.RibbonID = this.SelectedRibbonID;
-            info.IsGameOwner = true;
-            info.IsLoadTestBot = false;
-            info.IsNPCBot = false;
-            info.BotsMasqueradeAsHumans = false;
-            info.CharacterInfo = GetLobbyCharacterInfo();
-            //public List<LobbyCharacterInfo> RemoteCharacterInfos = new List<LobbyCharacterInfo>();
-            info.EffectiveClientAccessLevel = ClientAccessLevel.Full;
-
-            return info;
-        }
-
-        public LobbyCharacterInfo GetLobbyCharacterInfo()
-        {
-            return new LobbyCharacterInfo()
-            {
-                CharacterType = this.SelectedCharacter,
-                CharacterSkin = this.Loadout.Skin,
-                CharacterCards = this.Loadout.Cards,
-                CharacterMods = this.Loadout.Mods,
-                CharacterAbilityVfxSwaps = this.Loadout.AbilityVfxSwaps,
-                CharacterTaunts = this.Loadout.Taunts,
-                CharacterLoadouts = new List<CharacterLoadout>() { GetCharacterLoadout() },
-                CharacterMatches = 0,
-                CharacterLevel = 1
-            };
+            return this.PlayerInfo.GetLobbyPlayerInfo();
         }
 
         private static MethodBase GetHandler(Type type)
         {
             MethodBase method = null;
+            lock (LobbyManagerHandlers)
+            {
+                try
+                {
+                    method = LobbyManagerHandlers[type];
 
-            try
-            {
-                method = LobbyManagerHandlers[type];
-            }
-            catch(KeyNotFoundException e)
-            {
-                
-                MethodInfo[] methods = typeof(LobbyManager).GetMethods(BindingFlags.Static | BindingFlags.Public);
-                method = Type.DefaultBinder.SelectMethod(BindingFlags.Default, methods, new Type[] { typeof(ClientConnection), type }, null);
-                if(method != null) {
-                    LobbyManagerHandlers.Add(type, method);
-                    //Log.Print(LogType.Debug, $"Added method for {type.Name}: {method.ToString()}");
                 }
-                
-            }
+                catch (KeyNotFoundException e)
+                {
 
+                    MethodInfo[] methods = typeof(LobbyManager).GetMethods(BindingFlags.Static | BindingFlags.Public);
+                    method = Type.DefaultBinder.SelectMethod(BindingFlags.Default, methods, new Type[] { typeof(LobbyServerConnection), type }, null);
+                    if (method != null)
+                    {
+                        LobbyManagerHandlers.Add(type, method);
+                        //Log.Print(LogType.Debug, $"Added method for {type.Name}: {method.ToString()}");
+                    }
+
+                }
+            }
             
 
             return method;
         }
 
-        public CharacterLoadout GetCharacterLoadout()
-        {
-            CharacterLoadout ret = new CharacterLoadout(this.Loadout.Mods, this.Loadout.AbilityVfxSwaps, this.Loadout.Name);
-            return ret;
-        }
-
         public int CompareTo(object obj)
         {
-            if (((ClientConnection)obj).SessionToken - this.SessionToken == 0) return 0;
-            else if(((ClientConnection)obj).SessionToken > this.SessionToken) return -1;
+            if (((LobbyServerConnection)obj).SessionToken - this.SessionToken == 0) return 0;
+            else if(((LobbyServerConnection)obj).SessionToken > this.SessionToken) return -1;
             return 1;
         }
     }

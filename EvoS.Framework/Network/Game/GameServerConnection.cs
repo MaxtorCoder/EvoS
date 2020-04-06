@@ -14,7 +14,7 @@ namespace EvoS.Framework.Network.Game
 {
     public delegate void UNetGameMessageDelegate<T>(GamePlayer player, T msg) where T : MessageBase;
 
-    public class ClientConnection
+    public class GameServerConnection
     {
         protected vtortola.WebSockets.WebSocket Socket;
         public GameManager ActiveGame { get; set; }
@@ -25,14 +25,15 @@ namespace EvoS.Framework.Network.Game
         protected HashSet<NetworkIdentity> _visList = new HashSet<NetworkIdentity>();
         protected HashSet<NetworkInstanceId> _clientOwnedObjects;
         public bool isReady;
+        public long SessionToken;
         protected static int _connectionIdCounter;
         protected uint lastMessageOutgoingSeqNum;
         public readonly int connectionId = Interlocked.Increment(ref _connectionIdCounter);
         protected NetworkWriter m_Writer = new NetworkWriter();
         
-        protected ClientConnection() {}
+        protected GameServerConnection() {}
 
-        public ClientConnection(vtortola.WebSockets.WebSocket socket)
+        public GameServerConnection(vtortola.WebSockets.WebSocket socket)
         {
             Socket = socket;
             isReady = true;
@@ -48,24 +49,29 @@ namespace EvoS.Framework.Network.Game
 
         protected void SetupLoginHandler()
         {
-            // The client sends AddPlayer and then LoginRequest, instead we'll use the AccountId to determine
+            // The client sends AddPlayer and then LoginRequest, instead we'll use the SessionToken to determine
             // which Game the connection is for
 
             AddPlayerMessage addPlayerMessage = null;
-            Serializer.RegisterHandler(GameMessage.AddPlayerMessage, msg => { addPlayerMessage = (AddPlayerMessage) msg; });
-            Serializer.RegisterHandler(GameMessage.LoginRequest, msg =>
+            Serializer.RegisterHandler(37, msg => { addPlayerMessage = (AddPlayerMessage) msg; });
+            Serializer.RegisterHandler((short)MyMsgType.LoginRequest, msg =>
             {
                 var loginReq = (LoginRequest) msg;
-                long accountId = long.Parse(loginReq.AccountId);
+                long accountId = Convert.ToInt64(loginReq.AccountId);
+                SessionToken = Convert.ToInt64(loginReq.SessionToken);
+
+                Log.Print(LogType.Error, loginReq.PlayerId);
+                
 
                 if (addPlayerMessage == null)
                 {
                     Log.Print(LogType.Error, "Received LoginRequest before AddPlayerMessage!");
-                    Disconnect();
-                    return;
+                    //Disconnect();
+                    //return;
                 }
 
-                var gameManager = GameManagerHolder.FindGameManager(accountId);
+                Log.Print(LogType.Debug, $"Player: {accountId}");
+                var gameManager = GameManagerHolder.FindGameManager(SessionToken);
                 GameManagerHolder.PlayerConnected(accountId);
                 if (gameManager == null)
                 {
@@ -76,13 +82,13 @@ namespace EvoS.Framework.Network.Game
                 
 
                 // Send login ok response
-                Send(GameMessage.LoginReponse, new LoginResponse
+                Send((short)MyMsgType.LoginResponse, new LoginResponse
                 {
                     Reconnecting = false,
                     Success = true
                 });
 
-                gameManager.AddPlayer(this, loginReq, addPlayerMessage);
+                gameManager.OnPlayerConnect(this, loginReq);
             });
         }
 

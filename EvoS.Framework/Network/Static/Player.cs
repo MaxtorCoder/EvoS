@@ -11,7 +11,7 @@ namespace EvoS.Framework.Network.Static
         public int m_connectionId;
         public long m_accountId;
 
-        public Player(ClientConnection connection, long accountId)
+        public Player(GameServerConnection connection, long accountId)
         {
             m_valid = true;
             m_id = checked(s_nextId++);

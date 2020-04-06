@@ -5,7 +5,7 @@ using EvoS.Framework.Network.Unity;
 
 namespace EvoS.Framework.Network.Game
 {
-    public class FakeClientConnection : ClientConnection
+    public class FakeClientConnection : GameServerConnection
     {
         public FakeClientConnection()
         {

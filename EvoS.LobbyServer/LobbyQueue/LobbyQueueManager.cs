@@ -27,6 +27,7 @@ namespace EvoS.LobbyServer
         protected class PendingGame {
             public LobbyGameInfo GameInfo;
             public LobbyTeamInfo TeamInfo;
+            public List<long> PlayerSessionTokens;
             public String Name => GameInfo.GameConfig.RoomName;
             public GameStatus GameStatus
             {
@@ -39,6 +40,13 @@ namespace EvoS.LobbyServer
             {
                 GameInfo = gameInfo;
                 TeamInfo = teamInfo;
+                PlayerSessionTokens = new List<long>();
+                foreach(LobbyPlayerInfo playerInfo in TeamInfo.TeamPlayerInfo){
+                    if (!playerInfo.IsNPCBot) {
+                        LobbyServerConnection player = LobbyServer.GetPlayerByAccountId(playerInfo.AccountId);
+                        PlayerSessionTokens.Add(player.SessionToken);
+                    }
+                }
             }
 
             public void SendNotification()
@@ -47,7 +55,7 @@ namespace EvoS.LobbyServer
                 {
                     if (!playerInfo.IsNPCBot)
                     {
-                        ClientConnection player = LobbyServer.GetPlayerByAccountId(playerInfo.AccountId);
+                        LobbyServerConnection player = LobbyServer.GetPlayerByAccountId(playerInfo.AccountId);
                         //Log.Print(LogType.Debug, $"Sending notification to {Players[i]}");
                         GameInfoNotification gameInfoNotification = new GameInfoNotification()
                         {
@@ -92,9 +100,9 @@ namespace EvoS.LobbyServer
             
         }
 
-        public static void AddPlayerToQueue(ClientConnection client)
+        public static void AddPlayerToQueue(LobbyServerConnection client)
         {
-            LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.SelectedGameType);
+            LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.PlayerInfo.GetGameType());
             queue.AddPlayer(client);
             /*
             if (client.SelectedGameType == GameType.Practice)
@@ -135,10 +143,40 @@ namespace EvoS.LobbyServer
             */
         }
 
-        public static void RemovePlayerFromQueue(ClientConnection client)
+        public static void RemovePlayerFromQueue(LobbyServerConnection client)
         {
-            LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.SelectedGameType);
+            LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.PlayerInfo.GetGameType());
             queue.RemovePlayer(client);
+        }
+
+        private void StartGame(PendingGame game)
+        {
+            game.GameInfo.GameServerProcessCode = "LobbyQueueManager.StartGame";
+            foreach(LobbyPlayerInfo playerInfo in game.TeamInfo.TeamPlayerInfo) {
+                if (!playerInfo.IsNPCBot) {
+                    LobbyServerConnection player = LobbyServer.GetPlayerByAccountId(playerInfo.AccountId);
+                    player.SendMessage(new GameAssignmentNotification
+                    {
+                        GameInfo = game.GameInfo,
+                        GameResult = GameResult.NoResult,
+                        GameplayOverrides = DummyLobbyData.CreateLobbyGameplayOverrides(),
+                        PlayerInfo = player.GetLobbyPlayerInfo(),
+                        Reconnection = false,
+                        Observer = false
+                    }); ;
+                }
+            }
+            game.GameStatus = GameStatus.Launching; // Put in wait state until game server starts
+            game.SendNotification();
+
+            new Task(() => {
+                GameManagerHolder.CreateGameManager(game.GameInfo, game.TeamInfo, game.PlayerSessionTokens); // Launch new game
+                game.GameStatus = GameStatus.Launched; // Put in wait state until game server starts
+                game.SendNotification();
+
+                PendingGames.Remove(game);
+
+            }).Start();
         }
 
         private void Update(object state)
@@ -150,28 +188,38 @@ namespace EvoS.LobbyServer
                     case GameStatus.Assembling:
                         if (game.GameType == GameType.Practice)
                         {
-                            // autolaunch game
-                            game.GameStatus = GameStatus.Launching; // Put in wait state until game server starts
-                            game.SendNotification();
-
-                            GameManagerHolder.CreateGameManager(game.GameInfo, game.TeamInfo); // Launch new game
-
-                            game.GameStatus = GameStatus.Launched; // Put in wait state until game server starts
-                            game.SendNotification();
+                            StartGame(game);
                         }
                         else
                         {
-                            // Send to freelancer selection
+                            // TODO: maybe this is FreelancerSelecting
+                            game.GameStatus = GameStatus.LoadoutSelecting;
+                            game.SendNotification();
+
+                            new Task(() => { 
+                                Thread.Sleep(game.GameInfo.LoadoutSelectTimeout);
+                                StartGame(game);
+                            })
+                            .Start();
                         }
                         break;
                 }
             }
         }
 
-        // Creates a game
+        
+        /// <summary>
+        /// Creates a new game and puts all players in the pending games queue
+        /// </summary>
+        /// <param name="gameInfo"></param>
+        /// <param name="teamInfo"></param>
         public static void CreateGame(LobbyGameInfo gameInfo, LobbyTeamInfo teamInfo)
         {
-            Log.Print(LogType.Debug, "Creating Game...");
+            Log.Print(LogType.Debug, "Creating Game for playes:");
+            foreach (var a in teamInfo.TeamPlayerInfo) {
+                Log.Print(LogType.Debug, $"   player {a.Handle} in team {a.TeamId.ToString()}");
+            }
+            
 
             gameInfo.GameStatus = GameStatus.Assembling;
             LobbyQueueManager.GetInstance().PendingGames.Add(new PendingGame(gameInfo, teamInfo));
@@ -182,7 +230,7 @@ namespace EvoS.LobbyServer
             LobbyGameConfig gameConfig = new LobbyGameConfig()
             {
                 GameType = GameType.Practice,
-                IsActive = true,
+                IsActive = false,
                 GameOptionFlags = GameOptionFlag.EnableTeamAIOutput | GameOptionFlag.NoInputIdleDisconnect,
                 Spectators = 0,
                 TeamAPlayers = 1,
@@ -244,7 +292,7 @@ namespace EvoS.LobbyServer
             LobbyGameConfig gameConfig = new LobbyGameConfig()
             {
                 GameType = GameType.Coop,
-                IsActive = true,
+                IsActive = false,
                 GameOptionFlags = GameOptionFlag.EnableTeamAIOutput | GameOptionFlag.ReplaceHumansWithBots,
                 Spectators = 0,
                 TeamAPlayers = 4,
@@ -303,6 +351,64 @@ namespace EvoS.LobbyServer
 
         private void CreatePvPQueue()
         {
+            LobbyGameConfig gameConfig = new LobbyGameConfig()
+            {
+                GameType = GameType.PvP,
+                IsActive = true,
+                GameOptionFlags = GameOptionFlag.EnableTeamAIOutput | GameOptionFlag.ReplaceHumansWithBots,
+                Spectators = 0,
+                TeamAPlayers = 1,
+                TeamABots = 0,
+                TeamBPlayers = 1,
+                TeamBBots = 0,
+                ResolveTimeoutLimit = 160,
+                RoomName = "default",
+                Map = String.Empty,
+                SubTypes = new List<GameSubType>
+                {
+                    new GameSubType
+                    {
+                        DuplicationRule = FreelancerDuplicationRuleTypes.noneInTeam,
+                        GameMapConfigs = GameMapConfig.GetDeatmatchMaps(),
+                        InstructionsToDisplay = GameSubType.GameLoadScreenInstructions.Default,
+                        LocalizedName = "GenericPvP@SubTypes",
+                        PersistedStatBucket = PersistedStatBucket.Deathmatch_Unranked,
+                        RewardBucket = GameBalanceVars.GameRewardBucketType.HumanVsBotsRewards,
+                        RoleBalancingRule = FreelancerRoleBalancingRuleTypes.balanceBothTeams,
+                        TeamAPlayers = 1,
+                        TeamABots = 0,
+                        TeamBPlayers = 1,
+                        TeamBBots = 0,
+                        Mods = new List<GameSubType.SubTypeMods>
+                        {
+                            GameSubType.SubTypeMods.HumansHaveFirstSlots,
+                            //GameSubType.SubTypeMods.ShowWithAITeammates
+                        },
+                        TeamComposition = new TeamCompositionRules
+                        {
+                            Rules = new Dictionary<TeamCompositionRules.SlotTypes, FreelancerSet>
+                            {
+                                {
+                                    TeamCompositionRules.SlotTypes.TeamA,
+                                    new FreelancerSet
+                                    {
+                                        Roles = new List<CharacterRole> { CharacterRole.Assassin, CharacterRole.Tank, CharacterRole.Support },
+                                    }
+                                },
+                                {
+                                    TeamCompositionRules.SlotTypes.TeamB,
+                                    new FreelancerSet
+                                    {
+                                        Roles = new List<CharacterRole> { CharacterRole.Assassin, CharacterRole.Tank, CharacterRole.Support }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            LobbyQueue.LobbyQueue queue = new LobbyQueue.LobbyQueue(GameType.PvP, gameConfig);
+            Queues.Add(GameType.PvP, queue);
         }
 
         private void CreateRankedQueue()

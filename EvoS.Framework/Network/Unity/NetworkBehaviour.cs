@@ -12,8 +12,8 @@ namespace EvoS.Framework.Network.Unity
     public class NetworkBehaviour : MonoBehaviour
     {
         public NetworkInstanceId netId => myView.netId;
-        [JsonIgnore] public ClientConnection connectionToServer => myView.connectionToServer;
-        [JsonIgnore] public ClientConnection connectionToClient => myView.connectionToClient;
+        [JsonIgnore] public GameServerConnection connectionToServer => myView.connectionToServer;
+        [JsonIgnore] public GameServerConnection connectionToClient => myView.connectionToClient;
         public short playerControllerId => myView.playerControllerId;
         protected uint syncVarDirtyBits => m_SyncVarDirtyBits;
 
@@ -559,12 +559,12 @@ namespace EvoS.Framework.Network.Unity
         {
         }
 
-        public virtual bool OnRebuildObservers(HashSet<ClientConnection> observers, bool initialize)
+        public virtual bool OnRebuildObservers(HashSet<GameServerConnection> observers, bool initialize)
         {
             return false;
         }
 
-        public virtual bool OnCheckObserver(ClientConnection conn)
+        public virtual bool OnCheckObserver(GameServerConnection conn)
         {
             return true;
         }

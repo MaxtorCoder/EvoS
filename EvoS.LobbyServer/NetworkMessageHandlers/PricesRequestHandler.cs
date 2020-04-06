@@ -7,7 +7,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class PricesRequestHandler : IEvosNetworkMessageHandler
     {
-        public Task OnMessage(ClientConnection connection, object requestData)
+        public Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             return Task.CompletedTask;
         }

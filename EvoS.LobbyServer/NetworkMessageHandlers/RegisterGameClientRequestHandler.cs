@@ -18,18 +18,21 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
     /// </summary>
     class RegisterGameClientRequestHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             RegisterGameClientRequest request = (RegisterGameClientRequest) requestData;
             PlayerData.Player p = PlayerData.GetPlayer(request.SessionInfo.Handle);
-            connection.AccountId = p.AccountId;
-            connection.UserName = p.UserName;
-            connection.SelectedTitleID = p.SelectedTitleID;
-            connection.SelectedBackgroundBannerID = p.SelectedBackgroundBannerID;
-            connection.SelectedForegroundBannerID = p.SelectedForegroundBannerID;
-            connection.SelectedRibbonID = p.SelectedTitleID;
-            connection.SelectedCharacter = p.LastSelectedCharacter;
+
             connection.SessionToken = request.SessionInfo.SessionToken;
+
+            connection.PlayerInfo = SessionManager.Get(connection.SessionToken);
+            connection.PlayerInfo.SetHandle(p.UserName);
+            connection.PlayerInfo.SetAccountId(p.AccountId);
+            connection.PlayerInfo.SetBannerID(p.SelectedBackgroundBannerID);
+            connection.PlayerInfo.SetEmblemID(p.SelectedForegroundBannerID);
+            connection.PlayerInfo.SetRibbonID(p.SelectedRibbonID);
+            connection.PlayerInfo.SetTitleID(p.SelectedTitleID);
+            connection.PlayerInfo.SetCharacterType(p.LastSelectedCharacter);
 
             // Send RegisterGameClientResponse
             await Send_RegisterGameClientResponse(connection, request);
@@ -42,27 +45,27 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         }
 
 
-        private async Task Send_RegisterGameClientResponse(ClientConnection connection, RegisterGameClientRequest request)
+        private async Task Send_RegisterGameClientResponse(LobbyServerConnection connection, RegisterGameClientRequest request)
         {
             Log.Print(LogType.Debug, "Sending Send_RegisterGameClientResponse");
             var response = RegisterGameClient(request);
             await connection.SendMessage(response);
         }
 
-        private async Task Send_LobbyServerReadyNotification(ClientConnection connection)
+        private async Task Send_LobbyServerReadyNotification(LobbyServerConnection connection)
         {
             var lobbyServerReady = LobbyServerReady(connection);
             await connection.SendMessage(lobbyServerReady);
         }
 
-        private async Task Send_ChatConnectedNotification(ClientConnection connection)
+        private async Task Send_ChatConnectedNotification(LobbyServerConnection connection)
         {
-            ChatNotification connectedMessage = new ChatNotification() { Text = $"{connection.UserName} has connected", ConsoleMessageType = ConsoleMessageType.SystemMessage };
+            ChatNotification connectedMessage = new ChatNotification() { Text = $"{connection.PlayerInfo.GetHandle()} has connected", ConsoleMessageType = ConsoleMessageType.SystemMessage };
             await LobbyServer.sendChatToAll(connectedMessage);
         }
 
 
-        private LobbyServerReadyNotification LobbyServerReady(ClientConnection connection)
+        private LobbyServerReadyNotification LobbyServerReady(LobbyServerConnection connection)
         {
             // search here
             return new LobbyServerReadyNotification
@@ -76,8 +79,8 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 FriendStatus = null,//new FriendStatusNotification {FriendList = FriendData.GetFriendList(connection.AccountId)},
                 GroupInfo = new LobbyPlayerGroupInfo
                 {
-                    SelectedQueueType = GameType.Practice,
-                    MemberDisplayName = connection.UserName,
+                    SelectedQueueType = GameType.PvP,
+                    MemberDisplayName = connection.PlayerInfo.GetHandle(),
                     //ChararacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(CharacterType.Archer),
                     Members = new List<UpdateGroupMemberData>()
                 },

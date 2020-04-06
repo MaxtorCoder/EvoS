@@ -8,7 +8,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class PurchaseLoadoutSlotRequestHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             var response = new PurchaseLoadoutSlotResponse()
             {

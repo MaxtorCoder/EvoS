@@ -415,6 +415,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
 
         public override void OnDeserialize(NetworkReader reader, bool initialState)
         {
+            Log.Print(LogType.Network, "ActorTeamSensitiveData OnDeserialize called!");
             uint setBits = uint.MaxValue;
             if (!initialState)
                 setBits = reader.ReadPackedUInt32();

@@ -8,7 +8,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class PlayerUpdateStatusRequestHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             PlayerUpdateStatusRequest request = (PlayerUpdateStatusRequest)requestData;
             connection.StatusString = request.StatusString;

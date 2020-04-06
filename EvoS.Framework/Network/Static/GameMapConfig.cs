@@ -32,12 +32,13 @@ namespace EvoS.Framework.Network.Static
         {
             return new List<GameMapConfig>
             {
-                new GameMapConfig(Maps.CargoShip_Deathmatch),
+                // TODO : uncomment later, some maps fail to load so ill use only one for debugging
+                //new GameMapConfig(Maps.CargoShip_Deathmatch),
                 //new GameMapConfig(Maps.Casino01_Deathmatch),
-                new GameMapConfig(Maps.EvosLab_Deathmatch),
-                new GameMapConfig(Maps.Oblivion_Deathmatch),
-                new GameMapConfig(Maps.Reactor_Deathmatch),
-                new GameMapConfig(Maps.RobotFactory_Deathmatch),
+                //new GameMapConfig(Maps.EvosLab_Deathmatch),
+                //new GameMapConfig(Maps.Oblivion_Deathmatch),
+                //new GameMapConfig(Maps.Reactor_Deathmatch),
+                //new GameMapConfig(Maps.RobotFactory_Deathmatch),
                 new GameMapConfig(Maps.Skyway_Deathmatch),
             };
         }

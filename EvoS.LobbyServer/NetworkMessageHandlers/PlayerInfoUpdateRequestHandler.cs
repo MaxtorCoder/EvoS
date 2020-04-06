@@ -11,11 +11,11 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class PlayerInfoUpdateRequestHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             PlayerInfoUpdateRequest request = (PlayerInfoUpdateRequest) requestData;
             if (request.GameType != null)
-                connection.SelectedGameType = request.GameType.Value;
+                connection.PlayerInfo.SetGameType(request.GameType.Value);
 
 
             // Change ReadyState
@@ -24,7 +24,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 if (request.PlayerInfoUpdate.ContextualReadyState.Value.ReadyState == ReadyState.Ready)
                 {
                     //LobbyQueueManager.HandleReady(connection);
-                    Log.Print(LogType.Debug, "OLD HANDLE CHANGE READYSTATE");
+                    Log.Print(LogType.Debug, "HANDLE CHANGE READYSTATE");
                     LobbyQueueManager.AddPlayerToQueue(connection);
                 }
                 else
@@ -36,8 +36,8 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             // Change Selected Freelancer
             else if (request.PlayerInfoUpdate.CharacterType != null)
             {
-                connection.SelectedCharacter = request.PlayerInfoUpdate.CharacterType.Value;
-                PlayerData.SaveSelectedCharacter(connection.AccountId, (int)connection.SelectedCharacter);
+                connection.PlayerInfo.SetCharacterType(request.PlayerInfoUpdate.CharacterType.Value);
+                PlayerData.SaveSelectedCharacter(connection.PlayerInfo.GetAccountId(), (int)connection.PlayerInfo.GetCharacterType());
 
                 var accountDataUpdate = new PlayerAccountDataUpdateNotification
                 {
@@ -47,7 +47,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 await connection.SendMessage(accountDataUpdate);
                 var response = new PlayerInfoUpdateResponse
                 {
-                    CharacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(connection.SelectedCharacter),//TODO
+                    CharacterInfo = connection.PlayerInfo.GetLobbyPlayerInfo().CharacterInfo,
                     OriginalPlayerInfoUpdate = request.PlayerInfoUpdate,
                     ResponseId = request.RequestId
                 };
@@ -58,27 +58,27 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             //Change Skin
             else if (request.PlayerInfoUpdate.CharacterSkin != null)
             {
-                connection.Loadout.Skin = request.PlayerInfoUpdate.CharacterSkin.Value;
+                connection.PlayerInfo.SetSkin(request.PlayerInfoUpdate.CharacterSkin.Value);
             }
             //Chnage Catalyst
             else if (request.PlayerInfoUpdate.CharacterCards != null)
             {
-                connection.Loadout.Cards = request.PlayerInfoUpdate.CharacterCards.Value;
+                connection.PlayerInfo.SetCards(request.PlayerInfoUpdate.CharacterCards.Value);
             }
             // Chnage Mods
             else if (request.PlayerInfoUpdate.CharacterMods != null)
             {
-                connection.Loadout.Mods = request.PlayerInfoUpdate.CharacterMods.Value;
+                connection.PlayerInfo.SetMods(request.PlayerInfoUpdate.CharacterMods.Value);
             }
             // Change Vfx
             else if (request.PlayerInfoUpdate.CharacterAbilityVfxSwaps != null)
             {
-                connection.Loadout.AbilityVfxSwaps = request.PlayerInfoUpdate.CharacterAbilityVfxSwaps.Value;
+                connection.PlayerInfo.SetAbilityVfxSwaps(request.PlayerInfoUpdate.CharacterAbilityVfxSwaps.Value);
             }
             // Chnage Loadout
             else if (request.PlayerInfoUpdate.CharacterLoadoutChanges != null)
             {
-                Log.Print(LogType.Warning, "Chnages in loadout not implemented (PlayerInfoUpdateRequestHandler.cs)");
+                Log.Print(LogType.Warning, "Changes in loadout not implemented yet(PlayerInfoUpdateRequestHandler.cs)");
             }
 
         }

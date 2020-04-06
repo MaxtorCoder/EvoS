@@ -9,7 +9,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 {
     class PurchaseBannerForegroundRequestHandler : IEvosNetworkMessageHandler
     {
-        public async Task OnMessage(ClientConnection connection, object requestData)
+        public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             var request = (PurchaseBannerForegroundRequest)requestData;
             var response = new PurchaseBannerForegroundResponse()

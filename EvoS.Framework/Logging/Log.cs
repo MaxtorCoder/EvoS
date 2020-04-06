@@ -7,6 +7,7 @@ namespace EvoS.Framework.Logging
     public static class Log
     {
         public static bool Debug = true;
+        private static object printLock = new object();
 
         public static readonly Dictionary<LogType, (ConsoleColor Color, string Name)> TypeColor = new Dictionary<LogType, (ConsoleColor Color, string Name)>()
         {
@@ -51,28 +52,31 @@ namespace EvoS.Framework.Logging
 
         public static void Print(LogType _type, object _obj)
         {
-            Console.Write($"{DateTime.Now:HH:mm:ss tt} |");
-
-            Console.ForegroundColor = TypeColor[_type].Color;
-
-            if (_type == LogType.Debug)
+            lock (printLock) // avoid multiple lines merging in one by different tasks calling this method
             {
-                if (!Debug)
-                    return;
+                Console.Write($"{DateTime.Now:HH:mm:ss tt} |");
+
+                Console.ForegroundColor = TypeColor[_type].Color;
+
+                if (_type == LogType.Debug)
+                {
+                    if (!Debug)
+                        return;
+                    else
+                    {
+                        Console.ForegroundColor = TypeColor[LogType.Debug].Color;
+                        Console.Write(TypeColor[LogType.Debug].Name);
+                    }
+                }
                 else
                 {
-                    Console.ForegroundColor = TypeColor[LogType.Debug].Color;
-                    Console.Write(TypeColor[LogType.Debug].Name);
+                    Console.ForegroundColor = TypeColor[_type].Color;
+                    Console.Write(TypeColor[_type].Name);
                 }
-            }
-            else
-            {
-                Console.ForegroundColor = TypeColor[_type].Color;
-                Console.Write(TypeColor[_type].Name);
-            }
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"| {_obj.ToString()}");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"| {_obj.ToString()}");
+            }
         }
     }
 }

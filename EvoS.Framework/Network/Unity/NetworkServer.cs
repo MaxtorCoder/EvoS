@@ -10,7 +10,7 @@ namespace EvoS.Framework.Network.Unity
     {
         private static uint s_NextNetworkId = 1u;
         public ushort maxPacketSize = 1440;
-        public List<ClientConnection> connections = new List<ClientConnection>();
+        public List<GameServerConnection> connections = new List<GameServerConnection>();
         public int numChannels => 36; // TODO
 
         public NetworkInstanceId GetNextNetworkId() => new NetworkInstanceId(s_NextNetworkId++);
@@ -32,7 +32,7 @@ namespace EvoS.Framework.Network.Unity
                 bool flag = true;
                 for (int index = 0; index < connections.Count; ++index)
                 {
-                    ClientConnection connection = connections[index];
+                    GameServerConnection connection = connections[index];
                     if (connection != null && connection.isReady && !connection.SendBytes(buffer, numBytes, channelId))
                         flag = false;
                 }
@@ -91,7 +91,7 @@ namespace EvoS.Framework.Network.Unity
             int count = component.observers.Count;
             for (int j = 0; j < count; j++)
             {
-                ClientConnection networkConnection2 = component.observers[j];
+                GameServerConnection networkConnection2 = component.observers[j];
                 if (networkConnection2.isReady)
                 {
                     networkConnection2.Send(msgType, msg);
@@ -102,7 +102,7 @@ namespace EvoS.Framework.Network.Unity
         }
 
 
-        public void SendSpawnMessage(NetworkIdentity uv, ClientConnection conn)
+        public void SendSpawnMessage(NetworkIdentity uv, GameServerConnection conn)
         {
             if (!uv.serverOnly)
             {
@@ -154,7 +154,7 @@ namespace EvoS.Framework.Network.Unity
             }
         }
 
-        public void ShowForConnection(NetworkIdentity uv, ClientConnection conn)
+        public void ShowForConnection(NetworkIdentity uv, GameServerConnection conn)
         {
             if (conn.isReady)
             {
