@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Network.Game.Messages;
 using EvoS.Framework.Network.Unity;
 using Newtonsoft.Json;
 
@@ -77,8 +78,9 @@ namespace EvoS.Framework.Network
                 {
                     if (_handlers.ContainsKey(deserialized.msgType))
                     {
-                        Log.Print(LogType.Game,
-                            $"{deserialized.GetType().Name} - {JsonConvert.SerializeObject(deserialized)}");
+                        if (deserialized.GetType() != typeof(AssetsLoadingProgress)){
+                            Log.Print(LogType.Game, $"{deserialized.GetType().Name} - {JsonConvert.SerializeObject(deserialized)}");
+                        }
                         _handlers[deserialized.msgType].Invoke(deserialized);
                     }
                     else
