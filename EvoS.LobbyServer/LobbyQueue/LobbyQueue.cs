@@ -1,4 +1,5 @@
-﻿using EvoS.Framework.Constants.Enums;
+﻿using EvoS.Framework;
+using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Game;
 using EvoS.Framework.Logging;
 using EvoS.Framework.Network.NetworkMessages;
@@ -120,8 +121,8 @@ namespace EvoS.LobbyServer.LobbyQueue
             ) {
                 for (int i = 0; i<teamInfo.TeamPlayerInfo.Count; i++)
                 {
-                    teamInfo.TeamPlayerInfo[i].PlayerId = i;
-                    teamInfo.TeamPlayerInfo[i].ControllingPlayerId = i;
+                    teamInfo.TeamPlayerInfo[i].PlayerId = i+1;
+                    teamInfo.TeamPlayerInfo[i].ControllingPlayerId = i+1; // must be non-zero for players because 0 has a special use
 
                     if (!teamInfo.TeamPlayerInfo[i].IsNPCBot) {
 
@@ -174,8 +175,15 @@ namespace EvoS.LobbyServer.LobbyQueue
                         }
                     }
                 }
+                try
+                {
+                    LobbyQueueManager.CreateGame(gameInfo, teamInfo);
+                }
+                catch (Exception)
+                {
+                    throw new EvosException("Error on LobbyQueueManager.CreateGame");
+                }
                 
-                LobbyQueueManager.CreateGame(gameInfo, teamInfo);
             }
         }
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EvoS.Framework
 {
-    class EvosException : Exception
+    public class EvosException : Exception
     {
         public EvosException() : base() {}
         public EvosException(String? message) : base(message) {}

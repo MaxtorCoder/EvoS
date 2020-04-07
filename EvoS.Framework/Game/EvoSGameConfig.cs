@@ -10,7 +10,7 @@ namespace EvoS.Framework.Game
         public static bool DebugNetworkBehaviour = false;
         public static bool DebugSyncVars = false;
         public static bool DebugNetSerialize = false;
-        public static bool UseDatabase = false;
+        public static bool UseDatabase = true;
 
         public static bool GameTypeAvailability_Practice = false;
         public static bool GameTypeAvailability_Coop = false;

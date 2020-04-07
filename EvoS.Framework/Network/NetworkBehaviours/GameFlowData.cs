@@ -611,7 +611,7 @@ namespace EvoS.Framework.Network.NetworkBehaviours
         public List<ActorData> GetAllActorsForPlayer(int playerIndex)
         {
             var actorDataList = new List<ActorData>();
-            foreach (var actor in m_actors)
+            foreach (ActorData actor in m_actors)
             {
                 if (actor.PlayerIndex == playerIndex)
                     actorDataList.Add(actor);

@@ -114,12 +114,12 @@ namespace EvoS.Framework.Game
             MiscLoader.ConstructCaches();
 
             SpawnObject(MiscLoader, "ApplicationSingletonsNetId", out _);
-            SpawnObject(MiscLoader, "GameSceneSingletons", out var gameSceneSingletons);//OK
-            TheatricsManager = gameSceneSingletons.GetComponent<TheatricsManager>();//OK
-            AbilityModManager = gameSceneSingletons.GetComponent<AbilityModManager>();//OK
-            SpawnObject(MiscLoader, "SharedEffectBarrierManager", out SharedEffectBarrierManager);//OK
-            SpawnObject(MiscLoader, "SharedActionBuffer", out SharedActionBuffer);//OK
-            SharedActionBuffer.Networkm_actionPhase = ActionBufferPhase.Done;//OK
+            SpawnObject(MiscLoader, "GameSceneSingletons", out var gameSceneSingletons);
+            TheatricsManager = gameSceneSingletons.GetComponent<TheatricsManager>();
+            AbilityModManager = gameSceneSingletons.GetComponent<AbilityModManager>();
+            SpawnObject(MiscLoader, "SharedEffectBarrierManager", out SharedEffectBarrierManager);
+            SpawnObject(MiscLoader, "SharedActionBuffer", out SharedActionBuffer);
+            SharedActionBuffer.Networkm_actionPhase = ActionBufferPhase.Done;
 
             SpawnScene(MapLoader, 1, out var commonGameLogic);
             InterfaceManager = commonGameLogic.GetComponent<InterfaceManager>();
@@ -176,15 +176,21 @@ namespace EvoS.Framework.Game
 
             // check for owning player
             // TODO
-            /*
-            foreach (ActorData actor in gameManager.GameFlowData.GetAllActorsForPlayer(0))
-            {
-                player.Connection.Send(4, new OwnerMessage
+            lock (this.GamePlayersByPlayerId) {
+                foreach ((int playerID, GamePlayer player) in this.GamePlayersByPlayerId)
                 {
-                    netId = actor.netId,
-                    playerControllerId = (short)player.LoginRequest.PlayerId
-                });
-            }*/
+                    foreach (ActorData actor in GameFlowData.GetAllActorsForPlayer(playerID))
+                    {
+                        player.Connection.Send(4, new OwnerMessage
+                        {
+                            netId = actor.netId,
+                            playerControllerId = (short)player.PlayerId
+                        });
+                    }
+                }
+            }
+            
+            
 
             // The following should be sent after all players have loaded
             foreach (GameObject netObj in NetworkGameObjects.Values)
@@ -219,6 +225,8 @@ namespace EvoS.Framework.Game
             }
             BarrierManager.CallRpcUpdateBarriers();
             GameFlowData.CallRpcUpdateTimeRemaining(21);
+
+            PrintAllNetworkGameObjects();
         }
 
 
@@ -240,31 +248,63 @@ namespace EvoS.Framework.Game
             return false;
         }
 
-        public void OnPlayerConnect(GameServerConnection connection, LoginRequest loginReq)
+        public GamePlayer GetGamePlayerByPlayerId(int playerId)
         {
-            SessionPlayerInfo playerInfo = SessionManager.Get(connection.SessionToken);
-            Log.Print(LogType.Debug, $"{playerInfo.GetHandle()} Tiene playerID {loginReq.PlayerId}");
-            GamePlayer gamePlayer = new GamePlayer(connection, loginReq.PlayerId, Convert.ToInt64(loginReq.AccountId));
-            gamePlayer.PlayerInfo = playerInfo;
-            GamePlayersByPlayerId.Add(loginReq.PlayerId, gamePlayer);
+            lock (GamePlayersByPlayerId)
+            {
+                return GamePlayersByPlayerId[playerId];
+            }
+        }
+
+        public void AddGamePlayer(int playerId, GamePlayer gamePlayer)
+        {
+            lock (GamePlayersByPlayerId)
+            {
+                GamePlayersByPlayerId.Add(playerId, gamePlayer);
+            }
+        }
+        
+
+        public void OnPlayerConnect(GameServerConnection connection)
+        {
+            
+            Log.Print(LogType.Debug, $"Connected player {connection.PlayerInfo.GetHandle()} with playerID {connection.PlayerId} as {connection.PlayerInfo.GetCharacterType().ToString()}");
+
+            GamePlayer gamePlayer;
+            GamePlayersByPlayerId.TryGetValue(connection.PlayerId, out gamePlayer);
+
+            if (gamePlayer == null)
+            {
+                gamePlayer = new GamePlayer(connection, connection.PlayerId, connection.PlayerInfo.GetAccountId());
+                AddGamePlayer(connection.PlayerId, gamePlayer);
+            }
+            else
+            {
+                int oldConnectionId = gamePlayer.Connection.connectionId;
+                connection.connectionId = oldConnectionId;
+            }
+
+            gamePlayer.PlayerInfo = connection.PlayerInfo;
             connection.ActiveGame = this;
             
-            /*
-            var gfPlayer = GameFlow.GetPlayerFromConnectionId(connection.connectionId);
-            gfPlayer.m_id = (byte) loginReq.PlayerId;
+            
+            Player gfPlayer = GameFlow.GetPlayerFromConnectionId(connection.connectionId);
+
+            gfPlayer.m_id = (byte) connection.PlayerId;
             gfPlayer.m_valid = true;
-            gfPlayer.m_accountId = long.Parse(loginReq.AccountId);
+            gfPlayer.m_accountId = connection.PlayerInfo.GetAccountId();
             gfPlayer.m_connectionId = connection.connectionId;
+
             GameFlow.playerDetails[gfPlayer] = new PlayerDetails(PlayerGameAccountType.Human)
             {
-                m_team =  Team.TeamA,
-                m_handle = this.TeamInfo.GetPlayer(long.Parse(loginReq.AccountId)).Handle,
+                m_team =  this.TeamInfo.GetPlayer(connection.PlayerInfo.GetAccountId()).TeamId,
+                m_handle = this.TeamInfo.GetPlayer(connection.PlayerInfo.GetAccountId()).Handle,
                 m_accountId = gfPlayer.m_accountId,
-                m_lobbyPlayerInfoId = -1 // if this is needed we will get an error to fix it later
+                m_lobbyPlayerInfoId = this.TeamInfo.TeamPlayerInfo.FindIndex((LobbyPlayerInfo p)=>{ return p.AccountId == connection.PlayerInfo.GetAccountId(); })
             };
 
             // This isn't actually correct, but the client logs a warning with what it expected and continues
-            */
+            
             connection.Send(14, new CRCMessage
             {
                 scripts = new[]
@@ -292,43 +332,41 @@ namespace EvoS.Framework.Game
                 }
             });
 
-            connection.RegisterHandler<AssetsLoadingProgress>((short)MyMsgType.ClientAssetsLoadingProgressUpdate, GamePlayersByPlayerId[loginReq.PlayerId], OnAssetLoadingProgress);
-            connection.RegisterHandler<AssetsLoadedNotification>((short)MyMsgType.AssetsLoadedNotification, GamePlayersByPlayerId[loginReq.PlayerId], OnAssetsLoadedNotification);
+            connection.RegisterHandler<AssetsLoadingProgress>((short)MyMsgType.ClientAssetsLoadingProgressUpdate, GetGamePlayerByPlayerId(connection.PlayerId), OnAssetLoadingProgress);
+            connection.RegisterHandler<AssetsLoadedNotification>((short)MyMsgType.AssetsLoadedNotification, GetGamePlayerByPlayerId(connection.PlayerId), OnAssetsLoadedNotification);
 
-            lock (AllPlayersLoadedLock)
+            /*lock (AllPlayersLoadedLock)
             {
-                foreach(LobbyPlayerInfo player in TeamInfo.TeamPlayerInfo)
-                {
-                    if (player.ReadyState == ReadyState.Ready) {
-                        connection.Send((short)MyMsgType.AssetsLoadedNotification, new AssetsLoadedNotification { AccountId = player.AccountId, PlayerId = player.PlayerId });
+                if (AllPlayersLoaded) {
+                    foreach (LobbyPlayerInfo player in TeamInfo.TeamPlayerInfo)
+                    {
+                        if (player.ReadyState == ReadyState.Ready)
+                        {
+                            connection.Send((short)MyMsgType.AssetsLoadedNotification, new AssetsLoadedNotification { AccountId = player.AccountId, PlayerId = player.PlayerId });
+                        }
                     }
                 }
+                
             }
+            //*/
         }
 
         private void OnAssetLoadingProgress(GamePlayer player, AssetsLoadingProgress msg)
         {
-            GamePlayer sender = GamePlayersByPlayerId[msg.PlayerId];
+            
             // Send a loading progress message to all players
             foreach(int playerId in GamePlayersByPlayerId.Keys)
             {
-                GamePlayer humanplayer = GamePlayersByPlayerId[playerId];
-                Log.Print(LogType.Debug, $"sending loading notification to {humanplayer.PlayerInfo.GetHandle()} from {sender.PlayerInfo.GetHandle()}");
-                humanplayer.Connection.Send((short)MyMsgType.ServerAssetsLoadingProgressUpdate, msg);
+                
+                GamePlayer humanplayer = GetGamePlayerByPlayerId(playerId);
+                if (player.PlayerId != humanplayer.PlayerId)
+                    Log.Print(LogType.Debug, $"sending loading notification to {humanplayer.PlayerInfo.GetHandle()} from {player.PlayerInfo.GetHandle()}");
+                    humanplayer.Connection.Send((short)MyMsgType.ServerAssetsLoadingProgressUpdate, msg);
             }
         }
 
         private void OnAssetsLoadedNotification(GamePlayer player, AssetsLoadedNotification msg)
         {
-            /* NOT NEEDED!
-            GamePlayer sender = GamePlayersByPlayerId[msg.PlayerId];
-            foreach (int playerId in GamePlayersByPlayerId.Keys)
-            {
-                GamePlayer humanplayer = GamePlayersByPlayerId[playerId];
-                Log.Print(LogType.Error, $"sending LOADED notification to {humanplayer.PlayerInfo.GetHandle()} from {sender.PlayerInfo.GetHandle()}");
-                humanplayer.Connection.Send((short)MyMsgType.AssetsLoadedNotification, msg);
-            }*/
-
             player.Connection.Send(56, new ReconnectReplayStatus {WithinReconnectReplay = true});
             player.Connection.Send(54, new SpawningObjectsNotification
             {
@@ -379,33 +417,44 @@ namespace EvoS.Framework.Game
 
         private void SpawnPlayerCharacter(LobbyPlayerInfo playerInfo)
         {
+            //# 
             Log.Print(LogType.Error, "SpawnPlayerCharacter " + playerInfo.CharacterInfo.CharacterType.ToString());
+
+            GamePlayer gamePlayer = GetGamePlayerByPlayerId(playerInfo.PlayerId);
+
+            
 
             SpawnObject<ActorTeamSensitiveData>(MiscLoader, "ActorTeamSensitiveData_Friendly", out ActorTeamSensitiveData characterFriendly);
             SpawnObject(AssetsLoader, playerInfo.CharacterInfo.CharacterType.ToString(), out GameObject character);// Error here punching dummy
 
             ActorData characterActorData = character.GetComponent<ActorData>();
+
             PlayerData characterPlayerData = character.GetComponent<PlayerData>();
             characterActorData.SetClientFriendlyTeamSensitiveData(characterFriendly);
-            characterPlayerData.m_player = GameFlow.GetPlayerFromConnectionId(1); // TODO hardcoded connection id
+            characterPlayerData.m_player = GameFlow.GetPlayerFromConnectionId(gamePlayer.Connection.connectionId); // TODO hardcoded connection id
             characterPlayerData.PlayerIndex = playerInfo.PlayerId;
 
             characterActorData.ServerLastKnownPosSquare = Board.GetBoardSquare(5, 5);
             characterActorData.InitialMoveStartSquare = Board.GetBoardSquare(5, 5);
             characterActorData.UpdateDisplayName("Foo bar player");
-            characterActorData.ActorIndex = 0;
-            characterActorData.PlayerIndex = 0;
+            characterActorData.ActorIndex = playerInfo.PlayerId;
+            characterActorData.PlayerIndex = playerInfo.PlayerId;
             characterFriendly.SetActorIndex(characterActorData.ActorIndex);
-            characterActorData.SetTeam(Team.TeamA);
+
+
+
+            characterActorData.SetTeam(playerInfo.TeamId);
 
             GameFlowData.AddPlayer(character);
 
             var netChar = character.GetComponent<NetworkIdentity>();
             var netAtsd = characterFriendly.GetComponent<NetworkIdentity>();
-            foreach (GamePlayer player in GamePlayersByPlayerId.Values)
-            {
-                netChar.AddObserver(player.Connection);
-                netAtsd.AddObserver(player.Connection);
+            lock (GamePlayersByPlayerId) {
+                foreach (GamePlayer player in GamePlayersByPlayerId.Values)
+                {
+                    netChar.AddObserver(player.Connection);
+                    netAtsd.AddObserver(player.Connection);
+                }
             }
         }
 
@@ -420,7 +469,12 @@ namespace EvoS.Framework.Game
 
         public void PrintAllNetworkGameObjects(){
             foreach ((uint netId, GameObject obj) in NetworkGameObjects){
-                Console.WriteLine($"{netId}: {obj}");
+                Console.WriteLine($"--!!-- {netId}: {obj}");
+                IReadOnlyCollection<Component>objs = obj.GetComponents();
+                foreach (Component c in objs) {
+                    Console.WriteLine("          "+c.name);
+                }
+
             }
         }
 
@@ -502,7 +556,10 @@ namespace EvoS.Framework.Game
 
         public void SetGameInfo(LobbyGameInfo gameInfo){GameInfo = gameInfo;}
         public void SetQueueInfo(LobbyMatchmakingQueueInfo queueInfo){QueueInfo = queueInfo;}
-        public void SetTeamInfo(LobbyTeamInfo teamInfo){TeamInfo = teamInfo;SetTeamPlayerInfo(teamInfo.TeamPlayerInfo);}
+        public void SetTeamInfo(LobbyTeamInfo teamInfo){
+
+            TeamInfo = teamInfo;SetTeamPlayerInfo(teamInfo.TeamPlayerInfo);
+        }
         public void SetTeamPlayerInfo(List<LobbyPlayerInfo> teamPlayerInfo){TeamPlayerInfo = teamPlayerInfo;}
         public void SetGameSummary(LobbyGameSummary gameSummary){GameSummary = gameSummary;}
         public void SetGameSummaryOverrides(LobbyGameSummaryOverrides gameSummaryOverrides){GameSummaryOverrides = gameSummaryOverrides;}

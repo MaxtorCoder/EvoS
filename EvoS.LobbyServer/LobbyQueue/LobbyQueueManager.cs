@@ -56,12 +56,20 @@ namespace EvoS.LobbyServer
                     if (!playerInfo.IsNPCBot)
                     {
                         LobbyServerConnection player = LobbyServer.GetPlayerByAccountId(playerInfo.AccountId);
+                        LobbyTeamInfo teamInfoClone = TeamInfo.Clone();
+                        foreach (LobbyPlayerInfo pi in teamInfoClone.TeamPlayerInfo) {
+                            if(pi.PlayerId == playerInfo.PlayerId){
+                                pi.ControllingPlayerId = 0;
+                            }
+                        }
+                        LobbyPlayerInfo playerInfoClone = playerInfo.Clone();
+                        playerInfoClone.ControllingPlayerId = 0;
                         //Log.Print(LogType.Debug, $"Sending notification to {Players[i]}");
                         GameInfoNotification gameInfoNotification = new GameInfoNotification()
                         {
                             GameInfo = GameInfo,
-                            PlayerInfo = playerInfo,
-                            TeamInfo = TeamInfo
+                            PlayerInfo = playerInfoClone,
+                            TeamInfo = teamInfoClone
                         };
                         _ = player.SendMessage(gameInfoNotification);
                     }
@@ -155,15 +163,17 @@ namespace EvoS.LobbyServer
             foreach(LobbyPlayerInfo playerInfo in game.TeamInfo.TeamPlayerInfo) {
                 if (!playerInfo.IsNPCBot) {
                     LobbyServerConnection player = LobbyServer.GetPlayerByAccountId(playerInfo.AccountId);
-                    player.SendMessage(new GameAssignmentNotification
+                    GameAssignmentNotification assNotification = new GameAssignmentNotification
                     {
                         GameInfo = game.GameInfo,
                         GameResult = GameResult.NoResult,
                         GameplayOverrides = DummyLobbyData.CreateLobbyGameplayOverrides(),
-                        PlayerInfo = player.GetLobbyPlayerInfo(),
+                        PlayerInfo = player.GetLobbyPlayerInfo().Clone(),
                         Reconnection = false,
                         Observer = false
-                    }); ;
+                    };
+                    assNotification.PlayerInfo.ControllingPlayerId = 0;
+                    player.SendMessage(assNotification); ;
                 }
             }
             game.GameStatus = GameStatus.Launching; // Put in wait state until game server starts

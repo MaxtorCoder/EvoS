@@ -28,8 +28,10 @@ namespace EvoS.Framework.Network.Game
         public long SessionToken;
         protected static int _connectionIdCounter;
         protected uint lastMessageOutgoingSeqNum;
-        public readonly int connectionId = Interlocked.Increment(ref _connectionIdCounter);
+        public int connectionId = Interlocked.Increment(ref _connectionIdCounter);
         protected NetworkWriter m_Writer = new NetworkWriter();
+        public SessionPlayerInfo PlayerInfo;
+        public int PlayerId;
         
         protected GameServerConnection() {}
 
@@ -57,29 +59,21 @@ namespace EvoS.Framework.Network.Game
             Serializer.RegisterHandler((short)MyMsgType.LoginRequest, msg =>
             {
                 var loginReq = (LoginRequest) msg;
-                long accountId = Convert.ToInt64(loginReq.AccountId);
                 SessionToken = Convert.ToInt64(loginReq.SessionToken);
+                PlayerInfo = SessionManager.Get(SessionToken);
+                PlayerId = loginReq.PlayerId;
 
-                Log.Print(LogType.Error, loginReq.PlayerId);
-                
-
-                if (addPlayerMessage == null)
-                {
-                    Log.Print(LogType.Error, "Received LoginRequest before AddPlayerMessage!");
-                    //Disconnect();
-                    //return;
-                }
-
-                Log.Print(LogType.Debug, $"Player: {accountId}");
-                var gameManager = GameManagerHolder.FindGameManager(SessionToken);
-                GameManagerHolder.PlayerConnected(accountId);
+                GameManager gameManager = GameManagerHolder.FindGameManager(SessionToken);
+                GameManagerHolder.PlayerConnected(PlayerInfo.GetAccountId());
                 if (gameManager == null)
                 {
                     Log.Print(LogType.Error, $"Didn't find a GameManager for {loginReq}'");
                     Disconnect();
                     return;
                 }
-                
+
+
+                gameManager.OnPlayerConnect(this);
 
                 // Send login ok response
                 Send((short)MyMsgType.LoginResponse, new LoginResponse
@@ -88,7 +82,8 @@ namespace EvoS.Framework.Network.Game
                     Success = true
                 });
 
-                gameManager.OnPlayerConnect(this, loginReq);
+                
+                
             });
         }
 
