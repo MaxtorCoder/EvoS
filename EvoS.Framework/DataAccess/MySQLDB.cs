@@ -45,11 +45,14 @@ namespace EvoS.Framework.DataAccess
             if (Params != null)
                 for (int i = 0; i < Params.Length; i++)
                     command.Parameters.Add(new MySqlParameter(i.ToString(), Params[i]));
-            using (var reader = command.ExecuteReader())
-            {
-                while(reader.Read())
-                    yield return reader;
+            lock (connection) {
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                        yield return reader;
+                }
             }
+            
         }
     }
 }
