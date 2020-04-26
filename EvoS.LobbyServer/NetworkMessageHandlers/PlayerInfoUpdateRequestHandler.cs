@@ -14,8 +14,8 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             PlayerInfoUpdateRequest request = (PlayerInfoUpdateRequest) requestData;
-            if (request.GameType != null)
-                connection.PlayerInfo.SetGameType(request.GameType.Value);
+            //if (request.GameType != null)
+            //    connection.PlayerInfo.SetGameType(request.GameType.Value);
 
 
             // Change ReadyState
@@ -36,8 +36,8 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             // Change Selected Freelancer
             else if (request.PlayerInfoUpdate.CharacterType != null)
             {
-                connection.PlayerInfo.SetCharacterType(request.PlayerInfoUpdate.CharacterType.Value);
-                PlayerData.SaveSelectedCharacter(connection.PlayerInfo.GetAccountId(), (int)connection.PlayerInfo.GetCharacterType());
+                //connection.PlayerInfo.SetCharacterType(request.PlayerInfoUpdate.CharacterType.Value);
+                //PlayerData.SaveSelectedCharacter(connection.PlayerInfo.GetAccountId(), (int)connection.PlayerInfo.GetCharacterType());
 
                 var accountDataUpdate = new PlayerAccountDataUpdateNotification
                 {
@@ -47,7 +47,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 await connection.SendMessage(accountDataUpdate);
                 var response = new PlayerInfoUpdateResponse
                 {
-                    CharacterInfo = connection.PlayerInfo.GetLobbyPlayerInfo().CharacterInfo,
+                    //CharacterInfo = connection.PlayerInfo.GetLobbyPlayerInfo().CharacterInfo,
                     OriginalPlayerInfoUpdate = request.PlayerInfoUpdate,
                     ResponseId = request.RequestId
                 };
@@ -58,22 +58,22 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
             //Change Skin
             else if (request.PlayerInfoUpdate.CharacterSkin != null)
             {
-                connection.PlayerInfo.SetSkin(request.PlayerInfoUpdate.CharacterSkin.Value);
+                //connection.PlayerInfo.SetSkin(request.PlayerInfoUpdate.CharacterSkin.Value);
             }
             //Chnage Catalyst
             else if (request.PlayerInfoUpdate.CharacterCards != null)
             {
-                connection.PlayerInfo.SetCards(request.PlayerInfoUpdate.CharacterCards.Value);
+                //connection.PlayerInfo.SetCards(request.PlayerInfoUpdate.CharacterCards.Value);
             }
             // Chnage Mods
             else if (request.PlayerInfoUpdate.CharacterMods != null)
             {
-                connection.PlayerInfo.SetMods(request.PlayerInfoUpdate.CharacterMods.Value);
+                //connection.PlayerInfo.SetMods(request.PlayerInfoUpdate.CharacterMods.Value);
             }
             // Change Vfx
             else if (request.PlayerInfoUpdate.CharacterAbilityVfxSwaps != null)
             {
-                connection.PlayerInfo.SetAbilityVfxSwaps(request.PlayerInfoUpdate.CharacterAbilityVfxSwaps.Value);
+                //connection.PlayerInfo.SetAbilityVfxSwaps(request.PlayerInfoUpdate.CharacterAbilityVfxSwaps.Value);
             }
             // Chnage Loadout
             else if (request.PlayerInfoUpdate.CharacterLoadoutChanges != null)

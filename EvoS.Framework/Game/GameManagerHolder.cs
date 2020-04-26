@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Network.Game;
 using EvoS.Framework.Network.Game.Messages;
 using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
@@ -8,8 +9,8 @@ namespace EvoS.Framework.Game
 {
     public class GameManagerHolder
     {
-        private static Dictionary<string, GameManager> _gameManagers = new Dictionary<string, GameManager>();
-        private static Dictionary<long, GameManager> _gameManagersBySessionToken = new Dictionary<long, GameManager>();
+        private static Dictionary<string, EvosServer> ActiveServers = new Dictionary<string, EvosServer>();
+        private static Dictionary<long, EvosServer> ServersByPlayerSessionToken = new Dictionary<long, EvosServer>();
 
         class EmptyRoomNameGameServerException : System.Exception { }
         class InvalidPlayerAccountIDGameServerException : System.Exception { }
@@ -26,29 +27,16 @@ namespace EvoS.Framework.Game
             }
             try
             {
-                // Create a GameManager for this new game
-                GameManager gameManager = new GameManager();
-                gameManager.SetGameInfo(gameInfo);
-                gameManager.SetTeamInfo(teamInfo);
-
-                // Store the players SessionToken to identify them when they connect to this server
-                foreach (LobbyPlayerInfo player in teamInfo.TeamPlayerInfo)
+                EvosServer server = new EvosServer();
+                server.Setup(gameInfo, teamInfo);
+                ActiveServers.Add(gameInfo.GameConfig.RoomName, server);
+                foreach (long sessionToken in PlayerSessionTokens)
                 {
-                    if (!player.IsNPCBot)
-                    {
-                        if (player.AccountId == 0) // Each player must have a unique AccountId
-                            throw new InvalidPlayerAccountIDGameServerException();
-
-                        _gameManagersBySessionToken.Add(player.AccountId, gameManager);
-                    }
+                    ServersByPlayerSessionToken.Add(sessionToken, server);
                 }
 
-                foreach (long sessionToken in PlayerSessionTokens) {
-                    _gameManagersBySessionToken.Add(sessionToken, gameManager);
-                }
-
-                _gameManagers.Add(gameInfo.GameConfig.RoomName, gameManager);
-                gameManager.LaunchGame();
+                server.OnStop += HandleOnServerStop;
+                
                 Log.Print(LogType.Debug, "Game Server Launched with name " + gameInfo.GameConfig.RoomName);
             }
             catch (System.Exception e)
@@ -57,32 +45,36 @@ namespace EvoS.Framework.Game
             }
         }
 
-        public static GameManager? FindGameManager(long sessionToken)
+        /// <summary> Removes from memory the references to the server </summary>
+        public static void HandleOnServerStop(EvosServer server)
         {
-            try
+            ActiveServers.Remove(server.GetRoomName());
+            foreach (long sessionToken in ServersByPlayerSessionToken.Keys)
             {
-                return _gameManagersBySessionToken[sessionToken];
-            }
-            catch (KeyNotFoundException)
-            {
-                Log.Print(LogType.Debug, "Available gameManagers:");
-                foreach (var a in _gameManagers)
+                if (ServersByPlayerSessionToken[sessionToken] == server)
                 {
-                    Log.Print(LogType.Debug, $"{a.Key}: {a.Value.GameConfig.RoomName}");
+                    ServersByPlayerSessionToken.Remove(sessionToken);
                 }
-
-                Log.Print(LogType.Debug, "Available gameManagers per account:");
-                foreach (var a in _gameManagersBySessionToken)
-                {
-                    Log.Print(LogType.Debug, $"{a.Key}: {a.Value.GameConfig.RoomName}");
-                }
-                return null;
             }
         }
 
-        public static void PlayerConnected(long accountId)
+        /// <summary> Assigns the server to a connection and sets the events </summary>
+        public static void AssignServer(GameServerConnection connection)
         {
-            //_gameManagersByPlayerAccountID.Remove(accountId); // do not actually remove the player, if it fails on loading when it tries to reconnect it sends a LoginRequest again and we need the data
+            EvosServer server;
+
+            if (ServersByPlayerSessionToken.TryGetValue(connection.SessionToken, out server))
+            {
+                connection.Server = server;
+                server.HandleOnPlayerConnected(connection);
+                Log.Print(LogType.Game, $"{connection.ToString()} assigned to server {server.GetRoomName()}");
+            }
+            else
+            {
+                Log.Print(LogType.Error, $"No server found for player {connection.ToString()}");
+                connection.Disconnect();
+            }
         }
+
     }
 }

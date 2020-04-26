@@ -30,8 +30,8 @@ namespace EvoS.LobbyServer.Utils
             LobbyServerConnection friend = LobbyServer.GetPlayerByHandle(request.FriendHandle);
             var friendRequest = new FriendUpdateRequest()
             {
-                FriendHandle = connection.PlayerInfo.GetHandle(),
-                FriendAccountId = connection.PlayerInfo.GetAccountId(),
+                //FriendHandle = connection.PlayerInfo.GetHandle(),
+                //FriendAccountId = connection.PlayerInfo.GetAccountId(),
                 FriendOperation = FriendOperation.Add,
                 RequestId = 0,
                 ResponseId = 0
@@ -67,8 +67,8 @@ namespace EvoS.LobbyServer.Utils
                     0,
                     new Framework.Network.Static.FriendInfo()
                     {
-                        FriendHandle = connection.PlayerInfo.GetHandle(),
-                        FriendAccountId = connection.PlayerInfo.GetAccountId(),
+                        //FriendHandle = connection.PlayerInfo.GetHandle(),
+                        //FriendAccountId = connection.PlayerInfo.GetAccountId(),
                         FriendStatus = Framework.Constants.Enums.FriendStatus.RequestReceived,
                     }
                 }},

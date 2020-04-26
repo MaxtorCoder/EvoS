@@ -19,7 +19,7 @@ namespace EvoS.LobbyServer
         public async static Task OnPlayerConnectToLobby(LobbyServerConnection client, RegisterGameClientRequest request)
         {
             await new RegisterGameClientRequestHandler().OnMessage(client, request);
-            Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} ID {client.PlayerInfo.GetAccountId()}, Token {client.SessionToken} connected to the server");
+            //Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} ID {client.PlayerInfo.GetAccountId()}, Token {client.SessionToken} connected to the server");
         }
 
         /// <summary>
@@ -46,9 +46,9 @@ namespace EvoS.LobbyServer
         public async static Task OnJoinMatchmakingQueue(LobbyServerConnection client, JoinMatchmakingQueueRequest request)
         {
             await client.SendMessage(new JoinMatchmakingQueueResponse() { ResponseId = request.RequestId });
-            Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} joined Matchmaking queue");
+            //Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} joined Matchmaking queue");
 
-            client.PlayerInfo.SetGameType(request.GameType);
+            //client.PlayerInfo.SetGameType(request.GameType);
             client.AllyBotDifficulty = request.AllyBotDifficulty;
             client.EnemyBotDifficulty = request.EnemyBotDifficulty;
 
@@ -57,7 +57,7 @@ namespace EvoS.LobbyServer
 
         public async static Task OnLeaveMatchmakingQueue(LobbyServerConnection client, LeaveMatchmakingQueueRequest request)
         {
-            Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} left Matchmaking queue");
+            //Log.Print(LogType.Lobby, $"{client.PlayerInfo.GetHandle()} left Matchmaking queue");
             await new LeaveMatchmakingQueueRequestHandler().OnMessage(client, request);
         }
 

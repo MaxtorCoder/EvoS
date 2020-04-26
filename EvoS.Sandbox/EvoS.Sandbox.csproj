@@ -9,6 +9,7 @@
     <ProjectReference Include="..\EvoS.DirectoryServer\EvoS.DirectoryServer.csproj" />
     <ProjectReference Include="..\EvoS.GameServer\EvoS.GameServer.csproj" />
     <ProjectReference Include="..\EvoS.LobbyServer\EvoS.LobbyServer.csproj" />
+    <ProjectReference Include="..\LobbyServer2\CentralServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

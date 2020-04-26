@@ -59,7 +59,7 @@ namespace EvoS.LobbyServer.LobbyQueue
 
         public void AddPlayer(LobbyServerConnection client)
         {
-            Log.Print(LogType.Lobby, $"Player {client.PlayerInfo.GetHandle()} joined {GameType.ToString()} Queue");
+            //Log.Print(LogType.Lobby, $"Player {client.PlayerInfo.GetHandle()} joined {GameType.ToString()} Queue");
 
             Players.Add(client);
             QueueInfo.QueuedPlayers++;
@@ -167,11 +167,11 @@ namespace EvoS.LobbyServer.LobbyQueue
                     if (!player.IsNPCBot) {
                         //Log.Print(LogType.Debug, $"found player {player.Handle}");
                         for (int i = 0; i < Players.Count; i++) {
-                            if (Players[i].PlayerInfo.GetAccountId() == player.AccountId)
+                            /*if (Players[i].PlayerInfo.GetAccountId() == player.AccountId)
                             {
                                 RemovePlayer(Players[i]);
                                 break;
-                            }
+                            }*/
                         }
                     }
                 }
@@ -216,7 +216,7 @@ namespace EvoS.LobbyServer.LobbyQueue
                                 matchedAny = true;
                                 //Log.Print(LogType.Debug, "Matched slotType " + slotType.ToString());
 
-                                if (!CharacterUtils.MatchesCharacter(player.PlayerInfo.GetCharacterType(), compositionRules.Rules[slotType]))
+                                /*if (!CharacterUtils.MatchesCharacter(player.PlayerInfo.GetCharacterType(), compositionRules.Rules[slotType]))
                                 {
                                     //Log.Print(LogType.Debug, "not matched rule");
                                     matched = false;
@@ -233,7 +233,7 @@ namespace EvoS.LobbyServer.LobbyQueue
                                         if (tempSet.Types != null)
                                             botSet.Types.AddRange(tempSet.Types);
                                     }
-                                }
+                                }*/
                             }
                         }
 

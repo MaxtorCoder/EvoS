@@ -257,7 +257,7 @@ namespace EvoS.Framework.Assets
                 return;
             }
 
-            foreach (var obj in assetFile.GetObjectsByComponent(netIdentScript))
+            foreach (SerializedGameObject obj in assetFile.GetObjectsByComponent(netIdentScript))
             {
                 var netIdent = obj.GetComponent<NetworkIdentity>();
                 if (netIdent != null)

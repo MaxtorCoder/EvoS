@@ -14,7 +14,7 @@ namespace EvoS.Framework.Network.Static
         public static String Oblivion_Deathmatch = "Oblivion_Deathmatch";
         public static String Reactor_Deathmatch = "Reactor_Deathmatch";
         public static String RobotFactory_Deathmatch = "RobotFactory_Deathmatch";
-        public static String Skyway_Deathmatch = "Skyway_Deathmatch";
+        public static String Skyway_Deathmatch = "Skyway_Deathmatch"; // Cloud Piercer
         public static String CargoShip_CTF = "CargoShip_CTF";
         public static String EvosLab_CTF = "EvosLab_CTF";
         public static String Reactor_CTF = "Reactor_CTF";

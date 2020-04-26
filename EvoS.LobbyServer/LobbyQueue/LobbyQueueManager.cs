@@ -110,8 +110,8 @@ namespace EvoS.LobbyServer
 
         public static void AddPlayerToQueue(LobbyServerConnection client)
         {
-            LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.PlayerInfo.GetGameType());
-            queue.AddPlayer(client);
+            //LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.PlayerInfo.GetGameType());
+            //queue.AddPlayer(client);
             /*
             if (client.SelectedGameType == GameType.Practice)
             {
@@ -153,8 +153,8 @@ namespace EvoS.LobbyServer
 
         public static void RemovePlayerFromQueue(LobbyServerConnection client)
         {
-            LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.PlayerInfo.GetGameType());
-            queue.RemovePlayer(client);
+            //LobbyQueue.LobbyQueue queue = LobbyQueueManager.GetInstance().FindQueue(client.PlayerInfo.GetGameType());
+            //queue.RemovePlayer(client);
         }
 
         private void StartGame(PendingGame game)
@@ -180,7 +180,7 @@ namespace EvoS.LobbyServer
             game.SendNotification();
 
             new Task(() => {
-                GameManagerHolder.CreateGameManager(game.GameInfo, game.TeamInfo, game.PlayerSessionTokens); // Launch new game
+                //GameManagerHolder.CreateGameManager(game.GameInfo, game.TeamInfo, game.PlayerSessionTokens); // Launch new game
                 game.GameStatus = GameStatus.Launched; // Put in wait state until game server starts
                 game.SendNotification();
 

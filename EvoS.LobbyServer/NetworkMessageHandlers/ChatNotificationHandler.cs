@@ -11,8 +11,8 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
         public async Task OnMessage(LobbyServerConnection connection, object requestData)
         {
             ChatNotification notification = (ChatNotification)requestData;
-            notification.SenderAccountId = connection.PlayerInfo.GetAccountId();
-            notification.SenderHandle = connection.PlayerInfo.GetHandle();
+            //notification.SenderAccountId = connection.PlayerInfo.GetAccountId();
+            //notification.SenderHandle = connection.PlayerInfo.GetHandle();
 
             await LobbyServer.sendChatAsync(notification, connection);
         }

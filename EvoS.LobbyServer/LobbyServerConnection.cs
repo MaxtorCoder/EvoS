@@ -27,7 +27,7 @@ namespace EvoS.LobbyServer
         public BotDifficulty AllyBotDifficulty;
         public BotDifficulty EnemyBotDifficulty;
 
-        public SessionPlayerInfo PlayerInfo;
+        //public SessionPlayerInfo PlayerInfo;
 
         public long SessionToken;
 
@@ -39,13 +39,13 @@ namespace EvoS.LobbyServer
             Socket = socket;
         }
 
-        public String ToString() {
+        /*public String ToString() {
             return PlayerInfo.GetHandle();
-        }
+        }*/
 
         public void Disconnect()
         {
-            Log.Print(LogType.Lobby, $"Client {PlayerInfo.GetHandle()} disconnected.");
+            //Log.Print(LogType.Lobby, $"Client {PlayerInfo.GetHandle()} disconnected.");
             OnDisconnect.Invoke(this, new EventArgs());
             if (Socket.IsConnected)
                 Socket.Close();
@@ -56,7 +56,7 @@ namespace EvoS.LobbyServer
         {
             var responseStream = new MemoryStream();
             EvosSerializer.Instance.Serialize(responseStream, message);
-            Console.WriteLine("SendMessage("+ PlayerInfo.GetHandle() + "): " + message.ToString());
+            //Console.WriteLine("SendMessage("+ PlayerInfo.GetHandle() + "): " + message.ToString());
             lock (Socket){
                 using (var writer = Socket.CreateMessageWriter(WebSocketMessageType.Binary))
                 {
@@ -135,7 +135,7 @@ namespace EvoS.LobbyServer
                                 await task;
                             }
                             catch (vtortola.WebSockets.WebSocketException e) {
-                                Log.Print(LogType.Error, PlayerInfo.GetHandle() + "::" + e.Message);
+                                //Log.Print(LogType.Error, PlayerInfo.GetHandle() + "::" + e.Message);
                                 Disconnect();
                             }
                             
@@ -149,7 +149,8 @@ namespace EvoS.LobbyServer
 
         public LobbyPlayerInfo GetLobbyPlayerInfo()
         {
-            return this.PlayerInfo.GetLobbyPlayerInfo();
+            return null;
+            //return this.PlayerInfo.GetLobbyPlayerInfo();
         }
 
         private static MethodBase GetHandler(Type type)

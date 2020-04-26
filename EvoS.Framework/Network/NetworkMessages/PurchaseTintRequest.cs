@@ -12,7 +12,7 @@ namespace EvoS.Framework.Network.NetworkMessages
 {
     [Serializable]
     [EvosMessage(303)]
-    class PurchaseTintRequest : WebSocketMessage
+    public class PurchaseTintRequest : WebSocketMessage
     {
         public CurrencyType CurrencyType;
         public CharacterType CharacterType;

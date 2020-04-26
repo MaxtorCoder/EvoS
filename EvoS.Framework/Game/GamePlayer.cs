@@ -10,7 +10,7 @@ namespace EvoS.Framework.Game
         public GameServerConnection Connection { get; }
         public int PlayerId;
         public long AccountId;
-        public SessionPlayerInfo PlayerInfo;
+        //public SessionPlayerInfo PlayerInfo;
         public AddPlayerMessage AddPlayerMessage { get; }
 
         public bool IsLoading;

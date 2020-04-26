@@ -102,7 +102,9 @@ namespace EvoS.Framework.Game
             MapLoader = new AssetLoader();
             MapLoader.LoadAssetBundle("Bundles/scenes/maps.bundle");
             MapLoader.LoadAsset($"archive:/buildplayer-robotfactory_opu_gamemode/buildplayer-{GameConfig.Map.ToLower()}");
+            
             MapLoader.ConstructCaches();
+
 
             AssetsLoader = new AssetLoader();
             AssetsLoader.LoadAsset("resources.assets");
@@ -200,7 +202,7 @@ namespace EvoS.Framework.Game
 
                 // Just send the play to an arbitrary location for now
                 actorTeamSensitiveData.CallRpcMovement(GameEventManager.EventType.Invalid,
-                    new GridPosProp(5, 5, 6), new GridPosProp(5, 5, 5),
+                    new GridPosProp(11, 10, 6), new GridPosProp(11, 10, 5),
                     null, ActorData.MovementType.Teleport, false, false);
             }
 
@@ -268,14 +270,14 @@ namespace EvoS.Framework.Game
         public void OnPlayerConnect(GameServerConnection connection)
         {
             
-            Log.Print(LogType.Debug, $"Connected player {connection.PlayerInfo.GetHandle()} with playerID {connection.PlayerId} as {connection.PlayerInfo.GetCharacterType().ToString()}");
+            //Log.Print(LogType.Debug, $"Connected player {connection.PlayerInfo.GetHandle()} with playerID {connection.PlayerId} as {connection.PlayerInfo.GetCharacterType().ToString()}");
 
             GamePlayer gamePlayer;
             GamePlayersByPlayerId.TryGetValue(connection.PlayerId, out gamePlayer);
 
             if (gamePlayer == null)
             {
-                gamePlayer = new GamePlayer(connection, connection.PlayerId, connection.PlayerInfo.GetAccountId());
+                //gamePlayer = new GamePlayer(connection, connection.PlayerId, connection.PlayerInfo.GetAccountId());
                 AddGamePlayer(connection.PlayerId, gamePlayer);
             }
             else
@@ -284,23 +286,23 @@ namespace EvoS.Framework.Game
                 connection.connectionId = oldConnectionId;
             }
 
-            gamePlayer.PlayerInfo = connection.PlayerInfo;
-            connection.ActiveGame = this;
+            //gamePlayer.PlayerInfo = connection.PlayerInfo;
+            //connection.ActiveGame = this;
             
             
             Player gfPlayer = GameFlow.GetPlayerFromConnectionId(connection.connectionId);
 
             gfPlayer.m_id = (byte) connection.PlayerId;
             gfPlayer.m_valid = true;
-            gfPlayer.m_accountId = connection.PlayerInfo.GetAccountId();
+            //gfPlayer.m_accountId = connection.PlayerInfo.GetAccountId();
             gfPlayer.m_connectionId = connection.connectionId;
 
             GameFlow.playerDetails[gfPlayer] = new PlayerDetails(PlayerGameAccountType.Human)
             {
-                m_team =  this.TeamInfo.GetPlayer(connection.PlayerInfo.GetAccountId()).TeamId,
-                m_handle = this.TeamInfo.GetPlayer(connection.PlayerInfo.GetAccountId()).Handle,
+                //m_team =  this.TeamInfo.GetPlayer(connection.PlayerInfo.GetAccountId()).TeamId,
+                //m_handle = this.TeamInfo.GetPlayer(connection.PlayerInfo.GetAccountId()).Handle,
                 m_accountId = gfPlayer.m_accountId,
-                m_lobbyPlayerInfoId = this.TeamInfo.TeamPlayerInfo.FindIndex((LobbyPlayerInfo p)=>{ return p.AccountId == connection.PlayerInfo.GetAccountId(); })
+                //m_lobbyPlayerInfoId = this.TeamInfo.TeamPlayerInfo.FindIndex((LobbyPlayerInfo p)=>{ return p.AccountId == connection.PlayerInfo.GetAccountId(); })
             };
 
             // This isn't actually correct, but the client logs a warning with what it expected and continues
@@ -360,7 +362,7 @@ namespace EvoS.Framework.Game
                 
                 GamePlayer humanplayer = GetGamePlayerByPlayerId(playerId);
                 if (player.PlayerId != humanplayer.PlayerId)
-                    Log.Print(LogType.Debug, $"sending loading notification to {humanplayer.PlayerInfo.GetHandle()} from {player.PlayerInfo.GetHandle()}");
+                    //Log.Print(LogType.Debug, $"sending loading notification to {humanplayer.PlayerInfo.GetHandle()} from {player.PlayerInfo.GetHandle()}");
                     humanplayer.Connection.Send((short)MyMsgType.ServerAssetsLoadingProgressUpdate, msg);
             }
         }
@@ -425,20 +427,23 @@ namespace EvoS.Framework.Game
             
 
             SpawnObject<ActorTeamSensitiveData>(MiscLoader, "ActorTeamSensitiveData_Friendly", out ActorTeamSensitiveData characterFriendly);
-            SpawnObject(AssetsLoader, playerInfo.CharacterInfo.CharacterType.ToString(), out GameObject character);// Error here punching dummy
+            SpawnObject(AssetsLoader, playerInfo.CharacterInfo.CharacterType.ToString(), out GameObject character);
 
             ActorData characterActorData = character.GetComponent<ActorData>();
-
-            PlayerData characterPlayerData = character.GetComponent<PlayerData>();
             characterActorData.SetClientFriendlyTeamSensitiveData(characterFriendly);
-            characterPlayerData.m_player = GameFlow.GetPlayerFromConnectionId(gamePlayer.Connection.connectionId); // TODO hardcoded connection id
-            characterPlayerData.PlayerIndex = playerInfo.PlayerId;
-
             characterActorData.ServerLastKnownPosSquare = Board.GetBoardSquare(5, 5);
             characterActorData.InitialMoveStartSquare = Board.GetBoardSquare(5, 5);
-            characterActorData.UpdateDisplayName("Foo bar player");
-            characterActorData.ActorIndex = playerInfo.PlayerId;
+            characterActorData.UpdateDisplayName(playerInfo.Handle);
             characterActorData.PlayerIndex = playerInfo.PlayerId;
+            //characterActorData.ActorIndex = playerInfo.PlayerId;
+
+            PlayerData characterPlayerData = character.GetComponent<PlayerData>();
+            
+            characterPlayerData.m_player = GameFlow.GetPlayerFromConnectionId(gamePlayer.Connection.connectionId); // TODO hardcoded connection id
+            characterPlayerData.PlayerIndex = playerInfo.PlayerId;
+            
+            
+            
             characterFriendly.SetActorIndex(characterActorData.ActorIndex);
 
 

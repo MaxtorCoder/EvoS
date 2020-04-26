@@ -103,7 +103,7 @@ namespace EvoS.LobbyServer
                 EnableHiddenCharacters = true,
                 EnableAllMods = true,
                 EnableQuests = false,
-                EnableSeasons = false,
+                EnableSeasons = false, // Seasson tab
                 AllowReconnectingToGameInstantly = true,
                 EnableClientPerformanceCollecting = false,
                 EnableDiscordSdk = false,

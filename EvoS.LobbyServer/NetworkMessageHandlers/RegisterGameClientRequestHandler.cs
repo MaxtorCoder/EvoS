@@ -25,14 +25,14 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
             connection.SessionToken = request.SessionInfo.SessionToken;
 
-            connection.PlayerInfo = SessionManager.Get(connection.SessionToken);
-            connection.PlayerInfo.SetHandle(p.UserName);
-            connection.PlayerInfo.SetAccountId(p.AccountId);
-            connection.PlayerInfo.SetBannerID(p.SelectedBackgroundBannerID);
-            connection.PlayerInfo.SetEmblemID(p.SelectedForegroundBannerID);
-            connection.PlayerInfo.SetRibbonID(p.SelectedRibbonID);
-            connection.PlayerInfo.SetTitleID(p.SelectedTitleID);
-            connection.PlayerInfo.SetCharacterType(p.LastSelectedCharacter);
+            //connection.PlayerInfo = SessionManager.Get(connection.SessionToken);
+            //connection.PlayerInfo.SetHandle(p.UserName);
+            //connection.PlayerInfo.SetAccountId(p.AccountId);
+            //connection.PlayerInfo.SetBannerID(p.SelectedBackgroundBannerID);
+            //connection.PlayerInfo.SetEmblemID(p.SelectedForegroundBannerID);
+            //connection.PlayerInfo.SetRibbonID(p.SelectedRibbonID);
+            //connection.PlayerInfo.SetTitleID(p.SelectedTitleID);
+            //connection.PlayerInfo.SetCharacterType(p.LastSelectedCharacter);
 
             // Send RegisterGameClientResponse
             await Send_RegisterGameClientResponse(connection, request);
@@ -54,14 +54,14 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
 
         private async Task Send_LobbyServerReadyNotification(LobbyServerConnection connection)
         {
-            var lobbyServerReady = LobbyServerReady(connection);
+            LobbyServerReadyNotification lobbyServerReady = LobbyServerReady(connection);
             await connection.SendMessage(lobbyServerReady);
         }
 
         private async Task Send_ChatConnectedNotification(LobbyServerConnection connection)
         {
-            ChatNotification connectedMessage = new ChatNotification() { Text = $"{connection.PlayerInfo.GetHandle()} has connected", ConsoleMessageType = ConsoleMessageType.SystemMessage };
-            await LobbyServer.sendChatToAll(connectedMessage);
+            //ChatNotification connectedMessage = new ChatNotification() { Text = $"{connection.PlayerInfo.GetHandle()} has connected", ConsoleMessageType = ConsoleMessageType.SystemMessage };
+            //await LobbyServer.sendChatToAll(connectedMessage);
         }
 
 
@@ -80,7 +80,7 @@ namespace EvoS.LobbyServer.NetworkMessageHandlers
                 GroupInfo = new LobbyPlayerGroupInfo
                 {
                     SelectedQueueType = GameType.PvP,
-                    MemberDisplayName = connection.PlayerInfo.GetHandle(),
+                    //MemberDisplayName = connection.PlayerInfo.GetHandle(),
                     //ChararacterInfo = DummyLobbyData.CreateLobbyCharacterInfo(CharacterType.Archer),
                     Members = new List<UpdateGroupMemberData>()
                 },

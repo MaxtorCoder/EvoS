@@ -59,23 +59,33 @@ namespace EvoS.DirectoryServer
                 response.Success = true;
                 response.ErrorMessage = "";
 
-                PlayerData.Player p = PlayerData.GetPlayer(request.AuthInfo.Handle);
-                if (p == null)
+                PlayerData.Player p;
+                try
                 {
-                    Log.Print(LogType.Warning, $"Player {request.AuthInfo.Handle} doesnt exists");
-                    PlayerData.CreatePlayer(request.AuthInfo.Handle);
                     p = PlayerData.GetPlayer(request.AuthInfo.Handle);
-                    if (p != null)
+                    if (p == null)
                     {
-                        Log.Print(LogType.Debug, $"Succesfully Registered {p.UserName}");
-                    }
-                    else
-                    {
-                        Log.Print(LogType.Error, $"Error creating a new account for player '{request.AuthInfo.UserName}'");
+                        Log.Print(LogType.Warning, $"Player {request.AuthInfo.Handle} doesnt exists");
+                        PlayerData.CreatePlayer(request.AuthInfo.Handle);
+                        p = PlayerData.GetPlayer(request.AuthInfo.Handle);
+                        if (p != null)
+                        {
+                            Log.Print(LogType.Debug, $"Succesfully Registered {p.UserName}");
+                        }
+                        else
+                        {
+                            Log.Print(LogType.Error, $"Error creating a new account for player '{request.AuthInfo.UserName}'");
+                        }
                     }
                 }
+                catch (Exception)
+                {
+                    p = new PlayerData.Player();
+                    p.AccountId = 508;
+                    p.UserName = request.AuthInfo.Handle;
+                }
 
-                request.SessionInfo.SessionToken = SessionManager.CreateSessionToken();
+                request.SessionInfo.SessionToken = 0;
 
                 response.SessionInfo = request.SessionInfo;
                 response.SessionInfo.AccountId = p.AccountId;

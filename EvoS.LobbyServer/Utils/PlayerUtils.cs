@@ -14,16 +14,16 @@ namespace EvoS.LobbyServer.Utils
         {
             PersistedAccountData accountData = new PersistedAccountData()
             {
-                AccountId = connection.PlayerInfo.GetAccountId(),
+                //AccountId = connection.PlayerInfo.GetAccountId(),
                 AccountComponent = GetAccountComponent(connection),
-                BankComponent = GetBankData(connection.PlayerInfo.GetAccountId()),
+                //BankComponent = GetBankData(connection.PlayerInfo.GetAccountId()),
                 CharacterData = GetCharacterData(),
                 CreateDate = DateTime.Now.AddHours(-1),
-                Handle = connection.PlayerInfo.GetHandle(),
+                //Handle = connection.PlayerInfo.GetHandle(),
                 QuestComponent = new QuestComponent() { ActiveSeason = 9 }, // Provide a SeasonExperience to set Season Level on client
                 SchemaVersion = new SchemaVersion<AccountSchemaChange>(0x1FFFF),
                 UpdateDate = DateTime.Now,
-                UserName = connection.PlayerInfo.GetHandle(),
+                //UserName = connection.PlayerInfo.GetHandle(),
                 InventoryComponent = new InventoryComponent(true)
             };
             return accountData;
@@ -34,13 +34,13 @@ namespace EvoS.LobbyServer.Utils
             //TODO this looks awful
             AccountComponent accountComponent = new AccountComponent()
             {
-                LastCharacter = connection.PlayerInfo.GetCharacterType(),
+                //LastCharacter = connection.PlayerInfo.GetCharacterType(),
                 LastRemoteCharacters = new List<CharacterType>(),
                 UIStates = new Dictionary<AccountComponent.UIStateIdentifier, int> { { AccountComponent.UIStateIdentifier.HasViewedFluxHighlight, 1 },{ AccountComponent.UIStateIdentifier.HasViewedGGHighlight, 1 } },
-                UnlockedTitleIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
-                UnlockedBannerIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
-                UnlockedEmojiIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
-                UnlockedOverconIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
+                //UnlockedTitleIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
+                //UnlockedBannerIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
+                //UnlockedEmojiIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
+                //UnlockedOverconIDs = GetUnlockedTitleIDs(connection.PlayerInfo.GetAccountId()),
             };
 
             return accountComponent;

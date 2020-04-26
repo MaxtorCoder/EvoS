@@ -17,7 +17,7 @@ namespace EvoS.Framework.Network.Game
     public class GameServerConnection
     {
         protected vtortola.WebSockets.WebSocket Socket;
-        public GameManager ActiveGame { get; set; }
+        public EvosServer Server;
 
         public virtual string address => Socket.RemoteEndpoint.ToString();
 
@@ -30,8 +30,10 @@ namespace EvoS.Framework.Network.Game
         protected uint lastMessageOutgoingSeqNum;
         public int connectionId = Interlocked.Increment(ref _connectionIdCounter);
         protected NetworkWriter m_Writer = new NetworkWriter();
-        public SessionPlayerInfo PlayerInfo;
+        //public SessionPlayerInfo PlayerInfo;
         public int PlayerId;
+
+        public event Action<GameServerConnection> OnDisconnect;
         
         protected GameServerConnection() {}
 
@@ -60,20 +62,12 @@ namespace EvoS.Framework.Network.Game
             {
                 var loginReq = (LoginRequest) msg;
                 SessionToken = Convert.ToInt64(loginReq.SessionToken);
-                PlayerInfo = SessionManager.Get(SessionToken);
+                //PlayerInfo = SessionManager.Get(SessionToken);
                 PlayerId = loginReq.PlayerId;
 
-                GameManager gameManager = GameManagerHolder.FindGameManager(SessionToken);
-                GameManagerHolder.PlayerConnected(PlayerInfo.GetAccountId());
-                if (gameManager == null)
-                {
-                    Log.Print(LogType.Error, $"Didn't find a GameManager for {loginReq}'");
-                    Disconnect();
-                    return;
-                }
+                GameManagerHolder.AssignServer(this);
 
-
-                gameManager.OnPlayerConnect(this);
+                
 
                 // Send login ok response
                 Send((short)MyMsgType.LoginResponse, new LoginResponse
@@ -90,7 +84,7 @@ namespace EvoS.Framework.Network.Game
         internal void AddToVisList(NetworkIdentity uv)
         {
             _visList.Add(uv);
-            ActiveGame.NetworkServer.ShowForConnection(uv, this);
+            Server.NetworkServer.ShowForConnection(uv, this);
         }
 
         internal void RemoveFromVisList(NetworkIdentity uv, bool isDestroyed)
@@ -134,6 +128,7 @@ namespace EvoS.Framework.Network.Game
 
         public void Disconnect()
         {
+            OnDisconnect(this);
             Log.Print(LogType.Game, "Client disconnected.");
             if (Socket.IsConnected)
                 Socket.Close();

@@ -112,10 +112,10 @@ namespace EvoS.LobbyServer
 
             foreach (LobbyServerConnection con in ConnectedClients)
             {
-                if (con.PlayerInfo.GetHandle() == handle)
+                /*if (con.PlayerInfo.GetHandle() == handle)
                 {
                     return con;
-                }
+                }*/
             }
             return null;
         }
@@ -124,10 +124,10 @@ namespace EvoS.LobbyServer
         {
             foreach (LobbyServerConnection con in ConnectedClients)
             {
-                if (con.PlayerInfo.GetAccountId() == accountId)
-                {
-                    return con;
-                }
+                //if (con.PlayerInfo.GetAccountId() == accountId)
+                //{
+                //    return con;
+                //}
             }
             return null;
         }
