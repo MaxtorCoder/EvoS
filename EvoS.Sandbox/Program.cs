@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using EvoS.Framework.Assets;
 using EvoS.Framework.Logging;
@@ -38,8 +38,8 @@ namespace EvoS.Sandbox
 
             // Lobby Server
             //new Thread(() => StartLobbyServer()).Start();
-            Thread t2 = new Thread(() => CentralServer.CentralServer.Main(new string[] { }));
-
+            CentralServer.CentralServer.Main(new string[] { });
+            
             // Game Server
             //new Thread(() => StartGameServer()).Start();
             

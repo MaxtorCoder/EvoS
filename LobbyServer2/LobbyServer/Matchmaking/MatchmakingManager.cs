@@ -4,6 +4,7 @@ using CentralServer.LobbyServer.Gamemode;
 using CentralServer.LobbyServer.Session;
 using EvoS.Framework.Constants.Enums;
 using EvoS.Framework.Logging;
+using EvoS.Framework.Network.NetworkMessages;
 using EvoS.Framework.Network.Static;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,19 @@ namespace CentralServer.LobbyServer.Matchmaking
 {
     public static class MatchmakingManager
     {
+        private static Dictionary<GameType, MatchmakingQueue> Queues = new Dictionary<GameType, MatchmakingQueue>()
+        {
+            {GameType.Practice, new MatchmakingQueue(GameType.Practice)},
+            {GameType.Coop, new MatchmakingQueue(GameType.Coop)},
+            {GameType.PvP, new MatchmakingQueue(GameType.PvP)},
+            {GameType.Ranked, new MatchmakingQueue(GameType.Ranked)},
+            {GameType.Custom, new MatchmakingQueue(GameType.Custom)}
+        };
+
+        public static void AddToQueue(GameType gameType, LobbyPlayerInfo playerInfo)
+        {
+            // TODO
+        }
         public static void StartPractice(LobbyServerProtocolBase client)
         {
             LobbyGameInfo practiceGameInfo = new LobbyGameInfo
@@ -48,10 +62,40 @@ namespace CentralServer.LobbyServer.Matchmaking
                 CharacterManager.GetPunchingDummyPlayerInfo(),
                 CharacterManager.GetPunchingDummyPlayerInfo()
             };
+            teamInfo.TeamPlayerInfo[0].TeamId = Team.TeamA;
+
             string serverAddress = ServerManager.GetServer(practiceGameInfo, teamInfo);
             if (serverAddress == null)
             {
                 Log.Print(LogType.Error, "No available server for practice gamemode");
+            }
+            else
+            {
+                practiceGameInfo.GameServerAddress = "ws://" + serverAddress;
+                practiceGameInfo.GameStatus = GameStatus.Launched;
+                
+                GameAssignmentNotification notification1 = new GameAssignmentNotification
+                {
+                    GameInfo = practiceGameInfo,
+                    GameResult = GameResult.NoResult,
+                    Observer = false,
+                    PlayerInfo = teamInfo.TeamPlayerInfo[0],
+                    Reconnection = false,
+                    GameplayOverrides = client.GetGameplayOverrides()
+                };
+
+                client.Send(notification1);
+
+                practiceGameInfo.GameStatus = GameStatus.Launching;
+                GameInfoNotification notification2 = new GameInfoNotification()
+                {
+                    TeamInfo = teamInfo,
+                    GameInfo = practiceGameInfo,
+                    PlayerInfo = teamInfo.TeamPlayerInfo[0]
+
+                };
+
+                client.Send(notification2);
             }
         }
     }

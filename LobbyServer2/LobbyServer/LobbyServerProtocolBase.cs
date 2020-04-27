@@ -166,7 +166,7 @@ namespace CentralServer.LobbyServer
             };
         }
 
-        private LobbyGameplayOverrides GetGameplayOverrides()
+        public LobbyGameplayOverrides GetGameplayOverrides()
         {
             return new LobbyGameplayOverrides
             {
