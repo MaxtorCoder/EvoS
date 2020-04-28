@@ -63,6 +63,9 @@ namespace CentralServer.LobbyServer.Matchmaking
                 CharacterManager.GetPunchingDummyPlayerInfo()
             };
             teamInfo.TeamPlayerInfo[0].TeamId = Team.TeamA;
+            teamInfo.TeamPlayerInfo[0].PlayerId = 1;
+            teamInfo.TeamPlayerInfo[1].PlayerId = 2;
+            teamInfo.TeamPlayerInfo[2].PlayerId = 3;
 
             string serverAddress = ServerManager.GetServer(practiceGameInfo, teamInfo);
             if (serverAddress == null)
