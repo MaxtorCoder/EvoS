@@ -75,7 +75,7 @@ namespace CentralServer.LobbyServer.Matchmaking
             else
             {
                 practiceGameInfo.GameServerAddress = "ws://" + serverAddress;
-                practiceGameInfo.GameStatus = GameStatus.Launched;
+                practiceGameInfo.GameStatus = GameStatus.Launching;
                 
                 GameAssignmentNotification notification1 = new GameAssignmentNotification
                 {
@@ -89,7 +89,7 @@ namespace CentralServer.LobbyServer.Matchmaking
 
                 client.Send(notification1);
 
-                practiceGameInfo.GameStatus = GameStatus.Launching;
+                practiceGameInfo.GameStatus = GameStatus.Launched;
                 GameInfoNotification notification2 = new GameInfoNotification()
                 {
                     TeamInfo = teamInfo,
