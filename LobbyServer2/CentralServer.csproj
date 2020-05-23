@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,8 +10,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\Dependencies\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="websocket-sharp">
-      <HintPath>..\..\..\..\..\Artemis\Win64\AtlasReactor_Data\Managed\websocket-sharp.dll</HintPath>
+      <HintPath>..\Dependencies\websocket-sharp.dll</HintPath>
     </Reference>
   </ItemGroup>
 

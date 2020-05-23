@@ -52,7 +52,7 @@ namespace CentralServer.BridgeServer
                     ServerManager.AddServer(this);
                     break;
                 default:
-                    Log.Print(LogType.Game, "Received unhandled message type");
+                    EvoS.Framework.Logging.Log.Print(LogType.Game, "Received unhandled message type");
                     break;
             }
         }
@@ -91,7 +91,7 @@ namespace CentralServer.BridgeServer
             string jsonData = JsonConvert.SerializeObject(GameInfo);
             stream.Write(GetBytesSpan(jsonData));
             Send(stream.ToArray());
-            Log.Print(LogType.Game, "Setting Game Info");
+            EvoS.Framework.Logging.Log.Print(LogType.Game, "Setting Game Info");
         }
 
         public void SendTeamInfo()
@@ -101,7 +101,7 @@ namespace CentralServer.BridgeServer
             string jsonData = JsonConvert.SerializeObject(TeamInfo);
             stream.Write(GetBytesSpan(jsonData));
             Send(stream.ToArray());
-            Log.Print(LogType.Game, "Setting Team Info");
+            EvoS.Framework.Logging.Log.Print(LogType.Game, "Setting Team Info");
         }
 
         public void SendStartNotification()
@@ -109,7 +109,7 @@ namespace CentralServer.BridgeServer
             MemoryStream stream = new MemoryStream();
             stream.WriteByte((byte)BridgeMessageType.Start);
             Send(stream.ToArray());
-            Log.Print(LogType.Game, "Starting Game Server");
+            EvoS.Framework.Logging.Log.Print(LogType.Game, "Starting Game Server");
         }
     }
 }

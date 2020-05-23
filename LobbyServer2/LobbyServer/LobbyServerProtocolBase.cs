@@ -44,7 +44,7 @@ namespace CentralServer.LobbyServer
             }
             catch (NullReferenceException nullEx)
             {
-                Log.Print(LogType.Error, "No message handler registered for data:\n" + BitConverter.ToString(e.RawData));
+                EvoS.Framework.Logging.Log.Print(LogType.Error, "No message handler registered for data:\n" + BitConverter.ToString(e.RawData));
             }
 
             if (deserialized != null)
@@ -52,12 +52,12 @@ namespace CentralServer.LobbyServer
                 EvosMessageDelegate<WebSocketMessage> handler = GetHandler(deserialized.GetType());
                 if (handler != null)
                 {
-                    Log.Print(LogType.Network, "Received " + deserialized.GetType().Name);
+                    EvoS.Framework.Logging.Log.Print(LogType.Network, "Received " + deserialized.GetType().Name);
                     handler.Invoke(deserialized);
                 }
                 else
                 {
-                    Log.Print(LogType.Error, "No handler for " + deserialized.GetType().Name + "\n" + Newtonsoft.Json.JsonConvert.SerializeObject(deserialized, Newtonsoft.Json.Formatting.Indented));
+                    EvoS.Framework.Logging.Log.Print(LogType.Error, "No handler for " + deserialized.GetType().Name + "\n" + Newtonsoft.Json.JsonConvert.SerializeObject(deserialized, Newtonsoft.Json.Formatting.Indented));
                 }
             }
         }
@@ -75,7 +75,7 @@ namespace CentralServer.LobbyServer
             }
             catch (KeyNotFoundException e)
             {
-                Log.Print(LogType.Lobby, "No handler found for type " + type.Name);
+                EvoS.Framework.Logging.Log.Print(LogType.Lobby, "No handler found for type " + type.Name);
                 return null;
             }
         }
@@ -92,7 +92,7 @@ namespace CentralServer.LobbyServer
             response.Success = false;
             response.ErrorMessage = message;
             response.ResponseId = requestId;
-            Log.Print(LogType.Error, message);
+            EvoS.Framework.Logging.Log.Print(LogType.Error, message);
             Send(response);
         }
 
@@ -101,7 +101,7 @@ namespace CentralServer.LobbyServer
             response.Success = false;
             response.ErrorMessage = error.Message;
             response.ResponseId = requestId;
-            Log.Print(LogType.Error, error.Message);
+            EvoS.Framework.Logging.Log.Print(LogType.Error, error.Message);
             Console.WriteLine(error);
             Send(response);
         }
@@ -215,7 +215,7 @@ namespace CentralServer.LobbyServer
         protected void SetCharacterLoadoutChanges(CharacterLoadoutUpdate characterLoadoutUpdate)
         {
             // TODO
-            Log.Print(LogType.Debug, "SetCharacterLoadoutChanges not implemented!");
+            EvoS.Framework.Logging.Log.Print(LogType.Debug, "SetCharacterLoadoutChanges not implemented!");
         }
         protected void SetCharacterMods(CharacterModInfo characterModInfo)
         {
@@ -224,7 +224,7 @@ namespace CentralServer.LobbyServer
         protected void SetCharacterSkin(CharacterVisualInfo characterVisualInfo)
         {
             SessionManager.GetPlayerInfo(this.AccountId).CharacterInfo.CharacterSkin = characterVisualInfo;
-            Log.Print(LogType.Debug, characterVisualInfo.ToString());
+            EvoS.Framework.Logging.Log.Print(LogType.Debug, characterVisualInfo.ToString());
         }
         protected void SetCharacterType(CharacterType characterType)
         {
@@ -233,7 +233,7 @@ namespace CentralServer.LobbyServer
         }
         protected void SetContextualReadyState(ContextualReadyState contextualReadyState)
         {
-            Log.Print(LogType.Debug, "SetContextualReadyState");
+            EvoS.Framework.Logging.Log.Print(LogType.Debug, "SetContextualReadyState");
             MatchmakingManager.StartPractice(this);
         }
         protected void SetEnemyDifficulty(BotDifficulty difficulty)
@@ -242,7 +242,7 @@ namespace CentralServer.LobbyServer
         }
         protected void SetLastSelectedLoadout(int lastSelectedLoadout)
         {
-            Log.Print(LogType.Debug, "last selected loadout changed to " + lastSelectedLoadout);
+            EvoS.Framework.Logging.Log.Print(LogType.Debug, "last selected loadout changed to " + lastSelectedLoadout);
         }
 
     }

@@ -48,7 +48,7 @@ namespace CentralServer.LobbyServer
             LobbyPlayerInfo playerInfo = SessionManager.GetPlayerInfo(this.AccountId);
             if (playerInfo != null)
             {
-                Log.Print(LogType.Lobby, string.Format(Config.Messages.PlayerDisconnected, this.UserName));
+                EvoS.Framework.Logging.Log.Print(LogType.Lobby, string.Format(Config.Messages.PlayerDisconnected, this.UserName));
                 SessionManager.OnPlayerDisconnect(this);
             }
         }
@@ -61,7 +61,7 @@ namespace CentralServer.LobbyServer
 
                 if (playerInfo != null)
                 {
-                    Log.Print(LogType.Lobby, string.Format(Config.Messages.LoginSuccess, this.UserName));
+                    EvoS.Framework.Logging.Log.Print(LogType.Lobby, string.Format(Config.Messages.LoginSuccess, this.UserName));
                     RegisterGameClientResponse response = new RegisterGameClientResponse
                     {
                         AuthInfo = request.AuthInfo,
@@ -95,7 +95,7 @@ namespace CentralServer.LobbyServer
 
         public void HandlePlayerUpdateStatusRequest(PlayerUpdateStatusRequest request)
         {
-            Log.Print(LogType.Lobby, $"{this.UserName} is now {request.StatusString}");
+            EvoS.Framework.Logging.Log.Print(LogType.Lobby, $"{this.UserName} is now {request.StatusString}");
             PlayerUpdateStatusResponse response = FriendManager.OnPlayerUpdateStatusRequest(this, request);
 
             Send(response);
